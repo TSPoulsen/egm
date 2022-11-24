@@ -1,0 +1,54 @@
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{xifthen}
+\usepackage{xparse}
+\usepackage{dsfont}
+\usepackage{xcolor}
+
+\usepackage{fullpage}
+
+% Left-right bracket
+\newcommand{\lr}[1]{\left (#1\right)}
+
+% Left-right square bracket
+\newcommand{\lrs}[1]{\left [#1 \right]}
+
+% Left-right curly bracket
+\newcommand{\lrc}[1]{\left \{#1\right\}}
+
+% Left-right absolute value
+\newcommand{\lra}[1]{\left |#1\right|}
+
+% Left-right upper value
+\newcommand{\lru}[1]{\left \lceil#1\right\rceil}
+
+% Scalar product
+\newcommand{\vp}[2]{\left \langle#1, #2 \right \rangle}
+
+% The real numbers
+\newcommand{\R}{\mathbb{R}}
+
+% The natural numbers
+\newcommand{\N}{\mathbb{N}}
+
+% A nicer emptyset symbol
+\let\emptyset\varnothing
+
+% Set constructor
+\newcommand{\setdef}[2]{\lrc{ #1 \; \text{\textbar} \; #2}}
+
+% j'th entry
+\newcommand{\xj}{X^{(j)}}
+
+% eps, delta - dp
+\newcommand{\edp}{$(\epsilon, \delta)$-DP}
+
+% rando algo M
+\newcommand{\M}{\mathcal{M}}
+
+% Probability
+\newcommand{\prob}[1]{\textnormal{Pr}\lrs{#1}}
+
+

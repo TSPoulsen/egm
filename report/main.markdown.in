@@ -1,0 +1,26 @@
+
+- Max-flow
+	- Definition of a flow network (Graph $G = (V,E)$, source $s\in V$, sink $t\in V$, capacity $c\in E\times R_{\geq 0}$)
+		- Requirement: G has no self-loops and antiparallel edges
+	- For a flow we hold
+		- Capacity constraint (flow cannot exceed capacity)
+		- Flow conservation (Incoming material = outgoing material)
+	- $|f|$ is the _value_ of a flow $f$. A maximum flow is an $f$ with maximum value
+	- We can generalise to multiple sources&sinks
+
+- Ford-Fulkerson
+	- Algorithm to find max-flows
+	- Given a graph $G$, as long as there is a path, send as much flow as possible. Then return $G$.
+	- A path exists when the intermediate edges have
+		- Leftover capacity, or
+		- Reverse flow (capacity for decreasing flow)
+	- Alternatively, a path exists when the intermediate edges have positive, non-zero _residual capacity_
+	- Next time - how to find good paths for Ford-Fulkerson to terminate quickly
+
+- Residual capacity $c_f$, represents the flow we can accept for an edge. This includes leftover capacity of existing edges, but also used capacity on incoming edges.
+
+$$(f\uparrow f')(u,v) = f(u,v) + f'(u,v) - f'(v,u) \;\; if \;\; (u,v) \in E$$
+
+- Proof that $(f \uparrow f')$ is still a valid flow
+
+

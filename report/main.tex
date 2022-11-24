@@ -1,0 +1,102 @@
+\documentclass[a4paper,12pt]{article}
+
+\include{symbols}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}  % For including images
+
+\usepackage{amsfonts}
+\usepackage{todonotes}
+\usepackage{hyperref}
+\usepackage{cleveref}  % For referencing equations
+\usepackage{cite} % For bibtex
+\usepackage[smartEllipses]{markdown}
+
+\renewcommand{\qed}{\hfill\blacksquare}
+\renewenvironment{proof}{{\bfseries Proof \\}}{\qed}
+
+\newtheorem{definition}{Definition}[section]
+
+
+\title{Invetigation of the Elliptical Gaussian Noise in the case of multivariate normal data}
+\author{Tim Sehested Poulsen}
+
+\begin{document}
+
+\maketitle
+
+\section{Preliminaries}
+\subsection{Definitions}
+
+\textbf{The dataset} is denoted by $X$, where 
+$X \in \R^{n \times d}$.
+I have that $n$ denotes the number of entries in the dataset and 
+$d$ is the number of dimensions of the dataset.
+I will throughout the report refer to a single entry of 
+the dataset as $x_i$ and a single dimension of the dataset as $\xj$, 
+and therefore $x^{(j)}_i$
+denotes the $j$'th dimension of the $i$'th entry.
+\vspace*{0.3cm}
+
+\textbf{Differential privacy} is the heuristic of 
+releasing a database statistic whilst limiting the impact
+of any one entry. 
+Differential privacy has multiple slightly different
+formal definitions, 
+one such is $(\epsilon, \delta)$-Differential Privacy
+refered to as \edp.
+A prerequisite for almost all of the different differential privacy
+definitions relies on the concept of neighbouring dataset.
+\vspace*{0.3cm}
+
+\begin{definition}[Neighbouring dataset \cite{dwork2016}]
+Two dataset $X, X' \in \R^{n \times d}$ are said to be 
+neigbouring if they differ in at most a single entry.
+Neighbouring dataset are denoted with the relation $X \sim X'$ and defined as followed
+\[ X \sim X' \iff \lra{ \setdef{i \in \N}{i \le n \land x_i \ne x_i' } } \le 1 \]
+\end{definition}
+
+\begin{definition}[Sensitivity \cite{Lebeda2022}]
+Let $f(X): \R^{n \times d} \rightarrow \R^d$ given by 
+$f(X) = \sum_{i = 1}^n x_i$ be the sum over all vectors in a dataset.
+The sensitivity is then the maximal 
+possible difference in the output of our summation  
+from two neighbouring dataset denoted as $\Delta$.
+We denote the sensitivity of the $j$'th dimension as
+\[ \Delta_j = \max_{X \sim X'} \lra{{f(X)}^{(j)} - {f(X')}^{(j)}} \]
+and then the total $l_2$-sensitivity is then
+\[ \| \Delta \| = \max_{X \sim X'} \left\| {f(X)} - {f(X')} \right\|  \]
+    
+\end{definition}
+
+\vspace*{0.3cm}
+\begin{definition}[$(\epsilon, \delta)$-Differential Privacy \cite{dwork2016}]
+A randomized algorithm $\M: \R^{n \times d} \rightarrow \mathcal{R}$ 
+is $(\epsilon, \delta)$-differentially private if for all possible 
+subsets of outputs $S \subseteq \mathcal{R}$ and all pairs of 
+neighbouring dataset $X \sim X'$ we have that
+\[ \prob{M(X) \in S} \le e^{\epsilon} \cdot \prob{M(X') \in S} + \delta \]
+
+    
+\end{definition}
+
+
+
+\subsection{Problem setup}
+The problem consists of realeasing the sum of vectors 
+in a dataset under differential privacy.
+More formally we whish to release the value of 
+$f:\R^{n \times d} \rightarrow  \R^d$ given by
+\[ f(X) = \sum_{i = 1}^n x_i  \] 
+under \edp. \\
+The problem that the Elliptical Gaussian Mechanism solves 
+is in the setting where all dimensions $\xj$ are restricted
+by some bound $\Delta_j$ \cite{Lebeda2022}. This means that all 
+$ x^{(j)}_i \in \lrs{-\Delta_j/2, \Delta_j/2} $.
+
+
+\bibliography{refs.bib}{}
+\bibliographystyle{acm}
+
+
+\end{document}
+

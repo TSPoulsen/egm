@@ -1,0 +1,13 @@
+\begin{thebibliography}{1}
+
+\bibitem{dwork2016}
+{\sc Dwork, C., McSherry, F., Nissim, K., and Smith, A.}
+\newblock Calibrating noise to sensitivity in private data analysis.
+\newblock {\em Journal of Privacy and Confidentiality 7}, 3 (2016), 17--51.
+
+\bibitem{Lebeda2022}
+{\sc Pagh, R., and Lebeda, C.}
+\newblock Private vector aggregation when coordinates have different
+  sensitivity.
+
+\end{thebibliography}
