@@ -5,6 +5,12 @@
 \newblock Calibrating noise to sensitivity in private data analysis.
 \newblock {\em Journal of Privacy and Confidentiality 7}, 3 (2016), 17--51.
 
+\bibitem{dpbasic}
+{\sc Dwork, C., Roth, A., et~al.}
+\newblock The algorithmic foundations of differential privacy.
+\newblock {\em Foundations and Trends{\textregistered} in Theoretical Computer
+  Science 9}, 3--4 (2014), 211--407.
+
 \bibitem{Lebeda2022}
 {\sc Pagh, R., and Lebeda, C.}
 \newblock Private vector aggregation when coordinates have different

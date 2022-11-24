@@ -40,6 +40,7 @@ As the EGM expects data to lie within pre-specified bounds I will in the second 
 
 ### Meeting plans
 - Info/book about generalized chi square
+- I need not introduce the Gaussian distribution, but perhaps some results which are of importance to the project
 
 
 ### TODO:

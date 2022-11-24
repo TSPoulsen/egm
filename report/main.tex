@@ -9,12 +9,24 @@
 \usepackage{hyperref}
 \usepackage{cleveref}  % For referencing equations
 \usepackage{cite} % For bibtex
+
+% Used for writing pseudo code
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+% defined for writing input/output in pseudo code
+\algblock{Input}{EndInput}
+\algnotext{EndInput}
+\algblock{Output}{EndOutput}
+\algnotext{EndOutput}
+\newcommand{\Desc}[2]{\State \makebox[6em][l]{#1}#2}
+
 \usepackage[smartEllipses]{markdown}
 
 \renewcommand{\qed}{\hfill\blacksquare}
 \renewenvironment{proof}{{\bfseries Proof \\}}{\qed}
 
 \newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}
 
 
 \title{Invetigation of the Elliptical Gaussian Noise in the case of multivariate normal data}
@@ -39,11 +51,14 @@ denotes the $j$'th dimension of the $i$'th entry.
 
 \textbf{Differential privacy} is the heuristic of 
 releasing a database statistic whilst limiting the impact
-of any one entry. 
+of any one entry. It builds on the intuition that computing
+a statistics on a private dataset should not reveal 
+any sensitive information about any one individual 
+as long as that individual has little to no effect on the outcome.
 Differential privacy has multiple slightly different
 formal definitions, 
 one such is $(\epsilon, \delta)$-Differential Privacy
-refered to as \edp.
+refered to as \edp which will be introduced later on.
 A prerequisite for almost all of the different differential privacy
 definitions relies on the concept of neighbouring dataset.
 \vspace*{0.3cm}
@@ -80,8 +95,56 @@ neighbouring dataset $X \sim X'$ we have that
 \end{definition}
 
 
+\section{Algorithms}
+\subsection{The Gaussian Mechanism}
+One of the most foundational algorithms for achieving 
+\edp is the Gaussian Mechanism \cite{dpbasic}. It computes the real
+value of a statistic, where the $l_2$-sensitivity is known.
+That is it produces a \edp estimate of a function 
+$g: \R^{n \times d} \rightarrow \R^{d}$ where $ \| \Delta \|$ 
+for the function $g$ is known.
+It does so by computing the value of $g(X)$ and then adding noise
+to each dimension from the normal distribution 
+$\mathcal{N}(0, \sigma_{\epsilon,\delta}^2)$.
+This can be seen as adding a noise vector $\eta$ which 
+is then distributed according to
+the multivariate normal distribution 
+$\mathcal{N}(\overrightarrow{0}, \sigma_{\epsilon,\delta}^2I)$. 
+The algorithm can be seen in Algorithm \ref{alg:gaussmech}.
 
-\subsection{Problem setup}
+\begin{algorithm}
+\caption{The Gaussian Mechanism}\label{alg:gaussmech}
+\begin{algorithmic}
+    \Input
+    \Desc{$\sigma_{\epsilon,\delta}$}{Standard deviation required to achieve \edp}
+    \Desc{$X \in \R^{n \times d}$}{Dataset}
+    \EndInput
+    \Output
+    \State\edp estimate of $g(X)$
+    \EndOutput
+    \State$\eta \gets \textnormal{sample from } \mathcal{N}(\overrightarrow{0}, \sigma_{\epsilon,\delta}^2I)$ \\
+    \Return$g(X) + \eta$
+\end{algorithmic}
+\end{algorithm}
+It is quite apparent that the main difficulty of the mechanism 
+lies in determining a $\sigma_{\epsilon, \delta}$ which achieves
+\edp, and preferably the smallest such one.
+
+The following theorem was initially proven
+\begin{theorem}\textnormal{\cite{dpbasic}}
+Let $g: \R^{n \times d} \rightarrow \R^{d}$ be an arbitrary 
+$d$-dimensional function with $l_2$-sensitvity 
+$\| \Delta \| = \max_{X \sim X'} \| g(X) - g(X') \|$, 
+and let $\epsilon \in (0,1)$.
+The Gaussian Mechanism with
+$\sigma_{\epsilon, \delta} = \| \Delta \| \sqrt{2\ln(1.25/\delta)}/\epsilon$ 
+is \edp.
+\end{theorem}
+The proof is rather long and is therefore ommitted here.
+
+-Does introduce the same variance for all dimensions regardless of individual variance
+
+\section{Problem setup}
 The problem consists of realeasing the sum of vectors 
 in a dataset under differential privacy.
 More formally we whish to release the value of 

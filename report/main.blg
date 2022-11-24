@@ -4,45 +4,45 @@ The top-level auxiliary file: main.aux
 The style file: acm.bst
 Database file #1: refs.bib
 Warning--empty journal in Lebeda2022
-You've used 2 entries,
+You've used 3 entries,
             2253 wiz_defined-function locations,
-            539 strings with 4186 characters,
-and the built_in function-call counts, 599 in all, are:
-= -- 56
-> -- 34
+            548 strings with 4393 characters,
+and the built_in function-call counts, 953 in all, are:
+= -- 92
+> -- 51
 < -- 0
-+ -- 14
-- -- 12
-* -- 49
-:= -- 111
-add.period$ -- 5
-call.type$ -- 2
-change.case$ -- 12
++ -- 22
+- -- 18
+* -- 81
+:= -- 169
+add.period$ -- 8
+call.type$ -- 3
+change.case$ -- 17
 chr.to.int$ -- 0
-cite$ -- 3
-duplicate$ -- 17
-empty$ -- 39
-format.name$ -- 12
-if$ -- 113
+cite$ -- 4
+duplicate$ -- 26
+empty$ -- 66
+format.name$ -- 18
+if$ -- 184
 int.to.chr$ -- 0
-int.to.str$ -- 2
-missing$ -- 2
-newline$ -- 12
-num.names$ -- 4
-pop$ -- 10
+int.to.str$ -- 3
+missing$ -- 3
+newline$ -- 17
+num.names$ -- 6
+pop$ -- 13
 preamble$ -- 1
-purify$ -- 10
+purify$ -- 14
 quote$ -- 0
-skip$ -- 10
+skip$ -- 16
 stack$ -- 0
-substring$ -- 29
-swap$ -- 3
+substring$ -- 60
+swap$ -- 5
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 8
+type$ -- 12
 warning$ -- 1
-while$ -- 6
-width$ -- 3
-write$ -- 19
+while$ -- 10
+width$ -- 4
+write$ -- 29
 (There was 1 warning)
