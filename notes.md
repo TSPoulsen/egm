@@ -47,4 +47,20 @@ As the EGM expects data to lie within pre-specified bounds I will in the second 
 - Make argument for why clipping data preserves privacy. Should be closely related to definition of ($\epsilon$,$\delta$)-DP.
 - Think about transforming data such that expected norm is $1$ (in theory anything such that anything outside this is clipped). This is related to generalized chi square distributions.
 
+Let $x$ be multivariate normally distributed,
+then
+$$ <x,x> = x^Tx = \| x\|^2$$
+$$ E[\| x \|^2] = tr[\Sigma] + \| \mu \|^2 $$
+$$ var[\| x \|^2] = 2 tr[\Sigma \Sigma] + 4\mu^T\Sigma\mu$$ 
+
+I can always transform a normal random variable to standard normal variable by
+$$ X \sim N(\mu,\sigma^2)$$
+$$\frac{X-\mu}{\sigma} \sim N(0,1)$$
+Generalized Chi square is defined as the linear sum of indpendent noncentral chi-square variables
+$$ \xi = \sum_{i} w_i x_i $$ 
+where each $x_i \sim \sum_{j} X_j^2$, and $X_j \sim N(\mu_j,1)$
+
+so in my case $j=1$ and 
+$$ \xi = \sum_i w_i X_i^2$$
+Is it hen correct to set $w_i = \sigma_i^2$, as $\sigma_i X_i \sim N(\mu_i, \sigma_i^2)$
 
