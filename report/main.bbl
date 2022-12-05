@@ -1,5 +1,11 @@
 \begin{thebibliography}{1}
 
+\bibitem{coinpress}
+{\sc Biswas, S., Dong, Y., Kamath, G., and Ullman, J.}
+\newblock Coinpress: Practical private mean and covariance estimation.
+\newblock {\em Advances in Neural Information Processing Systems 33\/} (2020),
+  14475--14485.
+
 \bibitem{dwork2016}
 {\sc Dwork, C., McSherry, F., Nissim, K., and Smith, A.}
 \newblock Calibrating noise to sensitivity in private data analysis.
@@ -10,6 +16,10 @@
 \newblock The algorithmic foundations of differential privacy.
 \newblock {\em Foundations and Trends{\textregistered} in Theoretical Computer
   Science 9}, 3--4 (2014), 211--407.
+
+\bibitem{Huang2021}
+{\sc Huang, Z., Liang, Y., and Yi, K.}
+\newblock Instance-optimal mean estimation under differential privacy.
 
 \bibitem{Lebeda2022}
 {\sc Pagh, R., and Lebeda, C.}

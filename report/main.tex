@@ -3,6 +3,7 @@
 \include{symbols}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}  % For including images
+\usepackage{bm}  % For bold math symbols
 
 \usepackage{amsfonts}
 \usepackage{todonotes}
@@ -77,9 +78,14 @@ The sensitivity is then the maximal
 possible difference in the output of our summation  
 from two neighbouring dataset denoted as $\Delta$.
 We denote the sensitivity of the $j$'th dimension as
-\[ \Delta_j = \max_{X \sim X'} \lra{{f(X)}^{(j)} - {f(X')}^{(j)}} \]
+\[
+\Delta_j = \max_{X \sim X'} \lra{{f(X)}^{(j)} - {f(X')}^{(j)}} 
+\]
 and then the total $l_2$-sensitivity is then
-\[ \| \Delta \| = \max_{X \sim X'} \left\| {f(X)} - {f(X')} \right\|  \]
+\begin{equation}
+    \label{eq:l2sens}
+    \| \Delta \| = \max_{X \sim X'} \left\| {f(X)} - {f(X')} \right\|  
+\end{equation}
     
 \end{definition}
 
@@ -93,6 +99,23 @@ neighbouring dataset $X \sim X'$ we have that
 
     
 \end{definition}
+
+\paragraph{Error Measure}
+As I will be working exclusively with the sum of entries 
+in a dataset, error will be defined as the expected
+squared $l_2$-norm between the true sum and 
+the output of a randomized algorithm.
+So let $X \in \R^{n \times d}$ be the dataset and
+$f(X) = \sum_i^n x_i$ be the true sum. The error of a
+randomized algorithm $M : \R^{n \times d} \rightarrow \R^d$
+which estimates $f(X)$ is then 
+\[
+    \text{Err}(M) := \mathbb{E} \left[ \| M(X) - f(X) \|^2 \right]
+\]
+
+\paragraph{extra}
+\textbf{If proof of elliptical ... is included then 
+write about edp is preserved during transformatio}
 
 
 \section{Algorithms}
@@ -132,6 +155,7 @@ lies in determining a $\sigma_{\epsilon, \delta}$ which achieves
 
 The following theorem was initially proven
 \begin{theorem}\textnormal{\cite{dpbasic}}
+\label{theo:gaussMech}
 Let $g: \R^{n \times d} \rightarrow \R^{d}$ be an arbitrary 
 $d$-dimensional function with $l_2$-sensitvity 
 $\| \Delta \| = \max_{X \sim X'} \| g(X) - g(X') \|$, 
@@ -142,7 +166,25 @@ is \edp.
 \end{theorem}
 The proof is rather long and is therefore ommitted here.
 
--Does introduce the same variance for all dimensions regardless of individual variance
+In the case where $g(X) = f(X)$, i.e. it is estimating the sum
+of entries we have quite intuitively that the error is given by 
+the norm of the noise introduced as
+\[
+    \ee{(g(X) + \eta) - f(X)} =
+    \ee{(f(X) + \eta) - f(X)} = 
+    \ee{\eta}
+\]
+Which by theorem \ref{theo:expNorm} is 
+\[
+    \ee{\eta} = \sum_i^d \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
+\]
+
+
+\textbf{-Does introduce the same 
+variance for all dimensions regardless of individual variance}
+
+\textbf{-Talk about finding the minimal $\sigma$ s.t. 
+privacy is held, and the error in that case}
 
 \section{Problem setup}
 The problem consists of realeasing the sum of vectors 
@@ -151,10 +193,48 @@ More formally we whish to release the value of
 $f:\R^{n \times d} \rightarrow  \R^d$ given by
 \[ f(X) = \sum_{i = 1}^n x_i  \] 
 under \edp. \\
-The problem that the Elliptical Gaussian Mechanism solves 
-is in the setting where all dimensions $\xj$ are restricted
-by some bound $\Delta_j$ \cite{Lebeda2022}. This means that all 
-$ x^{(j)}_i \in \lrs{-\Delta_j/2, \Delta_j/2} $.
+The common factor for achieving \edp in both the Gaussian Mechanism
+and the Elliptical Gaussian Mechanism is the requirement that 
+data lie within some hyperrectangle. It is formally described as 
+each dimension of the data must lie within some range 
+$ x^{(j)}_i \in \lrs{-\Delta_j/2, \Delta_j/2} $. 
+This requirement is needed to know the $l_2$-sensitivity $\| \Delta \|$ 
+as defined in equation \ref{eq:l2sens} of the data.
+In this project I will change this assumption and instead 
+look at the case where each dimension is normally distributed.
+This means that for each 
+$ j \in [d] $ we have that 
+$X^{(j)} \sim \mathcal{N}(\mu_j, \sigma_j^2)$.
+An equivalent formulation is that a the data is 
+multivariately distributed but with no correlation between dimensions.
+This means that $X \sim \mathcal{N}(\bm{\mu}, \Sigma ) $, 
+where $\Sigma$ is a diagonal matrix with the variance of each 
+dimension along its diagonal.
+It is quite apparent that determining a $ \| \Delta \|$ is impossible 
+in this setting as the Gaussian distribution is continously defined 
+on the range $ (-\infty, \infty)$. What has been done in several 
+recent papers is that data is \textit{clipped} by some threshhold 
+$C$ \cite{Huang2021,coinpress}. 
+Clipping is the process of limiting the norm of any one entry 
+to be at most $C$. This means that every vector is transformed as such
+\[
+    \hat{x_i} := \min \lrc{\frac{C}{\| x_i \|}, 1} \cdot x_i
+\]
+Clipping entries by a factor $C$ thus means that $\| \Delta \| = C $ 
+as any one entry cannot have more impact on the summation than $C$.
+It can then be seen that if the summation $f(X)$ is instead 
+performed on a clipped dataset $\hat{X}$ then this is equivalent to
+defining the summation function $\hat{f}: \R^{n \times d} \rightarrow \R^d$ as
+\[
+    \hat{f}(X) = \sum_i^n \min \lrc{ \frac{C}{\| x_i \|}, 1} \cdot x_i
+    \]
+Then by theorem \ref{theo:gaussMech} the 
+gaussian mechanism with the function $\hat{f}$ is \edp with
+$\sigma_{\epsilon, \delta} = C \sqrt{2 \ln (1.25/\delta)}/\epsilon$.
+Though the mechanism is still \edp it will now have 
+a larger error when regarding the true sum
+$f(X) = \sum_i^n x_i$ as the actual answer.
+
 
 
 \bibliography{refs.bib}{}
