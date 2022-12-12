@@ -1,10 +1,21 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
+
+\bibitem{BatesQuadForm}
+{\sc Bates, D.}
+\newblock {\em Quadratic Forms of Random Variables}.
+\newblock University of Wisconsin-Madison: STAT 849 lectures, 2010.
 
 \bibitem{coinpress}
 {\sc Biswas, S., Dong, Y., Kamath, G., and Ullman, J.}
 \newblock Coinpress: Practical private mean and covariance estimation.
 \newblock {\em Advances in Neural Information Processing Systems 33\/} (2020),
   14475--14485.
+
+\bibitem{QuadFormsNume}
+{\sc Chen, T., and Lumley, T.}
+\newblock Numerical evaluation of methods approximating the distribution of a
+  large quadratic form in normal variables.
+\newblock {\em Computational Statistics \& Data Analysis 139\/} (2019), 75--81.
 
 \bibitem{dwork2016}
 {\sc Dwork, C., McSherry, F., Nissim, K., and Smith, A.}
@@ -17,9 +28,24 @@
 \newblock {\em Foundations and Trends{\textregistered} in Theoretical Computer
   Science 9}, 3--4 (2014), 211--407.
 
+\bibitem{IowaQuadNormForms}
+{\sc Hallam, A.}
+\newblock {\em Some Theorems on Quadratic Forms and Normal Variables}.
+\newblock Iowa State University: Econ 671 lectures, 2004.
+
+\bibitem{QaudFormsBounds}
+{\sc Hanson, D.~L., and Wright, F.~T.}
+\newblock A bound on tail probabilities for quadratic forms in independent
+  random variables.
+\newblock {\em The Annals of Mathematical Statistics 42}, 3 (1971), 1079--1083.
+
 \bibitem{Huang2021}
 {\sc Huang, Z., Liang, Y., and Yi, K.}
 \newblock Instance-optimal mean estimation under differential privacy.
+
+\bibitem{MathaiQaudForms}
+{\sc Mathai, A., and Provost, S.}
+\newblock Quadratic forms in random variables.
 
 \bibitem{Lebeda2022}
 {\sc Pagh, R., and Lebeda, C.}

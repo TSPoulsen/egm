@@ -11,6 +11,11 @@
 \usepackage{cleveref}  % For referencing equations
 \usepackage{cite} % For bibtex
 
+% For writing todo inline
+\presetkeys%
+    {todonotes}%
+    {inline}{}
+
 % Used for writing pseudo code
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -23,8 +28,8 @@
 
 \usepackage[smartEllipses]{markdown}
 
-\renewcommand{\qed}{\hfill\blacksquare}
-\renewenvironment{proof}{{\bfseries Proof \\}}{\qed}
+\renewcommand\qedsymbol{$\blacksquare$}
+\renewenvironment{proof}{{\textit{Proof} \\}}{\qed}
 
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}
@@ -114,8 +119,40 @@ which estimates $f(X)$ is then
 \]
 
 \paragraph{extra}
-\textbf{If proof of elliptical ... is included then 
-write about edp is preserved during transformatio}
+
+\todo{If proof of elliptical ... is included then 
+write about edp is preserved during transformation}
+
+\subsection{Quadratic forms of random variables}
+Quadratics of random variables have been well studied \cite{BatesQuadForm,MathaiQaudForms}, 
+specially in the case of multivariate gaussian varaibles \cite{IowaQuadNormForms,MathaiQaudForms}.
+Even more research has been done in evaluating the CDF of these quadratic forms
+for Gaussian random vectors \cite{QuadFormsNume,QaudFormsBounds}.
+
+\begin{theorem}[Expectation of a quadratic random variable \cite{BatesQuadForm}]
+\label{theo:ExpQuad}
+Let $X$ be a $d$-dimensional random vector with expected value $\Exp{X} =  \bm{\mu_{X}}$
+and covariance matrix $\var{X} = \bm{\Sigma_{X}}$. Let also $A$ be a constant 
+$k \times k$ symmetric matrix, then 
+\[
+    \Exp{X^T A X} = tr \lr{A \bm{\Sigma_X}} + \bm{\mu}^T A\bm{\mu}
+\]
+\end{theorem}
+
+\begin{proof}
+Blah blah
+\begin{align*}
+    &\Exp{X^T A X} 
+    =\text{tr}\lr{\Exp{X^T A X}} 
+    =\Exp{\text{tr} \lr{X^T A X}} \\
+    &= \Exp{\text{tr} \lr{A X X^T}}
+    = \text{tr} \lr{A \Exp{X X^T}} 
+    = \text{tr} \lr{A \lr{ \var{X} + \bm{\mu} \bm{\mu}^T}} \\
+    &= \text{tr} \lr{A \bm{\Sigma}} + \text{tr} \lr{A \bm{\mu \mu^T}}
+    = \text{tr} \lr{A \bm{\Sigma}} + \bm{\mu}^T A \bm{\mu}
+\end{align*}
+blah
+\end{proof}
 
 
 \section{Algorithms}
@@ -180,10 +217,10 @@ Which by theorem \ref{theo:expNorm} is
 \]
 
 
-\textbf{-Does introduce the same 
+\todo{-Does introduce the same 
 variance for all dimensions regardless of individual variance}
 
-\textbf{-Talk about finding the minimal $\sigma$ s.t. 
+\todo{-Talk about finding the minimal $\sigma$ s.t. 
 privacy is held, and the error in that case}
 
 \section{Problem setup}
@@ -235,6 +272,88 @@ Though the mechanism is still \edp it will now have
 a larger error when regarding the true sum
 $f(X) = \sum_i^n x_i$ as the actual answer.
 
+\subsection{Gaussian data}
+Let $X^{(j)} \sim \mathcal{N}(0, \sigma_j^2)$ 
+As the expected $l_2$-norm of $x_i$ is given by
+\[
+    \ee{x_i} = \sum_{j=1}^d \sigma_j^2
+\]
+To achieve an expected norm of $1$ I will scale 
+each dimension by a factor $\frac{1}{b_j}$ which achieves this.
+If 
+\[
+\hat{x_i} = \left( \frac{x_i^{(0)}}{b_0}, \frac{x_i^{(1)}}{b_1}, \dots, \frac{x_i^{(d)}}{b_d} \right)
+\]
+This means that $X^{(j)} \sim \mathcal{N}(0,\frac{\sigma_j^2}{b_j^2})$ 
+and the expected norm is given by 
+\[
+    \ee{x_i} = \sum_{j=1}^d \frac{\sigma_j^2}{b_j^2}
+\]
+and I can introduce that constraint that the expected norm
+after the transformation should be $1$.
+In such a case when noise is added after the transformation
+$\hat{X} + \eta$
+where $\eta \sim N(0, t^2)$ and achieves \edp in this space
+then then due to linearity of transformation the noise 
+introduced in the original space is then given by
+\[
+    \hat{\eta} = \left( b_0\eta_0,b_1\eta_1, \dots, b_d\eta_d \right)
+\]
+then the error is
+\[
+    \ee{\hat{\eta}} = \sum_{j=1}^d b_j^2 \cdot t^2 = t^2 \sum_{j=1}^d b_j^2
+\] 
+
+
+
+
+
+I desire a transformation of $x_i^{(j)}$ such that the 
+expected norm is $1$. Thus I must scale each dimension by
+$\frac{1}{b_j}$, and have that 
+\[
+    \ee{x_i} = 1
+\]
+
+Minimize $\| \hat{\eta} \|$ under the constraint that $\ee{x_i} = 1$  
+
+\paragraph*{An alternative}
+Again minimize $\| \hat{\eta} \|$, but instead the constraint
+comes from Chebyshev's inequality, I always have that
+\[
+    \prob{ |\|x_i\|^2 - \ee{x_i}| \ge k \cdot \sqrt{\var{\|x_i\|^2}}} \le \frac{1}{k^2}
+\]
+Therefore I can set $\frac{1}{k^2} = 0.05$, and find a 
+transformation where I decide how many standard deviations
+I must be away from the mean to have norm greater than 1, i.e.
+\begin{align*}
+    \ee{x_i} + k \cdot \sqrt{\var{\|x_i\|^2}} = 1 \implies k = \frac{1-\ee{x_i}}{\sqrt{\var{\|x_i\|^2}}}
+\end{align*}
+I then have that
+\[
+    \frac{1}{k^2} = \frac{1}{\lr{\frac{1-\ee{x_i}}{\sqrt{\var{\|x_i\|^2}}}}^2} = 
+    \lr{\frac{\sqrt{\var{\|x_i\|^2}}}{1-\ee{x_i}}}^2 = 
+    \frac{\var{\|x_i \|^2}}{\lr{1 - \ee{x_i}}^2}
+\]
+I already know that
+\begin{alignat*}{2}
+    &\ee{x_i} = &\sum_{j=1}^d \frac{\sigma_j^2}{b_j^2} \\
+    &\var{\|x_i \|^2} = 2 &\sum_{j=1}^d \frac{\sigma_j^4}{b_j^4}
+\end{alignat*}
+I therefore have the constraint 
+\[
+    \frac{\var{\|x_i \|^2}}{\lr{1 - \ee{x_i}}^2} = 
+    \frac{2 \sum_{j=1}^d \frac{\sigma_j^4}{b_j^4} \\}
+    {\lr{1-\sum_{j=1}^d \frac{\sigma_j^2}{b_j^2} }^2} = 
+    0.05
+\]
+Be aware that this could find cases where expected norm is greater than 1
+and the constraint then says that they are never less than 1 in norm.
+Another restriction could be that expected norm is < 1.
+
+Chebyshev's inequality could also be used when expected norm should be 1
+and then put a bound on number of std away one must be to have less than 
+0.05 fraction of data removed.
 
 
 \bibliography{refs.bib}{}

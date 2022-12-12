@@ -50,6 +50,19 @@ $$ d = 10 $$
 ![Image](norm_dist.png)
 
 
+##### Next
+- I have looked at using Chebyshev's inequality for the constraint, though it is a very complicated problem constraint then.
+- I will proceed with expectation 1. And then use either chebyshev's inequality to decide bound on removal of data.
+- I could also use numerical methods to evaluate the CDF, but if I do, shouldn't I include explanation of how these methods work? Some of them seem quite complex and written in the 80's.
+- I will (attempt to) solve the problem with expected 1, within the next week, and discuss that next week.
+- Next week is the last before break, so it would be nice to have an idea on the majority.
+- I can quite easily extend the majority of the work to any $p$. I.e. any norm, though evaluating the CDF and when to clip is only available in when $p$ is even.
+
+
+Davies algorithm for estimating the CDF of generalized chi square. Used by the python package, it has absolute error tolerance as a parameter
+https://www.jstor.org/stable/pdf/2346911.pdf?refreqid=excelsior%3A9cdee81fcfde8b00397063d6f08d5f06&ab_segments=&origin=&acceptTC=1
+
+
 ### TODO:
 - Make argument for why clipping data preserves privacy. Should be closely related to definition of ($\epsilon$,$\delta$)-DP.
 - Think about transforming data such that expected norm is $1$ (in theory anything such that anything outside this is clipped). This is related to generalized chi square distributions.
@@ -104,3 +117,4 @@ $$ c_k = \frac{1}{k} \cdot \sum_{r=0}^{k-1} d_{k-r} c_r $$
 $$ d_k = \frac{1}{2} \sum_{j=1}^{p} (2\lambda_j)^{-k} 
 = \frac{1}{2} \sum_{j=1}^p \frac{1}{(2\sigma_j^2)^k}
 $$
+
