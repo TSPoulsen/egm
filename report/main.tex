@@ -34,8 +34,10 @@
 \newtheorem{definition}{Definition}[section]
 \newtheorem{theorem}{Theorem}
 
+\newtheorem{corollary}{Corollary}[section]
 
-\title{Invetigation of the Elliptical Gaussian Noise in the case of multivariate normal data}
+
+\title{Differentially private vector aggreation in the case of multivariate gaussian data}
 \author{Tim Sehested Poulsen}
 
 \begin{document}
@@ -96,14 +98,40 @@ and then the total $l_2$-sensitivity is then
 
 \vspace*{0.3cm}
 \begin{definition}[$(\epsilon, \delta)$-Differential Privacy \cite{dwork2016}]
+
 A randomized algorithm $\M: \R^{n \times d} \rightarrow \mathcal{R}$ 
 is $(\epsilon, \delta)$-differentially private if for all possible 
 subsets of outputs $S \subseteq \mathcal{R}$ and all pairs of 
 neighbouring dataset $X \sim X'$ we have that
 \[ \prob{M(X) \in S} \le e^{\epsilon} \cdot \prob{M(X') \in S} + \delta \]
 
-    
 \end{definition}
+
+\begin{theorem}[ \edp under post-processing \cite{dpbasic}] %Proposition 2.1 in the cite
+\label{theo:PostProc}
+
+Let $\M: \R^{n \times d} \rightarrow \mathcal{R}$ be an \edp 
+algorithm. Let $f: \mathcal{R} \rightarrow \mathcal{R}'$ 
+be an arbitrary mapping, then 
+$f \circ \mathcal{M}: \R^{n \times d} \rightarrow \mathcal{R}'$ is \edp.
+
+\end{theorem}
+
+\begin{proof}
+
+Fix any pair of neighbouring datasets $X, X' \in \R^{n \times d}$ and 
+let $S \subseteq \mathcal{R}'$ be an arbitrary event. We then define 
+$T = \setdef{r \in \mathcal{R}}{f(r) \in S}$.
+We thus have that
+\begin{align*}
+    &\prob{f(\mathcal{M}(X)) \in S} = \prob{\mathcal{M}(X) \in T} \\
+    &\le e^{\epsilon} \cdot \prob{\mathcal{M}(X') \in T} + \delta = 
+    e^{\epsilon} \cdot \prob{f(\mathcal{M}(X')) \in S} + \delta
+\end{align*}
+    
+\end{proof}
+
+    
 
 \paragraph{Error Measure}
 As I will be working exclusively with the sum of entries 
@@ -153,6 +181,16 @@ Blah blah
 \end{align*}
 blah
 \end{proof}
+\begin{corollary}
+Let $X \sim \mathcal{N}(\bm{0}, \bm{\Sigma_X})$ be a $d$-dimensional gaussian vector
+with expected value $\bm{0}$, and let $\sigma_j^2$ denote the variance of the 
+$j$'th dimension where $1 \le j \le d$.
+By theorem \ref{theo:ExpQuad} we have that the expected $l_2$-norm 
+of such a vector is given by
+\[
+    \ee{X} = \text{tr} (\bm{\Sigma_X}) = \sum_{j=1}^d \sigma_j^2
+\]
+\end{corollary}
 
 
 \section{Algorithms}
@@ -203,8 +241,8 @@ is \edp.
 \end{theorem}
 The proof is rather long and is therefore ommitted here.
 
-In the case where $g(X) = f(X)$, i.e. it is estimating the sum
-of entries we have quite intuitively that the error is given by 
+In the case where $g(X) = f(X)$ i.e. it is estimating the sum
+of entries, we have quite intuitively that the error is given by 
 the norm of the noise introduced as
 \[
     \ee{(g(X) + \eta) - f(X)} =
@@ -316,6 +354,91 @@ $\frac{1}{b_j}$, and have that
 \]
 
 Minimize $\| \hat{\eta} \|$ under the constraint that $\ee{x_i} = 1$  
+\begin{theorem}
+Running algo 3, with parameter $\ee{x_i} = 1$ the error of is minimized when 
+\[
+    b_i = \frac{1}{\sqrt{\sigma_i} \sqrt{\sum_{j=1}^d \sigma_j}}
+\]
+\end{theorem}
+\begin{proof}
+Using lagrangian multipliers we find the local maxima or 
+minia of the function subject to equality constraints.
+To do so we construct the lagrangian function $\mathcal{L}: \R^{d+1} \rightarrow \R$, and find the stationary
+points of it, by setting the derivative of it to $\bm{0}$.
+
+\[
+    \mathcal{L}(\bm{b},\lambda) = \sum_{j = 1}^{d} \lr{\frac{t}{b_j}}^2 
+    + \lambda \lr{ \sum_{j=1}^d \lr{\sigma_j b_j}^2 - 1}
+\]
+
+The derivative with respect to $b_i$ is 
+\[
+    \frac{\partial \mathcal{L}}{\partial b_i} = 
+    \frac{\partial}{\partial b_i} \lr{\frac{t}{b_i}}^2
+    + \lambda \lr{\sigma_i b_i}^2 =
+    -2\frac{t^2}{b_i^3} + 2 \lambda \sigma_i^2b_i
+\]
+I then solve $\frac{\partial \mathcal{L}}{\partial b_i} = 0$ for $b_i$
+\begin{equation}
+\label{eq:solvbi}
+    -2\frac{t^2}{b_i^3} + 2 \lambda \sigma_i^2b_i = 0 \iff
+    \lambda \sigma_i^2b_i = \frac{t^2}{b_i^3} \iff 
+    b_i^4 = \frac{t^2}{\lambda \sigma_i^2} \iff 
+    b_i = \frac{\sqrt{t}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_i}} 
+\end{equation}
+I now have the last partial derivative 
+$\frac{\partial \mathcal{L}}{\partial \lambda} = 0$ which I solve for
+$lambda$ using the previous equation for $b_i$.
+
+\begin{align*}
+    &\frac{\partial \mathcal{L}}{\partial \lambda} = 
+    \sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 \\
+    &\sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 = 0 \iff
+    \sum_{j=1}^d \sigma_j^2 \lr{\frac{t}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
+    &\frac{t}{\sqrt{\lambda}} \sum_{j=1}^d \frac{\sigma_j^2}{\sigma_j} = 1 \iff
+    t \sum_{j=1}^d \sigma_j = \sqrt{\lambda}
+\end{align*}
+Inserting back into equation \ref{eq:solvbi}
+\[
+    b_i = \frac{\sqrt{t}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_i}} =
+    \frac{\sqrt{t}}{\sqrt{t \sum_{j=1}^d \sigma_j} \sqrt{\sigma_i}} = 
+    \frac{1}{\sqrt{\sum_{j=1}^d \sigma_j} \sqrt{\sigma_i}} 
+\]
+\end{proof}
+\begin{theorem}
+    Expected Error is given by
+    \[
+        \ee{\eta} = t^2 \lr{\sum_{i=1}^d \sigma_i}^2 \le \sigma_{\epsilon,\delta}  \cdot \alpha \cdot \lr{\sum_{i=1}^d \sigma_i}^2
+    \]
+\end{theorem}
+Determining $\alpha$ using Bernsteins inequality
+\[
+    \prob{\|x_i\|^2 - \ee{x_i} > t} < 2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}}
+\]
+In the case where $\ee{x_i} = 1$ and $b_i$ is optimized in this case,
+we have that
+\begin{align*}
+    &P(\|x_i\|^2 > 1 + t) < 2 \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} \\
+    &\var{\| x_i \|^2} = 2 \frac{\sum_i^d \sigma_i^2}{\lr{\sum_i^d \sigma_i}^2} \\
+    &C = \max_{i \in [d]} \lr{\sigma_i} \cdot \frac{16}{\sum_i^d \sigma_i}
+\end{align*}
+$C$ is decided such that less than $0.0001$ fraction of the data is outside this bound
+in each dimension. i.e. 
+\[
+    \forall j \in [d] \text{ : }\prob{X^{(j)} > C} < 0.0001
+\]
+
+Solving for $t$
+\begin{align*}
+&2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} = 0.0001
+\iff \ln(\frac{0.0001}{2}) = -\frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}
+\implies \\ &t = - \frac{C \ln(\frac{0.0001}{2}) - 
+\sqrt{\ln(\frac{0.0001}{2})(-18 \cdot \var{\|x_i\|^2} + C^2\ln(\frac{0.0001}{2}))}}{3}
+\end{align*}
+Then we have that $\alpha = 1 + t$.
+
+\todo{Determine $\alpha$ for the bound using \url{https://en.wikipedia.org/wiki/Concentration_inequality}, or \url{https://web.stanford.edu/class/cs229t/2017/Lectures/concentration-slides.pdf}}
+
 
 \paragraph*{An alternative}
 Again minimize $\| \hat{\eta} \|$, but instead the constraint
@@ -354,6 +477,12 @@ Another restriction could be that expected norm is < 1.
 Chebyshev's inequality could also be used when expected norm should be 1
 and then put a bound on number of std away one must be to have less than 
 0.05 fraction of data removed.
+
+\newpage
+
+
+\newpage
+
 
 
 \bibliography{refs.bib}{}

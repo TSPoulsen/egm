@@ -50,13 +50,25 @@ $$ d = 10 $$
 ![Image](norm_dist.png)
 
 
-##### Next
+##### Previous
 - I have looked at using Chebyshev's inequality for the constraint, though it is a very complicated problem constraint then.
 - I will proceed with expectation 1. And then use either chebyshev's inequality to decide bound on removal of data.
 - I could also use numerical methods to evaluate the CDF, but if I do, shouldn't I include explanation of how these methods work? Some of them seem quite complex and written in the 80's.
 - I will (attempt to) solve the problem with expected 1, within the next week, and discuss that next week.
 - Next week is the last before break, so it would be nice to have an idea on the majority.
 - I can quite easily extend the majority of the work to any $p$. I.e. any norm, though evaluating the CDF and when to clip is only available in when $p$ is even.
+- Should I explain lagrangian multipliers?
+- I would like to have a draft of something after new years which you can gauge the level of depth. Perhaps skip next meeting and use that time for the reading.
+
+Bernstein inequality
+- Model constraint with this equality
+    - Don't solve it if complicated
+    - Use this to construct upper bound on error
+    - Mention that in reality the CDF can be evaluated numerically
+
+##### Next
+- How do I handle c_i, the max limit on all dimensions, if I set that only 0.0001 fraction of points are outside, then is clipping these alright? Otherwise I have no clue on how to set the bound
+- Proofs of theorems from other sources (both your article and other)?
 
 
 Davies algorithm for estimating the CDF of generalized chi square. Used by the python package, it has absolute error tolerance as a parameter
