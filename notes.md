@@ -67,7 +67,7 @@ Bernstein inequality
     - Mention that in reality the CDF can be evaluated numerically
 
 ##### Next
-- How do I handle c_i, the max limit on all dimensions, if I set that only 0.0001 fraction of points are outside, then is clipping these alright? Otherwise I have no clue on how to set the bound
+- How do I handle $c_i$, the max limit on all dimensions, if I set that only 0.0001 fraction of points are outside, then is clipping these alright? Otherwise I have no clue on how to set the bound
 - Proofs of theorems from other sources (both your article and other)?
 
 
@@ -129,4 +129,23 @@ $$ c_k = \frac{1}{k} \cdot \sum_{r=0}^{k-1} d_{k-r} c_r $$
 $$ d_k = \frac{1}{2} \sum_{j=1}^{p} (2\lambda_j)^{-k} 
 = \frac{1}{2} \sum_{j=1}^p \frac{1}{(2\sigma_j^2)^k}
 $$
+
+Writing list
+- Introduction and the problem (informal)
+- Prerequisites (definitions/theorems)
+- The Problem and Algorithms 
+    - Gaussian Mechanism
+    - Problem of adding equal noise in each dimension
+    - Elliptical Gaussian Mechanism 
+        - Look at this as a transformation to symmetry (i.e. equal noise here is optimal)
+- Problem of Gaussian data 
+    - Clipping data (such that very little is removed 10^5 points and 10^{-5} prob of clipping points)
+    - Transition into symmetry again
+- Different ways of solving, setup different constraints
+- Present the one focused on and the steps to solving it
+- Theorem on optimality
+- Theorem on error
+- Discuss bounds for $\alpha$ and numerical solutions
+    - Using Chebyshevs
+    - Using Bernsteins
 

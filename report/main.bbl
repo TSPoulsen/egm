@@ -1,4 +1,4 @@
-\begin{thebibliography}{10}
+\begin{thebibliography}{1}
 
 \bibitem{BatesQuadForm}
 {\sc Bates, D.}
@@ -46,10 +46,5 @@
 \bibitem{MathaiQaudForms}
 {\sc Mathai, A., and Provost, S.}
 \newblock Quadratic forms in random variables.
-
-\bibitem{Lebeda2022}
-{\sc Pagh, R., and Lebeda, C.}
-\newblock Private vector aggregation when coordinates have different
-  sensitivity.
 
 \end{thebibliography}

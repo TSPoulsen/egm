@@ -35,6 +35,7 @@
 \newtheorem{theorem}{Theorem}
 
 \newtheorem{corollary}{Corollary}[section]
+\newtheorem{lemma}{Lemma}[section]
 
 
 \title{Differentially private vector aggreation in the case of multivariate gaussian data}
@@ -78,23 +79,20 @@ Neighbouring dataset are denoted with the relation $X \sim X'$ and defined as fo
 \[ X \sim X' \iff \lra{ \setdef{i \in \N}{i \le n \land x_i \ne x_i' } } \le 1 \]
 \end{definition}
 
-\begin{definition}[Sensitivity \cite{Lebeda2022}]
-Let $f(X): \R^{n \times d} \rightarrow \R^d$ given by 
-$f(X) = \sum_{i = 1}^n x_i$ be the sum over all vectors in a dataset.
-The sensitivity is then the maximal 
-possible difference in the output of our summation  
-from two neighbouring dataset denoted as $\Delta$.
-We denote the sensitivity of the $j$'th dimension as
+\begin{definition}[Sensitivity \cite{dpbasic}] % Definition 3.8
+Let $f(X): \R^{n \times d} \rightarrow \R^k$ be a function. 
+The $l_p$-sensitivity of $f$ is the maximal 
+possible $l_p$-norm of the difference between the output of $f$ 
+on two neighbouring dataset.
+We denote the sensitivity as 
 \[
-\Delta_j = \max_{X \sim X'} \lra{{f(X)}^{(j)} - {f(X')}^{(j)}} 
+\Delta_p (f) = \max_{X \sim X'} \| f(X) - f(X') \|_p 
 \]
 and then the total $l_2$-sensitivity is then
-\begin{equation}
-    \label{eq:l2sens}
-    \| \Delta \| = \max_{X \sim X'} \left\| {f(X)} - {f(X')} \right\|  
-\end{equation}
-    
 \end{definition}
+Throughout the report I will only be working with $l_2$-sensitivity and
+will just denote this as $\Delta(f)$ for ease of notation.
+    
 
 \vspace*{0.3cm}
 \begin{definition}[$(\epsilon, \delta)$-Differential Privacy \cite{dwork2016}]
@@ -119,7 +117,7 @@ $f \circ \mathcal{M}: \R^{n \times d} \rightarrow \mathcal{R}'$ is \edp.
 
 \begin{proof}
 
-Fix any pair of neighbouring datasets $X, X' \in \R^{n \times d}$ and 
+Fix any pair of neighbouring datasets $X \sim X'$ and 
 let $S \subseteq \mathcal{R}'$ be an arbitrary event. We then define 
 $T = \setdef{r \in \mathcal{R}}{f(r) \in S}$.
 We thus have that
@@ -134,16 +132,16 @@ We thus have that
     
 
 \paragraph{Error Measure}
-As I will be working exclusively with the sum of entries 
+As this report concerns itself exclusively with the sum of entries 
 in a dataset, error will be defined as the expected
 squared $l_2$-norm between the true sum and 
 the output of a randomized algorithm.
 So let $X \in \R^{n \times d}$ be the dataset and
-$f(X) = \sum_i^n x_i$ be the true sum. The error of a
+$f(X) = \sum_i^n x_i$ be the true sum of all entries. The error of a
 randomized algorithm $M : \R^{n \times d} \rightarrow \R^d$
 which estimates $f(X)$ is then 
 \[
-    \text{Err}(M) := \mathbb{E} \left[ \| M(X) - f(X) \|^2 \right]
+    \text{Err}(M) := \ee{M(X) - f(X)}
 \]
 
 \paragraph{extra}
@@ -161,7 +159,7 @@ for Gaussian random vectors \cite{QuadFormsNume,QaudFormsBounds}.
 \label{theo:ExpQuad}
 Let $X$ be a $d$-dimensional random vector with expected value $\Exp{X} =  \bm{\mu_{X}}$
 and covariance matrix $\var{X} = \bm{\Sigma_{X}}$. Let also $A$ be a constant 
-$k \times k$ symmetric matrix, then 
+$d \times d$ symmetric matrix, then 
 \[
     \Exp{X^T A X} = tr \lr{A \bm{\Sigma_X}} + \bm{\mu}^T A\bm{\mu}
 \]
@@ -182,6 +180,7 @@ Blah blah
 blah
 \end{proof}
 \begin{corollary}
+\label{cor:expNorm}
 Let $X \sim \mathcal{N}(\bm{0}, \bm{\Sigma_X})$ be a $d$-dimensional gaussian vector
 with expected value $\bm{0}$, and let $\sigma_j^2$ denote the variance of the 
 $j$'th dimension where $1 \le j \le d$.
@@ -199,10 +198,10 @@ One of the most foundational algorithms for achieving
 \edp is the Gaussian Mechanism \cite{dpbasic}. It computes the real
 value of a statistic, where the $l_2$-sensitivity is known.
 That is it produces a \edp estimate of a function 
-$g: \R^{n \times d} \rightarrow \R^{d}$ where $ \| \Delta \|$ 
-for the function $g$ is known.
+$g: \R^{n \times d} \rightarrow \R^{d}$ where the $l_2$-sensitivity $ \Delta(g) $ 
+is known.
 It does so by computing the value of $g(X)$ and then adding noise
-to each dimension from the normal distribution 
+to each dimension drawn from the normal distribution 
 $\mathcal{N}(0, \sigma_{\epsilon,\delta}^2)$.
 This can be seen as adding a noise vector $\eta$ which 
 is then distributed according to
@@ -233,10 +232,10 @@ The following theorem was initially proven
 \label{theo:gaussMech}
 Let $g: \R^{n \times d} \rightarrow \R^{d}$ be an arbitrary 
 $d$-dimensional function with $l_2$-sensitvity 
-$\| \Delta \| = \max_{X \sim X'} \| g(X) - g(X') \|$, 
+$ \Delta(g) = \max_{X \sim X'} \| g(X) - g(X') \|$, 
 and let $\epsilon \in (0,1)$.
 The Gaussian Mechanism with
-$\sigma_{\epsilon, \delta} = \| \Delta \| \sqrt{2\ln(1.25/\delta)}/\epsilon$ 
+$\sigma_{\epsilon, \delta} = \Delta(g)  \sqrt{2\ln(1.25/\delta)}/\epsilon$ 
 is \edp.
 \end{theorem}
 The proof is rather long and is therefore ommitted here.
@@ -245,11 +244,10 @@ In the case where $g(X) = f(X)$ i.e. it is estimating the sum
 of entries, we have quite intuitively that the error is given by 
 the norm of the noise introduced as
 \[
-    \ee{(g(X) + \eta) - f(X)} =
     \ee{(f(X) + \eta) - f(X)} = 
     \ee{\eta}
 \]
-Which by theorem \ref{theo:expNorm} is 
+Which by corollary \ref{cor:expNorm} is 
 \[
     \ee{\eta} = \sum_i^d \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
 \]
@@ -354,6 +352,33 @@ $\frac{1}{b_j}$, and have that
 \]
 
 Minimize $\| \hat{\eta} \|$ under the constraint that $\ee{x_i} = 1$  
+
+\begin{lemma}
+\label{lem:chibound}
+Let $X \sim \mathcal{N}(0,\sigma^2)$, and $\Phi$ denote the 
+cumulative density function of $\mathcal{N}(0,1)$, then the 
+cumulative density function of $X^2$ is given by
+\[
+    F_{X^2}(x) = \prob{X^2 \le x} = 2\Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1
+\]
+\end{lemma}
+\begin{proof}
+\begin{align*}
+    &\prob{X^2 \le x} =
+    \prob{ |X| \le \sqrt{x}} =
+    2 \prob{0 \le X \le \sqrt{x}}  \\
+    & =2  \lr{\prob{X \le \sqrt{x}} - \prob{X \le 0}} =
+    2 \lr{\prob{X \le \sqrt{x}} - \frac{1}{2}}  \\
+    &= 2 \Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1 
+\end{align*}
+\end{proof}
+\begin{corollary}
+From lemma \ref{lem:chibound} we can give following bound for $X \sim \mathcal{N}(0,\sigma^2)$.
+\[
+    \prob{X^2 > (4\sigma)^2} < 10^{-4}
+\]
+\end{corollary}
+
 \begin{theorem}
 Running algo 3, with parameter $\ee{x_i} = 1$ the error of is minimized when 
 \[
@@ -388,7 +413,7 @@ I then solve $\frac{\partial \mathcal{L}}{\partial b_i} = 0$ for $b_i$
 \end{equation}
 I now have the last partial derivative 
 $\frac{\partial \mathcal{L}}{\partial \lambda} = 0$ which I solve for
-$lambda$ using the previous equation for $b_i$.
+$\lambda$ using the previous expression for $b_i$.
 
 \begin{align*}
     &\frac{\partial \mathcal{L}}{\partial \lambda} = 
@@ -411,33 +436,99 @@ Inserting back into equation \ref{eq:solvbi}
         \ee{\eta} = t^2 \lr{\sum_{i=1}^d \sigma_i}^2 \le \sigma_{\epsilon,\delta}  \cdot \alpha \cdot \lr{\sum_{i=1}^d \sigma_i}^2
     \]
 \end{theorem}
-Determining $\alpha$ using Bernsteins inequality
-\[
-    \prob{\|x_i\|^2 - \ee{x_i} > t} < 2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}}
-\]
-In the case where $\ee{x_i} = 1$ and $b_i$ is optimized in this case,
-we have that
-\begin{align*}
-    &P(\|x_i\|^2 > 1 + t) < 2 \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} \\
-    &\var{\| x_i \|^2} = 2 \frac{\sum_i^d \sigma_i^2}{\lr{\sum_i^d \sigma_i}^2} \\
-    &C = \max_{i \in [d]} \lr{\sigma_i} \cdot \frac{16}{\sum_i^d \sigma_i}
-\end{align*}
-$C$ is decided such that less than $0.0001$ fraction of the data is outside this bound
-in each dimension. i.e. 
-\[
-    \forall j \in [d] \text{ : }\prob{X^{(j)} > C} < 0.0001
-\]
 
-Solving for $t$
-\begin{align*}
-&2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} = 0.0001
-\iff \ln(\frac{0.0001}{2}) = -\frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}
-\implies \\ &t = - \frac{C \ln(\frac{0.0001}{2}) - 
-\sqrt{\ln(\frac{0.0001}{2})(-18 \cdot \var{\|x_i\|^2} + C^2\ln(\frac{0.0001}{2}))}}{3}
-\end{align*}
-Then we have that $\alpha = 1 + t$.
+\begin{lemma}
+Let $X_1, X_2, \dots , X_d$ be $d$ independent random gaussian variables 
+where for $ 1 \le j \le d$ we have that $X_j \sim \mathcal{N}(0, \sigma_j)$.
+Then the probability for the sum of variables squared is bounded by
+\[
+    \prob{\sum_{j \in [d]} X^2_j \ge \sqrt{32} \cdot t \cdot 
+    \frac{\sqrt{\sum_{j \in [d]} \sigma_j^2}}{\sum_{j \in [d]} \sigma_j}} < e^{-t^2}
+\]
+for
+\[
+0 \le t \le 
+\sqrt{4} \cdot \frac{\sqrt{\sum_{i \in [d]} \sigma_i^2}}{\sum_{i \in [d]} \sigma_i}
+\]
+\end{lemma}
+\begin{proof}
+Let $Y_j = X_j^2 - \Exp{X_j^2}$ be the shifted chi-square with 1 degree of freedom
+using the $j$'th gaussian random variable.
+As $\Exp{Y_j} = \Exp{X_j^2 - \Exp{X_j^2}} = \Exp{X_j^2} - \Exp{X_j^2} = 0$ 
+we have that $Y_j$ is zero centered. We are thus interested in giving bounds on
+$\prob{\sum_{j \in [d]} Y_j}$. 
+We can use Bernsteins inequality, if the following holds for all $k \in \N$ with $k \ge 2$
+ and for all $j \in [d]$, and for some $L \in \R$
+\[
+    \Exp{ |Y^k_j| } \le \frac{1}{2} \Exp{Y_j^2} L^{k-2} k!
+\]
+Initially we have that $\Exp{ |Y_j^k| } = \Exp{ |\lr{X_j^2 - \Exp{X_j^2}}^k|}$
+and since $X_j^2 \ge 0$ and therefore also $\Exp{X_j^2} \ge 0$ 
+we can therefore bound it by
 
-\todo{Determine $\alpha$ for the bound using \url{https://en.wikipedia.org/wiki/Concentration_inequality}, or \url{https://web.stanford.edu/class/cs229t/2017/Lectures/concentration-slides.pdf}}
+\[
+    \Exp{ |\lr{X_j^2 - \Exp{X_j^2}}^k|} \le \Exp{ | X_j^{2k} | } =
+    \Exp{ | \lr{\sigma_j \hat{X}}^{2k} | } = 
+    \sigma_j^{2k} \cdot \Exp{ |\hat{X}^{k} | }
+\]
+Where $\hat{X} \sim \chi^2_1$ is a chi square with 1 degree of freedom.
+The moment generating function of $\hat{X}$ is $\Exp{X}(\hat{X}^m) = 1 \cdot 3 \cdot 5 \cdot \ldots \cdot (2m - 1) $
+
+\newpage
+It 
+
+
+
+
+
+Bernsteins inequality then states that
+\[
+    \prob{\sum_{j \in [d]} X_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{X_i^2}}} < e^{-t^2}
+\]
+for all 
+\[
+    0 \le t \le \frac{1}{2L} \sqrt{\sum}
+\]
+\end{proof}
+
+I have that $\bar{X}$ is a standard gaussian variable. \\
+Let $Y_j = X_j^2$ I am interested in $\sum_{j \in [d]} Y_j$,
+then it has 
+\begin{align*}
+    &\Exp{ |Y_j^k| } = \Exp{ |X_j^{2k}| } = \Exp{ |X_j|^{2k} } = 
+    \Exp{ | \sigma_j \bar{X} |^{2k} } = \\
+    &| \sigma_j |^{2k} \Exp{ | \bar{X} |^{2k}} = 
+    \sigma_j ^{2k} \prod_{c=1}^k 2c = \sigma_j^{2k} \cdot 2^k \cdot k!
+\end{align*}
+Which means $\Exp{Y_j^2} = 8 \sigma_j^{4}$.
+To check the constraint (find value for L)
+\begin{align*}
+    &\sigma_j^{2k} \cdot 2^k \cdot k! \le
+    \frac{1}{2} \cdot 8 \sigma_j^{4} \cdot L^{k-2} k! \iff \\
+    &\sigma_j^{2k} \cdot 2^k \le 4 \sigma_j^4 \cdot L^{k-2} \iff \\
+    &\sigma_j^{2(k-2)} \cdot 2^k \le 4 \L^{k-2}
+\end{align*}
+We have that 
+$\sigma_j = \sigma_j b_j = \frac{\sqrt{\sigma_j}}{\sqrt{\sum_{i \in [d]} \sigma_i}} = \sqrt{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}$.
+Therefore
+\begin{align*}
+    &\sigma_j^{2(k-2)} \cdot 2^k  = 
+    \lr{\sqrt{\frac{\sigma_j}{\sum_{i \in [d]}\sigma_i}}}^{2(k-2)} \cdot 2^k = \\
+    &\lr{\frac{\sigma_j}{\sum_{i \in [d]}\sigma_i}}^{k-2} \cdot 2^k \le 2^k
+\end{align*}
+This therefore implies
+\[
+    2^k \le 4 L^{k-2} \iff
+    2^{k-2} \le L^{k-2} \iff
+    2 \le L
+\]
+If it is desired that less than $10^{-p}$ points are removed then 
+$t = \sqrt{p \ln(10) }$ as long as 
+\[
+    \sqrt{p \ln(10)} \le \frac{1}{2L}\sqrt{\sum_{j \in [d]} \Exp{X_j^2}} 
+    = \sqrt{4} \cdot \frac{\sqrt{\sum_{i \in [d]} \sigma_i^2}}{\sum_{i \in [d]} \sigma_i}
+\] 
+
 
 
 \paragraph*{An alternative}
@@ -483,6 +574,34 @@ and then put a bound on number of std away one must be to have less than
 
 \newpage
 
+\section*{Extra}
+Determining $\alpha$ using Bernsteins inequality
+\[
+    \prob{\|x_i\|^2 - \ee{x_i} > t} < 2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}}
+\]
+In the case where $\ee{x_i} = 1$ and $b_i$ is optimized in this case,
+we have that
+\begin{align*}
+    &P(\|x_i\|^2 > 1 + t) < 2 \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} \\
+    &\var{\| x_i \|^2} = 2 \frac{\sum_i^d \sigma_i^2}{\lr{\sum_i^d \sigma_i}^2} \\
+    &C = \max_{i \in [d]} \lr{\sigma_i} \cdot \frac{16}{\sum_i^d \sigma_i}
+\end{align*}
+$C$ is decided such that less than $0.0001$ fraction of the data is outside this bound
+in each dimension. i.e. 
+\[
+    \forall j \in [d] \text{ : }\prob{X^{(j)} > C} < 0.0001
+\]
+
+Solving for $t$
+\begin{align*}
+&2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} = 0.0001
+\iff \ln(\frac{0.0001}{2}) = -\frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}
+\implies \\ &t = - \frac{C \ln(\frac{0.0001}{2}) - 
+\sqrt{\ln(\frac{0.0001}{2})(-18 \cdot \var{\|x_i\|^2} + C^2\ln(\frac{0.0001}{2}))}}{3}
+\end{align*}
+Then we have that $\alpha = 1 + t$.
+
+\todo{Determine $\alpha$ for the bound using \url{https://en.wikipedia.org/wiki/Concentration_inequality}, or \url{https://web.stanford.edu/class/cs229t/2017/Lectures/concentration-slides.pdf}}
 
 
 \bibliography{refs.bib}{}
