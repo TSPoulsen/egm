@@ -436,18 +436,17 @@ Inserting back into equation \ref{eq:solvbi}
 \begin{lemma}
 \label{lem:Bernstein}
 Let $X_1, X_2, \dots , X_d$ be $d$ independent random gaussian variables 
-where for $ 1 \le j \le d$ we have that $X_j \sim \mathcal{N}(0, \sigma_j)$ 
-and $\sigma_j \le 1$.
+where for $ 1 \le j \le d$ we have that $X_j \sim \mathcal{N}(0, \sigma_j^2)$.
 Then the probability for the sum of variables squared is bounded by
 \[
 \prob{\sum_{j \in [d]} X_j^2  \ge 
-    \sqrt{8} t \sqrt{ \sum_{j \in [d]}  \lr{\sigma_j^4}} +
+    t \sqrt{8 \sum_{j \in [d]} \sigma_j^4} +
     \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2}
 \]
 for
 \[
 0 \le t \le 
- \sqrt{ \frac{1}{8} \sum_{j \in [d]} \sigma_j^4 }
+    \frac{1}{4 \cdot \max_{j \in [d]} \sigma_j^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
 \]
 \end{lemma}
 \begin{proof}
@@ -468,57 +467,76 @@ we can therefore bound it by
 
 \[
     \Exp{ |\lr{X_j^2 - \Exp{X_j^2}}^k|} \le \Exp{ | X_j^{2k} | } =
-    \Exp{ | \lr{\sigma_j^2 \bar{X}}^{k} | } = 
-    \sigma_j^{2k} \cdot \Exp{ |\bar{X}^{k} | }
+    \Exp{ | \lr{\sigma_j^2 Z}^{k} | } = 
+    \sigma_j^{2k} \cdot \Exp{ |Z^{k} | }
 \]
-Where $\bar{X} \sim \chi^2_1$ is a chi square with 1 degree of freedom.
-The moment generating function of $\bar{X}$ is $\Exp{\hat{X}^m} = 1 \cdot 3 \cdot 5 \cdot \ldots \cdot (2m - 1) $
-As $\sigma_j \le 1$ by definition, we finally have that
+Where $Z \sim \chi^2_1$ is a chi square with 1 degree of freedom.
+The moment generating function of $Z$ is 
+$\Exp{Z^m} = 1 \cdot 3 \cdot 5 \cdot \ldots \cdot (2m - 1) $.
+Using this we can get the following bound
 \begin{align*}
-    &\sigma_j^{2k} \cdot \Exp{ |\bar{X}^{k} | } \le
-    \Exp{ |\bar{X}^{k} | } =
-    \prod_{c=1}^k(2c-1) =
-    3 \cdot \prod_{c=3}^k (2c-1) \\
-    &\le 3 \cdot \prod_{c=3}^k 2c
-    = 3 \cdot 2^{k-2} \cdot \frac{k!}{2}
+    &\sigma_j^{2k} \cdot \Exp{ |Z^{k} | } =
+    \sigma_j^{2k} \cdot \prod_{c=1}^k(2c-1) =
+    \sigma_j^{2k} \cdot \prod_{c=2}^k (2c-1) \\
+    &\le \sigma_j^{2k} \cdot \prod_{c=2}^k 2c
+    = \sigma_j^{2k} \cdot 2^{k-1} \cdot \frac{k!}{2}
+    = \sigma_j^{2k} \cdot 2^{k-2} \cdot k!
 \end{align*}
+Concluding that $\Exp{ |Y_j^k| } \le  \sigma_j^{2k} \cdot 2^{k-2} \cdot k!$.
 
-\noindent By using this result with $k=2$ we get
-\[
-    \Exp{Y_j^2} \le 3 \cdot 2^{2-2} \cdot \frac{2!}{2} = 3 
-\]
+\noindent Secondly I calculate $\Exp{Y_j^2}$ exactly to be used in equation \ref{eq:BernCon}
+\begin{align}
+\label{eq:ExpY2:1}
+    &\Exp{Y_j^2} = 
+    \Exp{\lr{X_j^2 - \Exp{X_j^2}}^2} =
+    \Exp{\lr{X_j^2 - \Exp{X_j^2}}^2} = \\
+    &\Exp{X_j^4 + \Exp{X_j^2}^2 - 2X_j^2\Exp{X_j^2}} = 
+    \Exp{X_j^4} + \Exp{X_j^2}^2 - 2\Exp{X_j^2}^2 = \\
+    &\Exp{X_j^4}  - \Exp{X_j^2}^2 =
+    \sigma_j^4\Exp{Z^2}  - \lr{\sigma_j^2\Exp{Z}}^2 = \\
+\label{eq:ExpY2:2}
+    &3\sigma_j^4  - \sigma_j^4 =
+    2\sigma_j^4
+\end{align}
+
 Eqaution \ref{eq:BernCon} is therefore rewritten to 
 \begin{align*}
-    3 \cdot 2^{k-2} \cdot \frac{k!}{2} \le \frac{3}{2} L^{k-2} k! \iff
-    2^{k-2} \cdot \le  L^{k-2} \iff
-    2 \le L
+    &\sigma_j^{2k} \cdot 2^{k-2} \cdot k! \le \frac{1}{2} \cdot 2 \sigma_j^4 L^{k-2} k! \iff \\
+    &\sigma_j^{2k-4} \cdot 2^{k-2} \cdot \le L^{k-2} \iff \\
+    &\sigma_j^2 \cdot 2 \le L
 \end{align*}
-% L= any, sqrt(5/3), 
-% sqrt(35/12) \le 12*L^2
-Therefore the constraint for Bernstein's inequality holds with $L=2$ and 
-we can therefore conclude the following
-\[
+As this has to hold for all $j \in [d]$, we can simply choose
+$ L := 2 \cdot \max_{j \in [d]} \sigma_j^2$ which satisfies the constraint.
+
+We can then use Bernstein's inequality to bound the following 
+\begin{equation}
+\label{eq:BernIneq}
     \prob{\sum_{j \in [d]} Y_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{Y_j^2}}} < e^{-t^2}
-\]
-Which in in this case can be rewritten to get a tail bound on $\sum_{j \in [d]} X_j^2$ 
+\end{equation}
+
+Which in in this case can be rewritten to get a tail bound on $\sum_{j \in [d]} X_j^2$,
+by reusing results from equations \eqref{eq:ExpY2:1}-\eqref{eq:ExpY2:2}
 \begin{align*}
-&\prob{\sum_{j \in [d]} Y_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{Y_j^2}}} < e^{-t^2} \iff \\
-&\prob{\sum_{j \in [d]} \lr{X_j^2 - \Exp{X_j^2}} \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{\lr{X_j^2 - \Exp{X_j^2}}^2}}} < e^{-t^2} \iff \\
-&\prob{\sum_{j \in [d]} X_j^2 - \sum_{j \in [d]} \Exp{X_j^2} \ge 
-    2 t \sqrt{ \sum_{j \in [d]} \Exp{X_j^4 + \Exp{X_j^2}^2 - 2X_j^2\Exp{X_j^2}}}} < e^{-t^2} \iff \\
-&\prob{\sum_{j \in [d]} X_j^2  \ge 
-    2 t \sqrt{ \sum_{j \in [d]} \lr{\Exp{X_j^4} - \Exp{X_j^2}}} +
-    \sum_{j \in [d]} \Exp{X_j^2}} < e^{-t^2} \iff \\
-&\prob{\sum_{j \in [d]} X_j^2  \ge 
-    2 t \sqrt{ \sum_{j \in [d]}  \lr{\sigma_j^4\Exp{\bar{X}^2} - \sigma_j^2 \Exp{\bar{X}}}} +
-    \sum_{j \in [d]} \sigma_j^2 \Exp{\bar{X}}} < e^{-t^2} \iff \\
-&\prob{\sum_{j \in [d]} X_j^2  \ge 
-    2 t \sqrt{ 2 \sum_{j \in [d]}  \lr{\sigma_j^4}} +
-    \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2} \\
-&\prob{\sum_{j \in [d]} X_j^2  \ge 
-    \sqrt{8} t \sqrt{ \sum_{j \in [d]}  \lr{\sigma_j^4}} +
-    \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2} \\
+&\prob{\sum_{j \in [d]} Y_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{Y_j^2}}} 
+=\prob{\sum_{j \in [d]} \lr{X_j^2 - \Exp{X_j^2}} \ge 2 t \sqrt{ \sum_{j \in [d]} 2 \sigma_j^4}} \\
+&=\prob{\sum_{j \in [d]} X_j^2  \ge 2 t \sqrt{ \sum_{j \in [d]} 2 \sigma_j^4} + \sum_{j \in [d]} \Exp{X_j^2}} 
+=\prob{\sum_{j \in [d]} X_j^2  \ge 2 t \sqrt{ \sum_{j \in [d]} 2 \sigma_j^4} + \sum_{j \in [d]} \sigma_j^2}  \\
+&=\prob{\sum_{j \in [d]} X_j^2  \ge 
+    t \sqrt{ 8 \sum_{j \in [d]}  \sigma_j^4} +
+    \sum_{j \in [d]} \sigma_j^2 } \\
 \end{align*}
+
+Finally giving us that 
+\[
+\prob{\sum_{j \in [d]} X_j^2  \ge 
+    t \sqrt{ 8 \sum_{j \in [d]}  \sigma_j^4} +
+    \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2}
+\]
+where t must lie within
+\[
+    0 \le t \le \frac{1}{2L} \sqrt{\sum_{j \in [d]} \Exp{Y_j^2}} =
+    \frac{1}{4 \cdot \max_{j \in [d]} \sigma_j^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
+\]
 \end{proof}
 
 \noindent Combining lemma \ref{lem:Bernstein} with theorem \ref{theo:OptStd} 
