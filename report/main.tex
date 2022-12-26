@@ -336,9 +336,10 @@ introduced in the original space is then given by
     \hat{\eta} = \left( b_0\eta_0,b_1\eta_1, \dots, b_d\eta_d \right)
 \]
 then the error is
-\[
+\begin{equation}
+\label{eq:Alg3Err}
     \ee{\hat{\eta}} = \sum_{j=1}^d b_j^2 \cdot t^2 = t^2 \sum_{j=1}^d b_j^2
-\] 
+\end{equation}
 
 
 
@@ -380,6 +381,7 @@ From lemma \ref{lem:chibound} we can give following bound for $X \sim \mathcal{N
 \end{corollary}
 
 \begin{theorem}
+\label{theo:OptStd}
 Running algo 3, with parameter $\ee{x_i} = 1$ the error of is minimized when 
 \[
     b_i = \frac{1}{\sqrt{\sigma_i} \sqrt{\sum_{j=1}^d \sigma_j}}
@@ -430,52 +432,163 @@ Inserting back into equation \ref{eq:solvbi}
     \frac{1}{\sqrt{\sum_{j=1}^d \sigma_j} \sqrt{\sigma_i}} 
 \]
 \end{proof}
-\begin{theorem}
-    Expected Error is given by
-    \[
-        \ee{\eta} = t^2 \lr{\sum_{i=1}^d \sigma_i}^2 \le \sigma_{\epsilon,\delta}  \cdot \alpha \cdot \lr{\sum_{i=1}^d \sigma_i}^2
-    \]
-\end{theorem}
 
 \begin{lemma}
+\label{lem:Bernstein}
 Let $X_1, X_2, \dots , X_d$ be $d$ independent random gaussian variables 
-where for $ 1 \le j \le d$ we have that $X_j \sim \mathcal{N}(0, \sigma_j)$.
+where for $ 1 \le j \le d$ we have that $X_j \sim \mathcal{N}(0, \sigma_j)$ 
+and $\sigma_j \le 1$.
 Then the probability for the sum of variables squared is bounded by
 \[
-    \prob{\sum_{j \in [d]} X^2_j \ge \sqrt{32} \cdot t \cdot 
-    \frac{\sqrt{\sum_{j \in [d]} \sigma_j^2}}{\sum_{j \in [d]} \sigma_j}} < e^{-t^2}
+\prob{\sum_{j \in [d]} X_j^2  \ge 
+    \sqrt{8} t \sqrt{ \sum_{j \in [d]}  \lr{\sigma_j^4}} +
+    \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2}
 \]
 for
 \[
 0 \le t \le 
-\sqrt{4} \cdot \frac{\sqrt{\sum_{i \in [d]} \sigma_i^2}}{\sum_{i \in [d]} \sigma_i}
+ \sqrt{ \frac{1}{8} \sum_{j \in [d]} \sigma_j^4 }
 \]
 \end{lemma}
 \begin{proof}
-Let $Y_j = X_j^2 - \Exp{X_j^2}$ be the shifted chi-square with 1 degree of freedom
+At first we define the random variable $Y_j = X_j^2 - \Exp{X_j^2}$ 
 using the $j$'th gaussian random variable.
 As $\Exp{Y_j} = \Exp{X_j^2 - \Exp{X_j^2}} = \Exp{X_j^2} - \Exp{X_j^2} = 0$ 
 we have that $Y_j$ is zero centered. We are thus interested in giving bounds on
 $\prob{\sum_{j \in [d]} Y_j}$. 
-We can use Bernsteins inequality, if the following holds for all $k \in \N$ with $k \ge 2$
+We can use Bernsteins inequality, if the following constraint holds for all $k \in \N$ with $k \ge 2$
  and for all $j \in [d]$, and for some $L \in \R$
-\[
+\begin{equation}
+\label{eq:BernCon}
     \Exp{ |Y^k_j| } \le \frac{1}{2} \Exp{Y_j^2} L^{k-2} k!
-\]
+\end{equation}
 Initially we have that $\Exp{ |Y_j^k| } = \Exp{ |\lr{X_j^2 - \Exp{X_j^2}}^k|}$
 and since $X_j^2 \ge 0$ and therefore also $\Exp{X_j^2} \ge 0$ 
 we can therefore bound it by
 
 \[
     \Exp{ |\lr{X_j^2 - \Exp{X_j^2}}^k|} \le \Exp{ | X_j^{2k} | } =
-    \Exp{ | \lr{\sigma_j \hat{X}}^{2k} | } = 
-    \sigma_j^{2k} \cdot \Exp{ |\hat{X}^{k} | }
+    \Exp{ | \lr{\sigma_j^2 \bar{X}}^{k} | } = 
+    \sigma_j^{2k} \cdot \Exp{ |\bar{X}^{k} | }
 \]
-Where $\hat{X} \sim \chi^2_1$ is a chi square with 1 degree of freedom.
-The moment generating function of $\hat{X}$ is $\Exp{X}(\hat{X}^m) = 1 \cdot 3 \cdot 5 \cdot \ldots \cdot (2m - 1) $
+Where $\bar{X} \sim \chi^2_1$ is a chi square with 1 degree of freedom.
+The moment generating function of $\bar{X}$ is $\Exp{\hat{X}^m} = 1 \cdot 3 \cdot 5 \cdot \ldots \cdot (2m - 1) $
+As $\sigma_j \le 1$ by definition, we finally have that
+\begin{align*}
+    &\sigma_j^{2k} \cdot \Exp{ |\bar{X}^{k} | } \le
+    \Exp{ |\bar{X}^{k} | } =
+    \prod_{c=1}^k(2c-1) =
+    3 \cdot \prod_{c=3}^k (2c-1) \\
+    &\le 3 \cdot \prod_{c=3}^k 2c
+    = 3 \cdot 2^{k-2} \cdot \frac{k!}{2}
+\end{align*}
+
+\noindent By using this result with $k=2$ we get
+\[
+    \Exp{Y_j^2} \le 3 \cdot 2^{2-2} \cdot \frac{2!}{2} = 3 
+\]
+Eqaution \ref{eq:BernCon} is therefore rewritten to 
+\begin{align*}
+    3 \cdot 2^{k-2} \cdot \frac{k!}{2} \le \frac{3}{2} L^{k-2} k! \iff
+    2^{k-2} \cdot \le  L^{k-2} \iff
+    2 \le L
+\end{align*}
+% L= any, sqrt(5/3), 
+% sqrt(35/12) \le 12*L^2
+Therefore the constraint for Bernstein's inequality holds with $L=2$ and 
+we can therefore conclude the following
+\[
+    \prob{\sum_{j \in [d]} Y_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{Y_j^2}}} < e^{-t^2}
+\]
+Which in in this case can be rewritten to get a tail bound on $\sum_{j \in [d]} X_j^2$ 
+\begin{align*}
+&\prob{\sum_{j \in [d]} Y_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{Y_j^2}}} < e^{-t^2} \iff \\
+&\prob{\sum_{j \in [d]} \lr{X_j^2 - \Exp{X_j^2}} \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{\lr{X_j^2 - \Exp{X_j^2}}^2}}} < e^{-t^2} \iff \\
+&\prob{\sum_{j \in [d]} X_j^2 - \sum_{j \in [d]} \Exp{X_j^2} \ge 
+    2 t \sqrt{ \sum_{j \in [d]} \Exp{X_j^4 + \Exp{X_j^2}^2 - 2X_j^2\Exp{X_j^2}}}} < e^{-t^2} \iff \\
+&\prob{\sum_{j \in [d]} X_j^2  \ge 
+    2 t \sqrt{ \sum_{j \in [d]} \lr{\Exp{X_j^4} - \Exp{X_j^2}}} +
+    \sum_{j \in [d]} \Exp{X_j^2}} < e^{-t^2} \iff \\
+&\prob{\sum_{j \in [d]} X_j^2  \ge 
+    2 t \sqrt{ \sum_{j \in [d]}  \lr{\sigma_j^4\Exp{\bar{X}^2} - \sigma_j^2 \Exp{\bar{X}}}} +
+    \sum_{j \in [d]} \sigma_j^2 \Exp{\bar{X}}} < e^{-t^2} \iff \\
+&\prob{\sum_{j \in [d]} X_j^2  \ge 
+    2 t \sqrt{ 2 \sum_{j \in [d]}  \lr{\sigma_j^4}} +
+    \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2} \\
+&\prob{\sum_{j \in [d]} X_j^2  \ge 
+    \sqrt{8} t \sqrt{ \sum_{j \in [d]}  \lr{\sigma_j^4}} +
+    \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2} \\
+\end{align*}
+\end{proof}
+
+\noindent Combining lemma \ref{lem:Bernstein} with theorem \ref{theo:OptStd} 
+we have can conclude the following:
+\todo{Explain why $\alpha$ is not squared (it is the sum of squares and $\Delta$ is limited by $\|X\|$)}
+
+\begin{theorem}
+The expected error of algorithm 3 is given by
+\[
+    \ee{\eta} = \sigma_{\epsilon,\delta}^2  \cdot \alpha \cdot \lr{\sum_{i=1}^d \sigma_i}^2
+\]
+where $\alpha$ is the smallest value statisfying $\prob{ \|X\|^2 > \alpha } < n^{-1}$.
+
+\noindent When $\ln(n) \le \frac{1}{8} \sum_{j \in [d]} \sigma_j^4$ 
+the error can thus be upper bounded by
+\[
+    \ee{\eta} \le \sigma_{\epsilon,\delta}^2  \cdot \sum_{j \in [d]} \sigma_j
+    \lr{ \sqrt{8\ln(n) \sum_{i \in [d]} \sigma_i^2} + \sum_{j \in [d]} \sigma_j }
+\]
+\end{theorem}
+
+\begin{proof}
+By equation \ref{eq:Alg3Err} the error is given by
+\begin{equation}
+\label{eq:Alg3Err2}
+    \ee{\eta} = \sigma_{\epsilon, \delta}^2 \cdot 
+    \Delta(\hat{f})^2 \cdot \lr{\sum_{i=1}^d \sigma_i}^2
+\end{equation}
+When clipping is performed to remove less than $n^{-1}$ we have the following 
+\todo{is this legal?}
+\[
+    \prob{ \| X \| \ge \Delta (f)} =
+    \prob{ \| X \|^2 \ge \Delta(f)^2} =
+    \prob{ \sum_{j \in [d]} X_j^2 \ge \Delta(f)^2}
+\]
+Which means I can give an upper bound on $\Delta(f)^2$ by using
+lemma \ref{lem:Bernstein}, and inserting that $\sigma_j = \sigma_j \cdot b_i$ 
+where $b_i$ is given by theorem \ref{theo:OptStd}. I whish the clipping 
+probability to be less than $n^{-1}$, which implies $t = \sqrt{\ln(n)}$. 
+Combining these results I get that
+\begin{align*}
+    \Delta(f)^2 &\le \sqrt{8 \ln(n) \sum_{j \in [d]}  \lr{\sigma_j^4}} + 
+    \sum_{j \in [d]} \sigma_j^2 \\
+    &=\sqrt{8 \ln(n) \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} + 
+    \sum_{j \in [d]} \frac{\sigma_j}{\sum_{i \in [d]} \sigma_i} \\
+    &=\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
+    + 1
+\end{align*}
+Inserting this back into equation \ref{eq:Alg3Err2} we conclude
+\begin{align*}
+    \ee{\eta} &= \sigma_{\epsilon, \delta}^2 \cdot 
+    \Delta(\hat{f})^2 \cdot \lr{\sum_{i=1}^d \sigma_i}^2 \\
+    &\le \sigma_{\epsilon, \delta}^2 \cdot 
+    \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
+    + 1} \cdot \lr{\sum_{i=1}^d \sigma_i}^2 \\
+    &= \sigma_{\epsilon, \delta}^2 \cdot \sum_{i=1}^d \sigma_i \cdot 
+    \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2}
+    + \sum_{i=1}^d \sigma_i}
+\end{align*}
+And the constraint on $t = \sqrt{\ln (n)}$ from lemma \ref{lem:Bernstein} is
+\begin{align*}
+    &0 \le t \le \sqrt{\frac{1}{8} \sum_{j \in [d]} \sigma_4} \iff \\
+    &\sqrt{\ln (n)} \le \sqrt{\frac{1}{8} \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
+    &\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{8\lr{\sum_{j \in [d]} \sigma_j}^2} 
+\end{align*}
+
+
+\end{proof}
 
 \newpage
-It 
 
 
 
@@ -489,7 +602,6 @@ for all
 \[
     0 \le t \le \frac{1}{2L} \sqrt{\sum}
 \]
-\end{proof}
 
 I have that $\bar{X}$ is a standard gaussian variable. \\
 Let $Y_j = X_j^2$ I am interested in $\sum_{j \in [d]} Y_j$,

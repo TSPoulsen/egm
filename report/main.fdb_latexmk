@@ -1,15 +1,15 @@
 # Fdb version 3
-["bibtex main"] 1671717724 "main.aux" "main.bbl" "main" 1671717742
+["bibtex main"] 1672063781 "main.aux" "main.bbl" "main" 1672064050
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/acm.bst" 1292289607 21064 c61a48664f3c347ce7f73c1a6a530506 ""
-  "main.aux" 1671717742 4254 1d4e714387b5fd5b7c54a1842ca9e3af "pdflatex"
+  "main.aux" 1672064050 5190 baf757f0e1ced9d2226616f4338f7e02 "pdflatex"
   "refs.bib" 1670766381 3362 4e11094cfad7169cead56517756e9eea ""
   (generated)
   "main.bbl"
   "main.blg"
-["pdflatex"] 1671717742 "/home/tim/repositories/uni/egm/report/main.tex" "/home/tim/repositories/uni/egm/report/main.pdf" "main" 1671717742
+["pdflatex"] 1672064050 "/home/tim/repositories/uni/egm/report/main.tex" "/home/tim/repositories/uni/egm/report/main.pdf" "main" 1672064050
   "/etc/texmf/web2c/texmf.cnf" 1641506330 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/tim/repositories/uni/egm/report/main.aux" 1671717742 4254 1d4e714387b5fd5b7c54a1842ca9e3af ""
-  "/home/tim/repositories/uni/egm/report/main.tex" 1671717741 22034 5dac4e7743691381fffcdb37053f350d ""
+  "/home/tim/repositories/uni/egm/report/main.aux" 1672064050 5190 baf757f0e1ced9d2226616f4338f7e02 ""
+  "/home/tim/repositories/uni/egm/report/main.tex" 1672064048 26819 3b25429e454cbca7274315ff0d84ce40 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcti1200.tfm" 1136768653 2048 4bf576aaa733142ac4e68faea01bc92e ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy6.tfm" 1246382020 1124 14ccf5552bc7f77ca02a8a402bea8bfb ""
@@ -221,16 +221,16 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1581979058 38841 ce3692aa899bb693b90b87eaa5d4d84e ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1669224849 4770781 1ed1abab22da9c3e2cc82e4db562318b ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1669224870 8258814 d77eb42911be11c496ad8e1b83bc2ad1 ""
-  "main.aux" 1671717742 4254 1d4e714387b5fd5b7c54a1842ca9e3af "pdflatex"
-  "main.bbl" 1671717724 1822 df4965d10be5eba84e5ebe1ecca3ea9c "bibtex main"
-  "main.out" 1671717742 418 87f86693d044a828d255f8dfc26c77f0 "pdflatex"
-  "main.tex" 1671717741 22034 5dac4e7743691381fffcdb37053f350d ""
+  "main.aux" 1672064050 5190 baf757f0e1ced9d2226616f4338f7e02 "pdflatex"
+  "main.bbl" 1672063781 1822 df4965d10be5eba84e5ebe1ecca3ea9c "bibtex main"
+  "main.out" 1672064050 418 87f86693d044a828d255f8dfc26c77f0 "pdflatex"
+  "main.tex" 1672064048 26819 3b25429e454cbca7274315ff0d84ce40 ""
   "symbols.tex" 1671130398 1273 d8eee9513152d014a2a283d92e4e89cc ""
   (generated)
-  "symbols.aux"
-  "main.pdf"
-  "main.aux"
-  "main.log"
   "main.out"
+  "main.aux"
+  "symbols.aux"
   "/home/tim/repositories/uni/egm/report/main.pdf"
+  "main.pdf"
   "/home/tim/repositories/uni/egm/report/main.log"
+  "main.log"
