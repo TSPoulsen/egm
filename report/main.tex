@@ -206,7 +206,7 @@ $\mathcal{N}(0, \sigma_{\epsilon,\delta}^2)$.
 This can be seen as adding a noise vector $\eta$ which 
 is then distributed according to
 the multivariate normal distribution 
-$\mathcal{N}(\overrightarrow{0}, \sigma_{\epsilon,\delta}^2I)$. 
+$\mathcal{N}(\bm{0}, \sigma_{\epsilon,\delta}^2I)$. 
 The algorithm can be seen in Algorithm \ref{alg:gaussmech}.
 
 \begin{algorithm}
@@ -223,7 +223,17 @@ The algorithm can be seen in Algorithm \ref{alg:gaussmech}.
     \Return$g(X) + \eta$
 \end{algorithmic}
 \end{algorithm}
-It is quite apparent that the main difficulty of the mechanism 
+\noindent The algorithm quite intuitively prodcues error which is purely given by the norm of the noise added, and the expected error can be calculated to be
+\[
+    \ee{(g(X) + \eta) - g(X)} = 
+    \ee{\eta}
+\]
+Which by corollary \ref{cor:expNorm} is 
+\begin{equation}
+\label{eq:ExpErrGM}
+    \ee{\eta} = \sum_i^d \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
+\end{equation}
+It is apparent that the main difficulty of the mechanism 
 lies in determining a $\sigma_{\epsilon, \delta}$ which achieves
 \edp, and preferably the smallest such one.
 
@@ -238,26 +248,94 @@ The Gaussian Mechanism with
 $\sigma_{\epsilon, \delta} = \Delta(g)  \sqrt{2\ln(1.25/\delta)}/\epsilon$ 
 is \edp.
 \end{theorem}
-The proof is rather long and is therefore ommitted here.
-
-In the case where $g(X) = f(X)$ i.e. it is estimating the sum
-of entries, we have quite intuitively that the error is given by 
-the norm of the noise introduced as
+The proof is rather long and is therefore ommitted here. A few years later it was shown in \cite{BalleWang} how to compute the minimal $\sigma_{\epsilon, \delta}$.
+\begin{theorem}\textnormal{\cite{BalleWang}}
+\label{theo:OptSig}
+The Gaussian Mechanism is differentially private if and only if $\sigma_{\epsilon, \delta} \ge \Delta(g) \cdot \sigma_{opt}$ where
+$\sigma_{opt} \in \R$ is the smallest value greater than 0, which satisfies
 \[
-    \ee{(f(X) + \eta) - f(X)} = 
-    \ee{\eta}
+    \Phi \lr{\frac{1}{2\sigma_{opt}} - \epsilon\sigma_{opt}} - e^{\epsilon} \Phi \lr{-\frac{1}{2\sigma_{opt}} - \epsilon\sigma_{opt}} \le \delta
 \]
-Which by corollary \ref{cor:expNorm} is 
+\end{theorem}
+In \cite{BalleWang} it is also shown how to compute this value, and since this is of no importance to this project it will therefore not be covered.
+For the rest of the report I will only be reffering to $\sigma_{\epsilon, \delta}$ as the minimal value given by theorem \ref{theo:OptSig} 
+and not that given by theorem \ref{theo:gaussMech}.
+
+
+The main downside of the Gaussian Mechanism is that it adds equal noise to all dimensions, regardless of the sensitivity in that dimension.
+As this report focuses on giving differentially private estimates of sums of vectors, it is natural to ask whether adding equal noise in all dimensions
+is optimal in this setting. Let us define the function of interest $f(X) = \sum_{i \in [n]} x_i$, for a dataset $X \in \R^{n \times d}$. 
+The sensitivity of this function must be given by the largest possible norm of any vector.
+Therefore if the largest difference between any two neighbouring datasets 
+in the $j$'th dimension is given by 
 \[
-    \ee{\eta} = \sum_i^d \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
+    \Delta_j := \max_{X \sim X'}|X^{(j)} - X'^{(j)}|
 \]
+and we say that $X$ and $X'$ differ in the $i$'th entry we conclude that
+\[
+    \Delta(f) = \max_{X \sim X'} \| f(X) - f(X') \| = 
+    \max_{X \sim X'} \| x_i - x_i' \| = \sqrt{\sum_{j \in [d]} \Delta_j^2} = \|\bm{\Delta}\|
+\]
+This means that by equation \ref{eq:ExpErrGM} the expected error of the Gaussian Mechanism when estimating $f(X)$ is given by
+\begin{equation}
+\label{eq:GMErr}
+    \ee{\eta} = d \cdot \sigma_{\epsilon, \delta}^2 = d \cdot \lr{\Delta(f) \sigma_{opt}}^2 =
+    d  \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 
+\end{equation}
+A logical next step would be to add noise to each dimensions such that it is proportional to the sensitivity of that dimension.
+This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism, appropriately called the Elliptical Gaussian Mechanism
+works very similairly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling $\eta_j$ from 
+$\mathcal{N}(0,\sigma_{\epsilon, \delta}^2)$, here it is instead drawn from $\mathcal{N}\lr{0,\lr{\sigma_{opt}\cdot \frac{\Delta_j}{b_j}}^2}$. 
+The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
 
+\begin{algorithm}
+\caption{The Elliptical Gaussian Mechanism}\label{alg:EllipGM}
+\begin{algorithmic}
+    \Input
+    \Desc{$\sigma_{opt}$}{Standard deviation as defined by theorem \ref{theo:OptSig}}
+    \Desc{$X \in \R^{n \times d}$}{Dataset}
+    \Desc{$\bm{b} \in \R^{d}$}{Scaling vector, where $\|\bm{b}\| = 1$}
+    \Desc{$\bm{\Delta} \in \R^{d}$}{Sensitivies of all dimensions}
+    \EndInput
+    \Output
+    \State \edp estimate of $f(X)$
+    \EndOutput
+    \For{$j \in [d]$}
+        \State $\sigma_j \gets \sigma_{opt} \cdot \frac{\Delta_j}{b_j}$
+        \State $\eta_j \gets \textnormal{sample from } \mathcal{N}(0, \sigma_j^2)$
+    \EndFor \\
+    \Return $g(X) + \eta$
+\end{algorithmic}
+\end{algorithm}
 
-\todo{-Does introduce the same 
-variance for all dimensions regardless of individual variance}
+\todo{add lemma/theorem/proof of why this is \edp (figure out if needed). Prolly is as the method is much the same for gaussian data}
 
-\todo{-Talk about finding the minimal $\sigma$ s.t. 
-privacy is held, and the error in that case}
+The main thing that really differentiates itself from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
+This is the scaling of how much weight should be attributed to each dimension when adding noise. It is shown how to determine the optimal values for $b_j$
+in \cite{Lebeda2022}, and the expected error of the mechanism.
+
+\begin{theorem}[Optimality and error of the Elliptical Gaussian Mechanism \cite{Lebeda2022}]
+The value for $b_j$ which minimized expected $l_2$ error $\ee{\eta}$ of the Elliptical Gaussian Mechanism is as follows
+\[
+    b_j = \sqrt{\frac{\Delta_j}{\sum_{j \in [d]} \Delta_j}}
+\]
+which leads the error to be
+\begin{equation}
+\label{eq:EGMErr}
+    \ee{\eta} =  \sigma_{opt} \cdot \| \bm{\Delta} \|_1^2
+\end{equation}
+
+\end{theorem}
+\todo{write the proof or skip it, it is going to be very similair to that which I will make}
+
+Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} it can be seen 
+that the error for the Elliptical Gaussian Mechanism is often smaller. If all $\Delta_j \ge 1$ then the following ration must be greater than $1$
+\[
+    \frac{d \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 }{\sigma_{opt} \cdot \| \bm{\Delta} \|_1^2} = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2 \ge 1
+\]
+This implies that the expected error of the Elliptical Gaussian Mechanism is less than that of the Gaussian Mechanism.
+%(equation \ref{eq:EGMErr})
+%to that of the normal Gaussian mechanism (equation \ref{eq:GMErr}) it is apparent that the first 
 
 \section{Problem setup}
 The problem consists of realeasing the sum of vectors 
@@ -550,7 +628,7 @@ The expected error of algorithm 3 is given by
 \]
 where $\alpha$ is the smallest value statisfying $\prob{ \|X\|^2 > \alpha } < n^{-1}$.
 
-\noindent When $\ln(n) \le \frac{1}{8} \sum_{j \in [d]} \sigma_j^4$ 
+\noindent When $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{8\max_{j \in [d]} \sigma_j^2}$
 the error can thus be upper bounded by
 \[
     \ee{\eta} \le \sigma_{\epsilon,\delta}^2  \cdot \sum_{j \in [d]} \sigma_j
@@ -598,9 +676,10 @@ Inserting this back into equation \ref{eq:Alg3Err2} we conclude
 \end{align*}
 And the constraint on $t = \sqrt{\ln (n)}$ from lemma \ref{lem:Bernstein} is
 \begin{align*}
-    &0 \le t \le \sqrt{\frac{1}{8} \sum_{j \in [d]} \sigma_4} \iff \\
-    &\sqrt{\ln (n)} \le \sqrt{\frac{1}{8} \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
-    &\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{8\lr{\sum_{j \in [d]} \sigma_j}^2} 
+    &0 \le t \le \frac{1}{4 \max_{j \in [d]}\sigma_j^2} \sqrt{2\sum_{j \in [d]} \sigma_j^4} \iff \\
+    &\sqrt{\ln (n)} \le \sqrt{\lr{\frac{\sum_{j \in [d]} \sigma_j}{\max_{j \in [d]} \sigma_j}}^2 \cdot \frac{1}{8} \cdot \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
+    &\ln (n) \le \frac{1}{8} \frac{1}{\max_{j \in [d]} \sigma_j^2} \cdot \sum_{j \in [d]} \sigma_j^2 \iff \\
+    &\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{8\max_{j \in [d]} \sigma_j^2}
 \end{align*}
 
 

@@ -1,4 +1,10 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
+
+\bibitem{BalleWang}
+{\sc Balle, B., and Wang, Y.}
+\newblock Improving the gaussian mechanism for differential privacy: Analytical
+  calibration and optimal denoising.
+\newblock {\em CoRR abs/1805.06530\/} (2018).
 
 \bibitem{BatesQuadForm}
 {\sc Bates, D.}
@@ -46,5 +52,10 @@
 \bibitem{MathaiQaudForms}
 {\sc Mathai, A., and Provost, S.}
 \newblock Quadratic forms in random variables.
+
+\bibitem{Lebeda2022}
+{\sc Pagh, R., and Lebeda, C.}
+\newblock Private vector aggregation when coordinates have different
+  sensitivity.
 
 \end{thebibliography}

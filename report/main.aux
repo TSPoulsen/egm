@@ -37,6 +37,8 @@
 \newlabel{theo:ExpQuad@cref}{{[theorem][2][]2}{[1][2][]2}}
 \citation{dpbasic}
 \citation{dpbasic}
+\citation{BalleWang}
+\citation{BalleWang}
 \newlabel{cor:expNorm}{{1.1}{3}{}{corollary.1.1}{}}
 \newlabel{cor:expNorm@cref}{{[corollary][1][1]1.1}{[1][2][]3}}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Algorithms}{3}{section.2}\protected@file@percent }
@@ -44,49 +46,66 @@
 \@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces The Gaussian Mechanism}}{3}{algorithm.1}\protected@file@percent }
 \newlabel{alg:gaussmech}{{1}{3}{The Gaussian Mechanism}{algorithm.1}{}}
 \newlabel{alg:gaussmech@cref}{{[algorithm][1][]1}{[1][3][]3}}
+\newlabel{eq:ExpErrGM}{{1}{3}{The Gaussian Mechanism}{equation.2.1}{}}
+\newlabel{eq:ExpErrGM@cref}{{[equation][1][]1}{[1][3][]3}}
 \newlabel{theo:gaussMech}{{3}{3}{}{theorem.3}{}}
 \newlabel{theo:gaussMech@cref}{{[theorem][3][]3}{[1][3][]3}}
-\@writefile{tdo}{\contentsline {todo}{-Does introduce the same variance for all dimensions regardless of individual variance}{3}{section*.4}\protected@file@percent }
-\pgfsyspdfmark {pgfid2}{19562754}{8678275}
-\@writefile{tdo}{\contentsline {todo}{-Talk about finding the minimal $\sigma $ s.t. privacy is held, and the error in that case}{3}{section*.5}\protected@file@percent }
-\pgfsyspdfmark {pgfid3}{19562754}{7339157}
+\citation{BalleWang}
+\citation{Lebeda2022}
+\citation{Lebeda2022}
+\citation{Lebeda2022}
+\newlabel{theo:OptSig}{{4}{4}{}{theorem.4}{}}
+\newlabel{theo:OptSig@cref}{{[theorem][4][]4}{[1][3][]4}}
+\newlabel{eq:GMErr}{{2}{4}{The Gaussian Mechanism}{equation.2.2}{}}
+\newlabel{eq:GMErr@cref}{{[equation][2][]2}{[1][4][]4}}
+\@writefile{tdo}{\contentsline {todo}{add lemma/theorem/proof of why this is $(\varepsilon , \delta )$-DP (figure out if needed). Prolly is as the method is much the same for gaussian data}{4}{section*.4}\protected@file@percent }
+\pgfsyspdfmark {pgfid2}{19562754}{17141833}
 \citation{Huang2021,coinpress}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Problem setup}{4}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Gaussian data}{4}{subsection.3.1}\protected@file@percent }
-\newlabel{eq:Alg3Err}{{1}{5}{Gaussian data}{equation.3.1}{}}
-\newlabel{eq:Alg3Err@cref}{{[equation][1][]1}{[1][5][]5}}
-\newlabel{lem:chibound}{{3.1}{5}{}{lemma.3.1}{}}
-\newlabel{lem:chibound@cref}{{[lemma][1][3]3.1}{[1][5][]5}}
-\newlabel{theo:OptStd}{{4}{6}{}{theorem.4}{}}
-\newlabel{theo:OptStd@cref}{{[theorem][4][]4}{[1][5][]6}}
-\newlabel{eq:solvbi}{{2}{6}{Gaussian data}{equation.3.2}{}}
-\newlabel{eq:solvbi@cref}{{[equation][2][]2}{[1][6][]6}}
-\newlabel{lem:Bernstein}{{3.2}{6}{}{lemma.3.2}{}}
-\newlabel{lem:Bernstein@cref}{{[lemma][2][3]3.2}{[1][6][]6}}
-\newlabel{eq:BernCon}{{3}{7}{Gaussian data}{equation.3.3}{}}
-\newlabel{eq:BernCon@cref}{{[equation][3][]3}{[1][7][]7}}
-\newlabel{eq:ExpY2:1}{{4}{7}{Gaussian data}{equation.3.4}{}}
-\newlabel{eq:ExpY2:1@cref}{{[equation][4][]4}{[1][7][]7}}
-\newlabel{eq:ExpY2:2}{{7}{7}{Gaussian data}{equation.3.7}{}}
-\newlabel{eq:ExpY2:2@cref}{{[equation][7][]7}{[1][7][]7}}
-\newlabel{eq:BernIneq}{{8}{8}{Gaussian data}{equation.3.8}{}}
-\newlabel{eq:BernIneq@cref}{{[equation][8][]8}{[1][7][]8}}
-\@writefile{tdo}{\contentsline {todo}{Explain why $\alpha $ is not squared (it is the sum of squares and $\Delta $ is limited by $\|X\|$)}{8}{section*.6}\protected@file@percent }
-\pgfsyspdfmark {pgfid4}{19562754}{18805345}
-\newlabel{eq:Alg3Err2}{{9}{9}{Gaussian data}{equation.3.9}{}}
-\newlabel{eq:Alg3Err2@cref}{{[equation][9][]9}{[1][8][]9}}
-\@writefile{tdo}{\contentsline {todo}{is this legal?}{9}{section*.7}\protected@file@percent }
-\pgfsyspdfmark {pgfid5}{19562754}{43824712}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces The Elliptical Gaussian Mechanism}}{5}{algorithm.2}\protected@file@percent }
+\newlabel{alg:EllipGM}{{2}{5}{The Gaussian Mechanism}{algorithm.2}{}}
+\newlabel{alg:EllipGM@cref}{{[algorithm][2][]2}{[1][4][]5}}
+\newlabel{eq:EGMErr}{{3}{5}{Optimality and error of the Elliptical Gaussian Mechanism \cite {Lebeda2022}}{equation.2.3}{}}
+\newlabel{eq:EGMErr@cref}{{[equation][3][]3}{[1][4][]5}}
+\@writefile{tdo}{\contentsline {todo}{write the proof or skip it, it is going to be very similair to that which I will make}{5}{section*.5}\protected@file@percent }
+\pgfsyspdfmark {pgfid3}{19562754}{32829176}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Problem setup}{5}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Gaussian data}{6}{subsection.3.1}\protected@file@percent }
+\newlabel{eq:Alg3Err}{{4}{7}{Gaussian data}{equation.3.4}{}}
+\newlabel{eq:Alg3Err@cref}{{[equation][4][]4}{[1][6][]7}}
+\newlabel{lem:chibound}{{3.1}{7}{}{lemma.3.1}{}}
+\newlabel{lem:chibound@cref}{{[lemma][1][3]3.1}{[1][7][]7}}
+\newlabel{theo:OptStd}{{6}{7}{}{theorem.6}{}}
+\newlabel{theo:OptStd@cref}{{[theorem][6][]6}{[1][7][]7}}
+\newlabel{eq:solvbi}{{5}{8}{Gaussian data}{equation.3.5}{}}
+\newlabel{eq:solvbi@cref}{{[equation][5][]5}{[1][7][]8}}
+\newlabel{lem:Bernstein}{{3.2}{8}{}{lemma.3.2}{}}
+\newlabel{lem:Bernstein@cref}{{[lemma][2][3]3.2}{[1][8][]8}}
+\newlabel{eq:BernCon}{{6}{8}{Gaussian data}{equation.3.6}{}}
+\newlabel{eq:BernCon@cref}{{[equation][6][]6}{[1][8][]8}}
+\newlabel{eq:ExpY2:1}{{7}{9}{Gaussian data}{equation.3.7}{}}
+\newlabel{eq:ExpY2:1@cref}{{[equation][7][]7}{[1][9][]9}}
+\newlabel{eq:ExpY2:2}{{10}{9}{Gaussian data}{equation.3.10}{}}
+\newlabel{eq:ExpY2:2@cref}{{[equation][10][]10}{[1][9][]9}}
+\newlabel{eq:BernIneq}{{11}{9}{Gaussian data}{equation.3.11}{}}
+\newlabel{eq:BernIneq@cref}{{[equation][11][]11}{[1][9][]9}}
+\@writefile{tdo}{\contentsline {todo}{Explain why $\alpha $ is not squared (it is the sum of squares and $\Delta $ is limited by $\|X\|$)}{10}{section*.6}\protected@file@percent }
+\pgfsyspdfmark {pgfid4}{19562754}{25189746}
+\newlabel{eq:Alg3Err2}{{12}{10}{Gaussian data}{equation.3.12}{}}
+\newlabel{eq:Alg3Err2@cref}{{[equation][12][]12}{[1][10][]10}}
+\@writefile{tdo}{\contentsline {todo}{is this legal?}{11}{section*.7}\protected@file@percent }
+\pgfsyspdfmark {pgfid5}{19562754}{49003029}
 \bibdata{refs.bib}
-\bibcite{BatesQuadForm}{1}
-\bibcite{coinpress}{2}
-\bibcite{QuadFormsNume}{3}
-\bibcite{dwork2016}{4}
-\bibcite{dpbasic}{5}
-\@writefile{tdo}{\contentsline {todo}{Determine $\alpha $ for the bound using \url  {https://en.wikipedia.org/wiki/Concentration_inequality}, or \url  {https://web.stanford.edu/class/cs229t/2017/Lectures/concentration-slides.pdf}}{13}{section*.10}\protected@file@percent }
-\pgfsyspdfmark {pgfid6}{19562754}{23884115}
-\bibcite{IowaQuadNormForms}{6}
-\bibcite{QaudFormsBounds}{7}
-\bibcite{Huang2021}{8}
-\bibcite{MathaiQaudForms}{9}
+\bibcite{BalleWang}{1}
+\bibcite{BatesQuadForm}{2}
+\bibcite{coinpress}{3}
+\bibcite{QuadFormsNume}{4}
+\bibcite{dwork2016}{5}
+\@writefile{tdo}{\contentsline {todo}{Determine $\alpha $ for the bound using \url  {https://en.wikipedia.org/wiki/Concentration_inequality}, or \url  {https://web.stanford.edu/class/cs229t/2017/Lectures/concentration-slides.pdf}}{14}{section*.10}\protected@file@percent }
+\pgfsyspdfmark {pgfid6}{19562754}{23062291}
+\bibcite{dpbasic}{6}
+\bibcite{IowaQuadNormForms}{7}
+\bibcite{QaudFormsBounds}{8}
+\bibcite{Huang2021}{9}
+\bibcite{MathaiQaudForms}{10}
+\bibcite{Lebeda2022}{11}
 \bibstyle{acm}
