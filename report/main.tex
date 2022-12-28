@@ -395,9 +395,11 @@ They achieve \edp by finding a transformation of points such that they all lie w
 There does not exist such a transformation which is linear, as some points will always lie outside the unit ball with at least a small probability. 
 Instead I will introduce the constraint that the expected norm of vectors after the transformation is $1$. 
 I whish to find a scaling of each dimension $b_j$ s.t.
-\begin{align*}
-    &\Exp{\| x_i \odot \bm{b} \|} = 1  \iff \ee{x_i \odot \bm{b} } = 1
-\end{align*}
+\todo{Introduce $\sigma_j$ before here}
+\begin{align}
+\label{eq:Alg3Con}
+    &\Exp{\| x_i \odot \bm{b} \|} = 1  \iff \sum_{j \in [d]} (\sigma_jb_j)^2 = 1
+\end{align}
 where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product.
 Then $\widehat{f}$ can be computed on this transformed dataset, where the probability of clipping is less than $\frac{1}{n}$.
 As Theorem \ref{theo:PostProc} shows, \edp is preserved under post processing, 
@@ -415,14 +417,65 @@ As the error is approximately given by $\| \bm{\eta} \|$ we have due to Corollar
 \label{eq:Alg3Err}
     \ee{\bm{\eta}} = \sum_{j=1}^d \lr{b_j^{-1} \cdot 2C\sigma_{opt}}^2   = \lr{2C\sigma_{opt}}^2 \sum_{j=1}^d b_j^{-2}
 \end{equation}
+\todo{Give pseudo code for algorithm}
+Now we are back to a very similiar problem to the one solved in \cite{Lebeda2022}. Minimize the error described in equation \eqref{eq:Alg3Err}
+under the constraint given in equation \eqref{eq:Alg3Con}. This leads to the following Lemma
 
-% wtf do I do here
+\begin{lemma}
+\label{lem:Optb}
+Let $X \in \R^{n \times d}$ be a dataset where each dimension $X^{(j)}$ is independently gaussianly distributed, i.e.
+$X^{(j)} \sim \mathcal{N}(\mu_j, \sigma_j^2)$. Then the expected error of Algorithm \ref{alg:EGM2} is minimized when
+\[
+    b_j = \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i}}
+\]
+\end{lemma}
+\begin{proof}
+Using lagrangian multipliers we find the local maxima or 
+minia of the function subject to equality constraints.
+To do so we construct the lagrangian function $\mathcal{L}: \R^{d+1} \rightarrow \R$ from the optimization problem given by
+equation \eqref{eq:Alg3Err} and the constraint given by \eqref{eq:Alg3Con} for ease of notation we define 
+$\sigma_{\epsilon, \delta} := 2C\sigma_{opt}$.
+\[
+    \mathcal{L}(\bm{b},\lambda) = \sigma_{\epsilon,\delta}^2\sum_{j \in [d]} b_j^{-2}
+    + \lambda \lr{ \sum_{j=1}^d \lr{\sigma_j b_j}^2 - 1}
+\]
+We then find the stationary points of it,
+by setting the derivative of it to $\bm{0}$.
+The derivative with respect to $b_j$ is 
+\[
+    \frac{\partial \mathcal{L}}{\partial b_j} (\bm{b}, \lambda)= 
+    \frac{\partial}{\partial b_j} \lr{\sigma_{\epsilon,\delta}^2 \cdot b_j^{-2}
+    + \lambda \lr{\sigma_j b_j}^2} =
+    -2 \sigma_{\epsilon,\delta}^2 b_j^{-3} + 2 \lambda \sigma_j^2b_j
+\]
+I then solve $\frac{\partial \mathcal{L}}{\partial b_j} = 0$ for $b_j$
+\begin{align}
+    &-2\sigma_{\epsilon,\delta}^2 b_j^{-3} + 2 \lambda \sigma_j^2b_j = 0 \iff
+    \lambda \sigma_j^2b_j = \sigma_{\epsilon,\delta}^2 b_i^{-3}  \\
+\label{eq:solvbi}
+    &\iff b_j^4 = \frac{\sigma_{\epsilon,\delta}^2}{\lambda \sigma_j^2} \iff 
+    b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} 
+\end{align}
+I now have the last partial derivative 
+$\frac{\partial \mathcal{L}}{\partial \lambda} = 0$ which I solve for
+$\lambda$ using the previous expression for $b_j$.
 
-
-and then transform it back
-giving us that $\eta_j$ is sampled from $\mathcal{N}(0,)$ 
-In this transformed space clipping can then be performed, such that the probability of clipping a point is less than 
-Then the summ
+\begin{align*}
+    &\frac{\partial \mathcal{L}}{\partial \lambda} = 
+    \sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 \\
+    &\sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 = 0 \iff
+    \sum_{j=1}^d \sigma_j^2 \lr{\frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
+    &\frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}} \sum_{j=1}^d \frac{\sigma_j^2}{\sigma_j} = 1 \iff
+    \sigma_{\epsilon,\delta} \sum_{j=1}^d \sigma_j = \sqrt{\lambda}
+\end{align*}
+Inserting back into equation \ref{eq:solvbi}
+\[
+    b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} =
+    \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
+    \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i} } 
+\]
+Giving os the value of $b_j$ which minimizes the expected error.
+\end{proof}
 
 \subsection{Gaussian data}
 Let $X^{(j)} \sim \mathcal{N}(0, \sigma_j^2)$ 
@@ -489,58 +542,6 @@ From lemma \ref{lem:chibound} we can give following bound for $X \sim \mathcal{N
 \]
 \end{corollary}
 
-\begin{theorem}
-\label{theo:OptStd}
-Running algo 3, with parameter $\ee{x_i} = 1$ the error of is minimized when 
-\[
-    b_i = \frac{1}{\sqrt{\sigma_i} \sqrt{\sum_{j=1}^d \sigma_j}}
-\]
-\end{theorem}
-\begin{proof}
-Using lagrangian multipliers we find the local maxima or 
-minia of the function subject to equality constraints.
-To do so we construct the lagrangian function $\mathcal{L}: \R^{d+1} \rightarrow \R$, and find the stationary
-points of it, by setting the derivative of it to $\bm{0}$.
-
-\[
-    \mathcal{L}(\bm{b},\lambda) = \sum_{j = 1}^{d} \lr{\frac{t}{b_j}}^2 
-    + \lambda \lr{ \sum_{j=1}^d \lr{\sigma_j b_j}^2 - 1}
-\]
-
-The derivative with respect to $b_i$ is 
-\[
-    \frac{\partial \mathcal{L}}{\partial b_i} = 
-    \frac{\partial}{\partial b_i} \lr{\frac{t}{b_i}}^2
-    + \lambda \lr{\sigma_i b_i}^2 =
-    -2\frac{t^2}{b_i^3} + 2 \lambda \sigma_i^2b_i
-\]
-I then solve $\frac{\partial \mathcal{L}}{\partial b_i} = 0$ for $b_i$
-\begin{equation}
-\label{eq:solvbi}
-    -2\frac{t^2}{b_i^3} + 2 \lambda \sigma_i^2b_i = 0 \iff
-    \lambda \sigma_i^2b_i = \frac{t^2}{b_i^3} \iff 
-    b_i^4 = \frac{t^2}{\lambda \sigma_i^2} \iff 
-    b_i = \frac{\sqrt{t}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_i}} 
-\end{equation}
-I now have the last partial derivative 
-$\frac{\partial \mathcal{L}}{\partial \lambda} = 0$ which I solve for
-$\lambda$ using the previous expression for $b_i$.
-
-\begin{align*}
-    &\frac{\partial \mathcal{L}}{\partial \lambda} = 
-    \sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 \\
-    &\sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 = 0 \iff
-    \sum_{j=1}^d \sigma_j^2 \lr{\frac{t}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
-    &\frac{t}{\sqrt{\lambda}} \sum_{j=1}^d \frac{\sigma_j^2}{\sigma_j} = 1 \iff
-    t \sum_{j=1}^d \sigma_j = \sqrt{\lambda}
-\end{align*}
-Inserting back into equation \ref{eq:solvbi}
-\[
-    b_i = \frac{\sqrt{t}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_i}} =
-    \frac{\sqrt{t}}{\sqrt{t \sum_{j=1}^d \sigma_j} \sqrt{\sigma_i}} = 
-    \frac{1}{\sqrt{\sum_{j=1}^d \sigma_j} \sqrt{\sigma_i}} 
-\]
-\end{proof}
 
 \begin{lemma}
 \label{lem:Bernstein}
@@ -648,7 +649,7 @@ where t must lie within
 \]
 \end{proof}
 
-\noindent Combining lemma \ref{lem:Bernstein} with theorem \ref{theo:OptStd} 
+\noindent Combining lemma \ref{lem:Bernstein} with theorem \ref{lem:Optb} 
 we have can conclude the following:
 \todo{Explain why $\alpha$ is not squared (it is the sum of squares and $\Delta$ is limited by $\|X\|$)}
 
@@ -683,7 +684,7 @@ When clipping is performed to remove less than $n^{-1}$ we have the following
 \]
 Which means I can give an upper bound on $\Delta(f)^2$ by using
 lemma \ref{lem:Bernstein}, and inserting that $\sigma_j = \sigma_j \cdot b_i$ 
-where $b_i$ is given by theorem \ref{theo:OptStd}. I whish the clipping 
+where $b_i$ is given by theorem \ref{lem:Optb}. I whish the clipping 
 probability to be less than $n^{-1}$, which implies $t = \sqrt{\ln(n)}$. 
 Combining these results I get that
 \begin{align*}
