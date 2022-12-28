@@ -268,14 +268,16 @@ is optimal in this setting. Let us define the function of interest $f(X) = \sum_
 The sensitivity of this function must be given by the largest possible norm of any vector.
 Therefore if the largest difference between any two neighbouring datasets 
 in the $j$'th dimension is given by 
-\[
+\begin{equation}
+\label{eq:DimCon}
     \Delta_j := \max_{X \sim X'}|X^{(j)} - X'^{(j)}|
-\]
+\end{equation}
 and we say that $X$ and $X'$ differ in the $i$'th entry we conclude that
-\[
+\begin{equation}
+\label{eq:DelF}
     \Delta(f) = \max_{X \sim X'} \| f(X) - f(X') \| = 
     \max_{X \sim X'} \| x_i - x_i' \| = \sqrt{\sum_{j \in [d]} \Delta_j^2} = \|\bm{\Delta}\|
-\]
+\end{equation}
 This means that by equation \ref{eq:ExpErrGM} the expected error of the Gaussian Mechanism when estimating $f(X)$ is given by
 \begin{equation}
 \label{eq:GMErr}
@@ -324,33 +326,30 @@ which leads the error to be
 \label{eq:EGMErr}
     \ee{\eta} =  \sigma_{opt} \cdot \| \bm{\Delta} \|_1^2
 \end{equation}
+where $\| \cdot \|_1$ is the $l_1$ norm.
 
 \end{theorem}
 \todo{write the proof or skip it, it is going to be very similair to that which I will make}
 
-Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} it can be seen 
-that the error for the Elliptical Gaussian Mechanism is often smaller. If all $\Delta_j \ge 1$ then the following ration must be greater than $1$
+Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} we have the following ratio
 \[
-    \frac{d \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 }{\sigma_{opt} \cdot \| \bm{\Delta} \|_1^2} = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2 \ge 1
+    \frac{d \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 }{\sigma_{opt} \cdot \| \bm{\Delta} \|_1^2} = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2
 \]
-This implies that the expected error of the Elliptical Gaussian Mechanism is less than that of the Gaussian Mechanism.
-%(equation \ref{eq:EGMErr})
-%to that of the normal Gaussian mechanism (equation \ref{eq:GMErr}) it is apparent that the first 
+in which it can be seen that they are equal when all entries of $\bm{\Delta}$ are the same. Otherwise the error for the Elliptical Gaussian Mechanism is lower
+when $\bm{\Delta}$ is skewed. As argued in \cite{Lebeda2022} Algorithm \ref{alg:EllipGM} improves Algorithm \ref{alg:gaussmech} by a factor in $[1,d)$.
 
 \section{Problem setup}
-The problem consists of realeasing the sum of vectors 
+As previously mentioned the problem investigated here consists of realeasing the sum of vectors 
 in a dataset under differential privacy.
 More formally we whish to release the value of 
-$f:\R^{n \times d} \rightarrow  \R^d$ given by
-\[ f(X) = \sum_{i = 1}^n x_i  \] 
+$ f(X) = \sum_{i = 1}^n x_i  $
 under \edp. \\
 The common factor for achieving \edp in both the Gaussian Mechanism
-and the Elliptical Gaussian Mechanism is the requirement that 
-data lie within some hyperrectangle. It is formally described as 
-each dimension of the data must lie within some range 
-$ x^{(j)}_i \in \lrs{-\Delta_j/2, \Delta_j/2} $. 
-This requirement is needed to know the $l_2$-sensitivity $\| \Delta \|$ 
-as defined in equation \ref{eq:l2sens} of the data.
+and the Elliptical Gaussian Mechanism is the knowledge that data lie within some bounds.
+Specifically for the Elliptical Gaussian Mechanism data is required to lie within some hyperrectangle.
+It is formally described by equation \eqref{eq:DimCon} 
+essentially saying that there is an upper and lower bound on each dimension.
+This requirement is needed to know the $l_2$-sensitivity $ \Delta(f) $ as shown in equation \eqref{eq:DelF}.
 In this project I will change this assumption and instead 
 look at the case where each dimension is normally distributed.
 This means that for each 
@@ -361,30 +360,69 @@ multivariately distributed but with no correlation between dimensions.
 This means that $X \sim \mathcal{N}(\bm{\mu}, \Sigma ) $, 
 where $\Sigma$ is a diagonal matrix with the variance of each 
 dimension along its diagonal.
-It is quite apparent that determining a $ \| \Delta \|$ is impossible 
+It is quite apparent that determining a $ \Delta_j $ is impossible 
 in this setting as the Gaussian distribution is continously defined 
-on the range $ (-\infty, \infty)$. What has been done in several 
-recent papers is that data is \textit{clipped} by some threshhold 
-$C$ \cite{Huang2021,coinpress}. 
+on the range $ (-\infty, \infty)$.
+Several recent papers has combatted this by doing something called 
+\textit{clipping} \cite{Huang2021,coinpress}. 
 Clipping is the process of limiting the norm of any one entry 
-to be at most $C$. This means that every vector is transformed as such
+to be at most a chosen threshold $C$. This means that every vector is transformed as such
 \[
-    \hat{x_i} := \min \lrc{\frac{C}{\| x_i \|}, 1} \cdot x_i
+    \widehat{x}_i := \min \lrc{\frac{C}{\| x_i \|}, 1} \cdot x_i
 \]
-Clipping entries by a factor $C$ thus means that $\| \Delta \| = C $ 
+Clipping entries by a factor $C$ thus means that $ \Delta(f) = 2C $ 
 as any one entry cannot have more impact on the summation than $C$.
-It can then be seen that if the summation $f(X)$ is instead 
-performed on a clipped dataset $\hat{X}$ then this is equivalent to
-defining the summation function $\hat{f}: \R^{n \times d} \rightarrow \R^d$ as
+If the summation $f(X)$ is 
+performed on a clipped dataset $\widehat{X}$ it is equivalent to
+defining the summation function $\widehat{f}: \R^{n \times d} \rightarrow \R^d$ as
 \[
-    \hat{f}(X) = \sum_i^n \min \lrc{ \frac{C}{\| x_i \|}, 1} \cdot x_i
-    \]
-Then by theorem \ref{theo:gaussMech} the 
-gaussian mechanism with the function $\hat{f}$ is \edp with
-$\sigma_{\epsilon, \delta} = C \sqrt{2 \ln (1.25/\delta)}/\epsilon$.
+    \widehat{f}(X) = \sum_i^n \min \lrc{ \frac{C}{\| x_i \|}, 1} \cdot x_i
+\]
+Then by theorem \ref{theo:OptSig} the 
+gaussian mechanism with the function $\widehat{f}$ is \edp with
+$\sigma_{\epsilon, \delta} = \Delta\lr{\widehat{f}} \sigma_{opt} = 2C \sigma_{opt}$.
 Though the mechanism is still \edp it will now have 
 a larger error when regarding the true sum
-$f(X) = \sum_i^n x_i$ as the actual answer.
+$f(X) = \sum_i^n x_i$ as the actual answer. If the probability of clipping is set
+so low that we actually don't expect to clip any entries we can use $\widehat{f}$ as an approximation of $f$.
+Say there are $n$ points in a dataset, I will thus set the probability of clipping to be less than $\frac{1}{n}$ and get that
+\[
+    \ee{\lr{\widehat{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
+\]
+The intuition in this context is the same as that for the Elliptical Gaussian Mechanism, that dimensions with high variance should have more noise
+added. Therefore I will use the same approach as that used by the Elliptical Gaussian Mechanism to achieve \edp.
+They achieve \edp by finding a transformation of points such that they all lie within the unit ball centered at the origin. 
+There does not exist such a transformation which is linear, as some points will always lie outside the unit ball with at least a small probability. 
+Instead I will introduce the constraint that the expected norm of vectors after the transformation is $1$. 
+I whish to find a scaling of each dimension $b_j$ s.t.
+\begin{align*}
+    &\Exp{\| x_i \odot \bm{b} \|} = 1  \iff \ee{x_i \odot \bm{b} } = 1
+\end{align*}
+where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product.
+Then $\widehat{f}$ can be computed on this transformed dataset, where the probability of clipping is less than $\frac{1}{n}$.
+As Theorem \ref{theo:PostProc} shows, \edp is preserved under post processing, 
+we can therefore add noise to each coordinate drawn from $\mathcal{N}(0,(2C\sigma_{opt})^2)$ in the transformed space to achieve \edp.
+The transformation back to the original space is the done by multiplying each dimension with $b_j^{-1}$, and due to the linearity of transformation 
+this is also done to the noise added.
+We end up with the following noise vector being added
+\[
+    \bm{\eta} = \lr{ b_1^{-1}\eta_1, b_2^{-1}\eta_2, \dots, b_d^{-1}\eta_d }
+\]
+\todo{Explain that multiplying Gaussian with factor is multiplying std with factor (perhaps make lemma)}
+in which all $\eta_j \sim \mathcal{N}(0,(2C\sigma_{opt})^2)$, and then by Lemma \ref{lem:GaussTransform} we have $b_j^{-1}\eta_j \sim \mathcal{N}(0, (b_j^{-1} \cdot 2C\sigma_{opt})^2)$.
+As the error is approximately given by $\| \bm{\eta} \|$ we have due to Corollary \ref{cor:expNorm} that the expected error is 
+\begin{equation}
+\label{eq:Alg3Err}
+    \ee{\bm{\eta}} = \sum_{j=1}^d \lr{b_j^{-1} \cdot 2C\sigma_{opt}}^2   = \lr{2C\sigma_{opt}}^2 \sum_{j=1}^d b_j^{-2}
+\end{equation}
+
+% wtf do I do here
+
+
+and then transform it back
+giving us that $\eta_j$ is sampled from $\mathcal{N}(0,)$ 
+In this transformed space clipping can then be performed, such that the probability of clipping a point is less than 
+Then the summ
 
 \subsection{Gaussian data}
 Let $X^{(j)} \sim \mathcal{N}(0, \sigma_j^2)$ 
@@ -410,14 +448,7 @@ $\hat{X} + \eta$
 where $\eta \sim N(0, t^2)$ and achieves \edp in this space
 then then due to linearity of transformation the noise 
 introduced in the original space is then given by
-\[
-    \hat{\eta} = \left( b_0\eta_0,b_1\eta_1, \dots, b_d\eta_d \right)
-\]
 then the error is
-\begin{equation}
-\label{eq:Alg3Err}
-    \ee{\hat{\eta}} = \sum_{j=1}^d b_j^2 \cdot t^2 = t^2 \sum_{j=1}^d b_j^2
-\end{equation}
 
 
 
