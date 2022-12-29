@@ -23,6 +23,10 @@
   large quadratic form in normal variables.
 \newblock {\em Computational Statistics \& Data Analysis 139\/} (2019), 75--81.
 
+\bibitem{GenChiSq}
+{\sc Das, A., and Geisler, W.~S.}
+\newblock A method to integrate and classify normal distributions, 2020.
+
 \bibitem{dwork2016}
 {\sc Dwork, C., McSherry, F., Nissim, K., and Smith, A.}
 \newblock Calibrating noise to sensitivity in private data analysis.

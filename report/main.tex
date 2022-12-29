@@ -398,7 +398,7 @@ I whish to find a scaling of each dimension $b_j$ s.t.
 \todo{Introduce $\sigma_j$ before here}
 \begin{align}
 \label{eq:Alg3Con}
-    &\Exp{\| x_i \odot \bm{b} \|} = 1  \iff \sum_{j \in [d]} (\sigma_jb_j)^2 = 1
+    &\Exp{\| x_i \odot \bm{b} \|} = 1  \iff \ee{x_i \odot \bm{b}} = \sum_{j \in [d]} (\sigma_jb_j)^2 = 1
 \end{align}
 where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product.
 Then $\widehat{f}$ can be computed on this transformed dataset, where the probability of clipping is less than $\frac{1}{n}$.
@@ -477,71 +477,19 @@ Inserting back into equation \ref{eq:solvbi}
 Giving os the value of $b_j$ which minimizes the expected error.
 \end{proof}
 
-\subsection{Gaussian data}
-Let $X^{(j)} \sim \mathcal{N}(0, \sigma_j^2)$ 
-As the expected $l_2$-norm of $x_i$ is given by
+Now to evaluate the expected error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important important to determine the value $C$.
+As $C$ should be given by the minimal value which satisfies the inequality
 \[
-    \ee{x_i} = \sum_{j=1}^d \sigma_j^2
+   \prob{ \| x_i \odot \bm{b} \| > C } = \prob{ \| x_i \odot \bm{b} \|^2 > C^2} < \frac{1}{n}
 \]
-To achieve an expected norm of $1$ I will scale 
-each dimension by a factor $\frac{1}{b_j}$ which achieves this.
-If 
-\[
-\hat{x_i} = \left( \frac{x_i^{(0)}}{b_0}, \frac{x_i^{(1)}}{b_1}, \dots, \frac{x_i^{(d)}}{b_d} \right)
-\]
-This means that $X^{(j)} \sim \mathcal{N}(0,\frac{\sigma_j^2}{b_j^2})$ 
-and the expected norm is given by 
-\[
-    \ee{x_i} = \sum_{j=1}^d \frac{\sigma_j^2}{b_j^2}
-\]
-and I can introduce that constraint that the expected norm
-after the transformation should be $1$.
-In such a case when noise is added after the transformation
-$\hat{X} + \eta$
-where $\eta \sim N(0, t^2)$ and achieves \edp in this space
-then then due to linearity of transformation the noise 
-introduced in the original space is then given by
-then the error is
-
-
-
-
-
-I desire a transformation of $x_i^{(j)}$ such that the 
-expected norm is $1$. Thus I must scale each dimension by
-$\frac{1}{b_j}$, and have that 
-\[
-    \ee{x_i} = 1
-\]
-
-Minimize $\| \hat{\eta} \|$ under the constraint that $\ee{x_i} = 1$  
-
-\begin{lemma}
-\label{lem:chibound}
-Let $X \sim \mathcal{N}(0,\sigma^2)$, and $\Phi$ denote the 
-cumulative density function of $\mathcal{N}(0,1)$, then the 
-cumulative density function of $X^2$ is given by
-\[
-    F_{X^2}(x) = \prob{X^2 \le x} = 2\Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1
-\]
-\end{lemma}
-\begin{proof}
-\begin{align*}
-    &\prob{X^2 \le x} =
-    \prob{ |X| \le \sqrt{x}} =
-    2 \prob{0 \le X \le \sqrt{x}}  \\
-    & =2  \lr{\prob{X \le \sqrt{x}} - \prob{X \le 0}} =
-    2 \lr{\prob{X \le \sqrt{x}} - \frac{1}{2}}  \\
-    &= 2 \Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1 
-\end{align*}
-\end{proof}
-\begin{corollary}
-From lemma \ref{lem:chibound} we can give following bound for $X \sim \mathcal{N}(0,\sigma^2)$.
-\[
-    \prob{X^2 > (4\sigma)^2} < 10^{-4}
-\]
-\end{corollary}
-
+again where $n$ denotes the number of points in the dataset.
+As $x_i$ is a multivariate gaussian distribution, so is $x_i \odot \bm{b}$, and $\|x_i \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
+Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form.
+These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms}, and some special cases does have closed forms.
+Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, however there was none which were of use in this setting.
+However there does exist several numerial algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
+I would recommend using one of these algorithms in practice, but for the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
+\todo{Give Bernsteins inequality}
 
 \begin{lemma}
 \label{lem:Bernstein}
@@ -556,8 +504,9 @@ Then the probability for the sum of variables squared is bounded by
 for
 \[
 0 \le t \le 
-    \frac{1}{4 \cdot \max_{j \in [d]} \sigma_j^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
+    \frac{1}{4 \sigma_*^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
 \]
+where $\sigma_* = \max_{j \in [d]} \sigma_j$.
 \end{lemma}
 \begin{proof}
 At first we define the random variable $Y_j = X_j^2 - \Exp{X_j^2}$ 
@@ -716,6 +665,77 @@ And the constraint on $t = \sqrt{\ln (n)}$ from lemma \ref{lem:Bernstein} is
 
 
 \end{proof}
+
+\todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
+\todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
+
+
+\newpage
+\subsection{Gaussian data}
+Let $X^{(j)} \sim \mathcal{N}(0, \sigma_j^2)$ 
+As the expected $l_2$-norm of $x_i$ is given by
+\[
+    \ee{x_i} = \sum_{j=1}^d \sigma_j^2
+\]
+To achieve an expected norm of $1$ I will scale 
+each dimension by a factor $\frac{1}{b_j}$ which achieves this.
+If 
+\[
+\hat{x_i} = \left( \frac{x_i^{(0)}}{b_0}, \frac{x_i^{(1)}}{b_1}, \dots, \frac{x_i^{(d)}}{b_d} \right)
+\]
+This means that $X^{(j)} \sim \mathcal{N}(0,\frac{\sigma_j^2}{b_j^2})$ 
+and the expected norm is given by 
+\[
+    \ee{x_i} = \sum_{j=1}^d \frac{\sigma_j^2}{b_j^2}
+\]
+and I can introduce that constraint that the expected norm
+after the transformation should be $1$.
+In such a case when noise is added after the transformation
+$\hat{X} + \eta$
+where $\eta \sim N(0, t^2)$ and achieves \edp in this space
+then then due to linearity of transformation the noise 
+introduced in the original space is then given by
+then the error is
+
+
+
+
+
+I desire a transformation of $x_i^{(j)}$ such that the 
+expected norm is $1$. Thus I must scale each dimension by
+$\frac{1}{b_j}$, and have that 
+\[
+    \ee{x_i} = 1
+\]
+
+Minimize $\| \hat{\eta} \|$ under the constraint that $\ee{x_i} = 1$  
+
+\begin{lemma}
+\label{lem:chibound}
+Let $X \sim \mathcal{N}(0,\sigma^2)$, and $\Phi$ denote the 
+cumulative density function of $\mathcal{N}(0,1)$, then the 
+cumulative density function of $X^2$ is given by
+\[
+    F_{X^2}(x) = \prob{X^2 \le x} = 2\Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1
+\]
+\end{lemma}
+\begin{proof}
+\begin{align*}
+    &\prob{X^2 \le x} =
+    \prob{ |X| \le \sqrt{x}} =
+    2 \prob{0 \le X \le \sqrt{x}}  \\
+    & =2  \lr{\prob{X \le \sqrt{x}} - \prob{X \le 0}} =
+    2 \lr{\prob{X \le \sqrt{x}} - \frac{1}{2}}  \\
+    &= 2 \Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1 
+\end{align*}
+\end{proof}
+\begin{corollary}
+From lemma \ref{lem:chibound} we can give following bound for $X \sim \mathcal{N}(0,\sigma^2)$.
+\[
+    \prob{X^2 > (4\sigma)^2} < 10^{-4}
+\]
+\end{corollary}
+
 
 \newpage
 
