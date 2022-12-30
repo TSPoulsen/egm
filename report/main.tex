@@ -150,6 +150,18 @@ which estimates $f(X)$ is then
 write about edp is preserved during transformation}
 
 \subsection{Quadratic forms of random variables}
+\todo{write cohesive text here, and decide what to keep}
+
+\begin{lemma}
+Let $X \sim \mathcal{N}(\mu, \sigma^2)$ be a gaussian random variable and let $r \in \R$ be a constant.
+We then have that
+\begin{align*}
+    &rX \sim \mathcal{N}(\mu, (r\sigma)^2) \\
+    &X - r \sim \mathcal{N}(\mu-r, \sigma^2) 
+\end{align*}
+    
+\end{lemma}
+
 Quadratics of random variables have been well studied \cite{BatesQuadForm,MathaiQaudForms}, 
 specially in the case of multivariate gaussian varaibles \cite{IowaQuadNormForms,MathaiQaudForms}.
 Even more research has been done in evaluating the CDF of these quadratic forms
@@ -354,13 +366,13 @@ In this project I will change this assumption and instead
 look at the case where each dimension is normally distributed.
 This means that for each 
 $ j \in [d] $ we have that 
-$X^{(j)} \sim \mathcal{N}(\mu_j, \sigma_j^2)$.
-An equivalent formulation is that a the data is 
-multivariately distributed but with no correlation between dimensions.
-This means that $X \sim \mathcal{N}(\bm{\mu}, \Sigma ) $, 
+$x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$.
+An equivalent formulation is that the data is 
+multivariately gaussianly distributed but with no correlation between dimensions.
+This means that $x_i \sim \mathcal{N}(\bm{\mu}, \Sigma ) $, 
 where $\Sigma$ is a diagonal matrix with the variance of each 
 dimension along its diagonal.
-It is quite apparent that determining a $ \Delta_j $ is impossible 
+It is quite apparent that determining a limit $ \Delta_j $ is impossible 
 in this setting as the Gaussian distribution is continously defined 
 on the range $ (-\infty, \infty)$.
 Several recent papers has combatted this by doing something called 
@@ -389,6 +401,7 @@ Say there are $n$ points in a dataset, I will thus set the probability of clippi
 \[
     \ee{\lr{\widehat{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
 \]
+\todo{rewrite and introduce better}
 The intuition in this context is the same as that for the Elliptical Gaussian Mechanism, that dimensions with high variance should have more noise
 added. Therefore I will use the same approach as that used by the Elliptical Gaussian Mechanism to achieve \edp.
 They achieve \edp by finding a transformation of points such that they all lie within the unit ball centered at the origin. 
@@ -474,7 +487,8 @@ Inserting back into equation \ref{eq:solvbi}
     \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
     \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i} } 
 \]
-Giving os the value of $b_j$ which minimizes the expected error.
+\todo{show that this stationary point is a minimum}
+Giving us the value of $b_j$ which minimizes the expected error.
 \end{proof}
 
 Now to evaluate the expected error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important important to determine the value $C$.
@@ -495,7 +509,8 @@ I would recommend using one of these algorithms in practice, but for the sake of
 \label{lem:Bernstein}
 Let $X_1, X_2, \dots , X_d$ be $d$ independent random gaussian variables 
 where for $ 1 \le j \le d$ we have that $X_j \sim \mathcal{N}(0, \sigma_j^2)$.
-Then the probability for the sum of variables squared is bounded by
+Let thereafter the largest standard deviation be denoted as $\sigma_* := \max_{j \in [d]} \sigma_j$,
+and as long as $\sigma_* \le \frac{2}{3}$ we can bound the probability for the sum of variables squared as follows 
 \[
 \prob{\sum_{j \in [d]} X_j^2  \ge 
     t \sqrt{8 \sum_{j \in [d]} \sigma_j^4} +
@@ -504,7 +519,7 @@ Then the probability for the sum of variables squared is bounded by
 for
 \[
 0 \le t \le 
-    \frac{1}{4 \sigma_*^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
+    \frac{1}{6 \sigma_*^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
 \]
 where $\sigma_* = \max_{j \in [d]} \sigma_j$.
 \end{lemma}
@@ -536,12 +551,11 @@ Using this we can get the following bound
 \begin{align*}
     &\sigma_j^{2k} \cdot \Exp{ |Z^{k} | } =
     \sigma_j^{2k} \cdot \prod_{c=1}^k(2c-1) =
-    \sigma_j^{2k} \cdot \prod_{c=2}^k (2c-1) \\
-    &\le \sigma_j^{2k} \cdot \prod_{c=2}^k 2c
-    = \sigma_j^{2k} \cdot 2^{k-1} \cdot \frac{k!}{2}
-    = \sigma_j^{2k} \cdot 2^{k-2} \cdot k!
+    \sigma_j^{2k} \cdot 3\cdot \prod_{c=3}^k (2c-1) \\
+    &\le \sigma_j^{2k} \cdot 3 \cdot \prod_{c=3}^k 2c
+    = \frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdot k!
 \end{align*}
-Concluding that $\Exp{ |Y_j^k| } \le  \sigma_j^{2k} \cdot 2^{k-2} \cdot k!$.
+Concluding that $\Exp{ |Y_j^k| } \le \frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdot k!$.
 
 \noindent Secondly I calculate $\Exp{Y_j^2}$ exactly to be used in equation \ref{eq:BernCon}
 \begin{align}
@@ -558,14 +572,21 @@ Concluding that $\Exp{ |Y_j^k| } \le  \sigma_j^{2k} \cdot 2^{k-2} \cdot k!$.
     2\sigma_j^4
 \end{align}
 
-Eqaution \ref{eq:BernCon} is therefore rewritten to 
+Equation \ref{eq:BernCon} is therefore rewritten to 
 \begin{align*}
-    &\sigma_j^{2k} \cdot 2^{k-2} \cdot k! \le \frac{1}{2} \cdot 2 \sigma_j^4 L^{k-2} k! \iff \\
-    &\sigma_j^{2k-4} \cdot 2^{k-2} \cdot \le L^{k-2} \iff \\
-    &\sigma_j^2 \cdot 2 \le L
+    &\frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdot k! \le \frac{1}{2} \cdot 2 \sigma_j^4 L^{k-2} k! \iff \\
+    &\frac{3}{2} \sigma_j^{2k-4} \cdot 2^{k-2} \le L^{k-2} \iff \\
+    &\begin{cases}
+        \frac{3}{2} \sigma_j \le 1 & \text{when $k=2$} \\
+        \lr{\frac{3}{2}}^{\frac{1}{k-2}} \sigma_j^2 \cdot 2 \le L & \text{when $k>2$}
+    \end{cases}
 \end{align*}
-As this has to hold for all $j \in [d]$, we can simply choose
-$ L := 2 \cdot \max_{j \in [d]} \sigma_j^2$ which satisfies the constraint.
+As $\lim_{k \rightarrow \infty} \lr{\frac{3}{2}}^{\frac{1}{k-2}} = 1$, 
+and these constraints must hold for all $j \in [d]$, we can define $\sigma_* = \max_{j \in [d]} \sigma_j$ and finally have that
+\begin{align*}
+    &\sigma_* \le \frac{2}{3} \\
+    &L = 3\sigma_*^2 
+\end{align*}
 
 We can then use Bernstein's inequality to bound the following 
 \begin{equation}
@@ -591,53 +612,52 @@ Finally giving us that
     t \sqrt{ 8 \sum_{j \in [d]}  \sigma_j^4} +
     \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2}
 \]
-where t must lie within
+as long as $\sigma_* \le \frac{2}{3}$, where t must lie within
 \[
     0 \le t \le \frac{1}{2L} \sqrt{\sum_{j \in [d]} \Exp{Y_j^2}} =
-    \frac{1}{4 \cdot \max_{j \in [d]} \sigma_j^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
+    \frac{1}{6 \sigma_*^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
 \]
 \end{proof}
 
 \noindent Combining lemma \ref{lem:Bernstein} with theorem \ref{lem:Optb} 
 we have can conclude the following:
-\todo{Explain why $\alpha$ is not squared (it is the sum of squares and $\Delta$ is limited by $\|X\|$)}
+\todo{Introduce variables better}
 
 \begin{theorem}
-The expected error of algorithm 3 is given by
+\label{theo:Alg3OptErr}
+Let $\sigma_* := \max_{j \in [d]} \sigma_j$ be the maximal standard deviation.
+When $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}$
+    
+and $\frac{\sigma_*}{\sum_{j \in [d]} \sigma_j} \le \frac{4}{9}$
+the expected error of algorithm 3 can be upper bounded by 
 \[
-    \ee{\eta} = \sigma_{\epsilon,\delta}^2  \cdot \alpha \cdot \lr{\sum_{i=1}^d \sigma_i}^2
-\]
-where $\alpha$ is the smallest value statisfying $\prob{ \|X\|^2 > \alpha } < n^{-1}$.
-
-\noindent When $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{8\max_{j \in [d]} \sigma_j^2}$
-the error can thus be upper bounded by
-\[
-    \ee{\eta} \le \sigma_{\epsilon,\delta}^2  \cdot \sum_{j \in [d]} \sigma_j
+    \ee{\bm{\eta}} \le 4\sigma_{opt}^2  \cdot \sum_{j \in [d]} \sigma_j \cdot
     \lr{ \sqrt{8\ln(n) \sum_{i \in [d]} \sigma_i^2} + \sum_{j \in [d]} \sigma_j }
 \]
 \end{theorem}
 
 \begin{proof}
-By equation \ref{eq:Alg3Err} the error is given by
+By equation \eqref{eq:Alg3Err} the error is given by
 \begin{equation}
 \label{eq:Alg3Err2}
-    \ee{\eta} = \sigma_{\epsilon, \delta}^2 \cdot 
-    \Delta(\hat{f})^2 \cdot \lr{\sum_{i=1}^d \sigma_i}^2
+    \ee{\bm{\eta}} = \lr{2C\sigma_{opt}}^2 \cdot 
+    \sum_{i=1}^d b_j^{-2} 
 \end{equation}
 When clipping is performed to remove less than $n^{-1}$ we have the following 
 \todo{is this legal?}
 \[
-    \prob{ \| X \| \ge \Delta (f)} =
-    \prob{ \| X \|^2 \ge \Delta(f)^2} =
-    \prob{ \sum_{j \in [d]} X_j^2 \ge \Delta(f)^2}
+    \prob{ \| X \| \ge C} =
+    \prob{ \| X \|^2 \ge C^2} =
+    \prob{ \sum_{j \in [d]} X_j^2 \ge C^2}
 \]
-Which means I can give an upper bound on $\Delta(f)^2$ by using
-lemma \ref{lem:Bernstein}, and inserting that $\sigma_j = \sigma_j \cdot b_i$ 
+\todo{clean up sigma notation}
+Which means I can give an upper bound on $C^2$ by using
+lemma \ref{lem:Bernstein}, and inserting that $\sigma_j = \sigma_j \cdot b_j$ 
 where $b_i$ is given by theorem \ref{lem:Optb}. I whish the clipping 
 probability to be less than $n^{-1}$, which implies $t = \sqrt{\ln(n)}$. 
 Combining these results I get that
 \begin{align*}
-    \Delta(f)^2 &\le \sqrt{8 \ln(n) \sum_{j \in [d]}  \lr{\sigma_j^4}} + 
+    C^2 &\le \sqrt{8 \ln(n) \sum_{j \in [d]}  \lr{\sigma_j^4}} + 
     \sum_{j \in [d]} \sigma_j^2 \\
     &=\sqrt{8 \ln(n) \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} + 
     \sum_{j \in [d]} \frac{\sigma_j}{\sum_{i \in [d]} \sigma_i} \\
@@ -646,26 +666,38 @@ Combining these results I get that
 \end{align*}
 Inserting this back into equation \ref{eq:Alg3Err2} we conclude
 \begin{align*}
-    \ee{\eta} &= \sigma_{\epsilon, \delta}^2 \cdot 
-    \Delta(\hat{f})^2 \cdot \lr{\sum_{i=1}^d \sigma_i}^2 \\
-    &\le \sigma_{\epsilon, \delta}^2 \cdot 
+    \ee{\eta} &= 4\sigma_{opt}^2 \cdot 
+    C^2 \cdot \sum_{i=1}^d b_j^{-2} \\
+    &\le 4\sigma_{opt}^2 \cdot 
+    \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
+    + 1} \cdot \sum_{i=1}^d \lr{\sigma_i \cdot \sum_{j \in [d]} \sigma_j} \\
+    &\le 4\sigma_{opt}^2 \cdot 
     \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
     + 1} \cdot \lr{\sum_{i=1}^d \sigma_i}^2 \\
-    &= \sigma_{\epsilon, \delta}^2 \cdot \sum_{i=1}^d \sigma_i \cdot 
+    &= 4\sigma_{opt}^2 \cdot \sum_{i=1}^d \sigma_i \cdot 
     \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2}
     + \sum_{i=1}^d \sigma_i}
 \end{align*}
 And the constraint on $t = \sqrt{\ln (n)}$ from lemma \ref{lem:Bernstein} is
 \begin{align*}
-    &0 \le t \le \frac{1}{4 \max_{j \in [d]}\sigma_j^2} \sqrt{2\sum_{j \in [d]} \sigma_j^4} \iff \\
-    &\sqrt{\ln (n)} \le \sqrt{\lr{\frac{\sum_{j \in [d]} \sigma_j}{\max_{j \in [d]} \sigma_j}}^2 \cdot \frac{1}{8} \cdot \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
-    &\ln (n) \le \frac{1}{8} \frac{1}{\max_{j \in [d]} \sigma_j^2} \cdot \sum_{j \in [d]} \sigma_j^2 \iff \\
-    &\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{8\max_{j \in [d]} \sigma_j^2}
+    &0 \le t \le \frac{1}{6 \sigma_*^2} \sqrt{2\sum_{j \in [d]} \sigma_j^4} \iff \\
+    &\sqrt{\ln (n)} \le \sqrt{\lr{\frac{\sum_{j \in [d]} \sigma_j}{\sigma_*}}^2 \cdot \frac{2}{36} \cdot \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
+    &\ln (n) \le \frac{1}{18\sigma_*^2} \cdot \sum_{j \in [d]} \sigma_j^2 \iff \\
+    &\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}
 \end{align*}
 
-
+At this point it would be preferable to compare the error of algorithm 3, to that of doing no transformation, and similairly deciding on a bound $C$ 
+such that the clipping probability was less than $n^{-1}$. However as I can only give upper bounds on these errors there is little to no value in comparing 
+upper bounds as there is no guarentee of the bounds. So even if I were to determine an upper bound for the error without transformation which was lower than that of algorithm 3, 
+it could very well still be that the error was less in reality. Secondly to produce the upper bound in as in \ref{theo:Alg3OptErr} using Bernstein's inequality, I
+have the constraint that all $\sigma_j \le \frac{2}{3}$, which is unlikely to happen in reality, whereas $\frac{\sigma_j}{\sum_{j \in [d]} \sigma_j} \le \frac{4}{9}$ 
+is much more likely to be satisfied for all $j$.
+As numerical solutions exist for evaluating $\prob{\|x_i\| > C^2}$ it is evident (oplagt) that emperically evaluating these errors and comparing them, would yield
+whether doing the transformation is beneficial.
+Intuitively it makes sense that allowing different noise to be added for each dimension, can only produce better results.
 \end{proof}
-
+\todo{Compare error with upper bound to the one which we be if no transformation was done.
+ i.e clipping in the original space. Impossible due to the constraint on $\sigma_*$}
 \todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
 \todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
 
