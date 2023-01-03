@@ -67,6 +67,12 @@ Bernstein inequality
     - Mention that in reality the CDF can be evaluated numerically
 
 ##### Next
+- Include proofs/explanation of why EGM is DP
+- Include other definitions of DP
+- Bound is not very good as it is restrictive
+    - Should I mention that this bound is very restrictive
+- Is there any value in giving bounds on not doing transformation and comparing it to doing transformation
+##### Not next anymore
 - How do I handle $c_i$, the max limit on all dimensions, if I set that only 0.0001 fraction of points are outside, then is clipping these alright? Otherwise I have no clue on how to set the bound
 - Proofs of theorems from other sources (both your article and other)?
 
@@ -137,10 +143,8 @@ Writing list
     - Gaussian Mechanism
     - Problem of adding equal noise in each dimension
     - Elliptical Gaussian Mechanism 
-        - Look at this as a transformation to symmetry (i.e. equal noise here is optimal)
 - Problem of Gaussian data 
     - Clipping data (such that very little is removed 10^5 points and 10^{-5} prob of clipping points)
-    - Transition into symmetry again
 - Different ways of solving, setup different constraints
 - Present the one focused on and the steps to solving it
 - Theorem on optimality

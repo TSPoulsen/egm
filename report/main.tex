@@ -298,7 +298,7 @@ This means that by equation \ref{eq:ExpErrGM} the expected error of the Gaussian
 \end{equation}
 A logical next step would be to add noise to each dimensions such that it is proportional to the sensitivity of that dimension.
 This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism, appropriately called the Elliptical Gaussian Mechanism
-works very similairly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling $\eta_j$ from 
+works very similairly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling all $\eta_j$ from 
 $\mathcal{N}(0,\sigma_{\epsilon, \delta}^2)$, here it is instead drawn from $\mathcal{N}\lr{0,\lr{\sigma_{opt}\cdot \frac{\Delta_j}{b_j}}^2}$. 
 The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
 
@@ -322,11 +322,11 @@ The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
 \end{algorithmic}
 \end{algorithm}
 
-\todo{add lemma/theorem/proof of why this is \edp (figure out if needed). Prolly is as the method is much the same for gaussian data}
+\todo{add lemma/theorem/proof of why this is \edp (figure out if needed). It is very similair to why it works for Gaussian data.}
 
 The main thing that really differentiates itself from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
 This is the scaling of how much weight should be attributed to each dimension when adding noise. It is shown how to determine the optimal values for $b_j$
-in \cite{Lebeda2022}, and the expected error of the mechanism.
+in \cite{Lebeda2022}, and the expected error of the mechanism then is.
 
 \begin{theorem}[Optimality and error of the Elliptical Gaussian Mechanism \cite{Lebeda2022}]
 The value for $b_j$ which minimized expected $l_2$ error $\ee{\eta}$ of the Elliptical Gaussian Mechanism is as follows
@@ -503,7 +503,7 @@ These quadratic forms of gaussian vectors has been studied well and for decades 
 Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, however there was none which were of use in this setting.
 However there does exist several numerial algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
 I would recommend using one of these algorithms in practice, but for the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
-\todo{Give Bernsteins inequality}
+\todo{Should I give the general definition of Bernsteins inequality before here? Or just inside the proof}
 
 \begin{lemma}
 \label{lem:Bernstein}
@@ -521,7 +521,6 @@ for
 0 \le t \le 
     \frac{1}{6 \sigma_*^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
 \]
-where $\sigma_* = \max_{j \in [d]} \sigma_j$.
 \end{lemma}
 \begin{proof}
 At first we define the random variable $Y_j = X_j^2 - \Exp{X_j^2}$ 
