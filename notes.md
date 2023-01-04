@@ -72,6 +72,7 @@ Bernstein inequality
 - Bound is not very good as it is restrictive
     - Should I mention that this bound is very restrictive
 - Is there any value in giving bounds on not doing transformation and comparing it to doing transformation
+- Show that stationary point is minimum
 ##### Not next anymore
 - How do I handle $c_i$, the max limit on all dimensions, if I set that only 0.0001 fraction of points are outside, then is clipping these alright? Otherwise I have no clue on how to set the bound
 - Proofs of theorems from other sources (both your article and other)?
@@ -82,6 +83,9 @@ https://www.jstor.org/stable/pdf/2346911.pdf?refreqid=excelsior%3A9cdee81fcfde8b
 
 
 ### TODO:
+- Less discussion of different ways of defining problem
+- Emperical investigation of comparing doing transformationt to no transformation
+    -  draw sigmas from zipf dist
 - Make argument for why clipping data preserves privacy. Should be closely related to definition of ($\epsilon$,$\delta$)-DP.
 - Think about transforming data such that expected norm is $1$ (in theory anything such that anything outside this is clipped). This is related to generalized chi square distributions.
 

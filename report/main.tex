@@ -146,13 +146,11 @@ which estimates $f(X)$ is then
 
 \paragraph{extra}
 
-\todo{If proof of elliptical ... is included then 
-write about edp is preserved during transformation}
-
 \subsection{Quadratic forms of random variables}
 \todo{write cohesive text here, and decide what to keep}
 
 \begin{lemma}
+\label{lem:GaussTrans}
 Let $X \sim \mathcal{N}(\mu, \sigma^2)$ be a gaussian random variable and let $r \in \R$ be a constant.
 We then have that
 \begin{align*}
@@ -219,7 +217,7 @@ This can be seen as adding a noise vector $\eta$ which
 is then distributed according to
 the multivariate normal distribution 
 $\mathcal{N}(\bm{0}, \sigma_{\epsilon,\delta}^2I)$. 
-The algorithm can be seen in Algorithm \ref{alg:gaussmech}.
+Pseudo code for the algorithm can be seen in Algorithm \ref{alg:gaussmech}.
 
 \begin{algorithm}
 \caption{The Gaussian Mechanism}\label{alg:gaussmech}
@@ -299,7 +297,7 @@ This means that by equation \ref{eq:ExpErrGM} the expected error of the Gaussian
 A logical next step would be to add noise to each dimensions such that it is proportional to the sensitivity of that dimension.
 This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism, appropriately called the Elliptical Gaussian Mechanism
 works very similairly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling all $\eta_j$ from 
-$\mathcal{N}(0,\sigma_{\epsilon, \delta}^2)$, here it is instead drawn from $\mathcal{N}\lr{0,\lr{\sigma_{opt}\cdot \frac{\Delta_j}{b_j}}^2}$. 
+$\mathcal{N}(0,\sigma_{\epsilon, \delta}^2)$, here they are instead drawn from $\mathcal{N}\lr{0,\lr{\sigma_{opt}\cdot \frac{\Delta_j}{b_j}}^2}$. 
 The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
 
 \begin{algorithm}
@@ -326,17 +324,17 @@ The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
 
 The main thing that really differentiates itself from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
 This is the scaling of how much weight should be attributed to each dimension when adding noise. It is shown how to determine the optimal values for $b_j$
-in \cite{Lebeda2022}, and the expected error of the mechanism then is.
+in \cite{Lebeda2022}, and what the expected error of the mechanism then is.
 
 \begin{theorem}[Optimality and error of the Elliptical Gaussian Mechanism \cite{Lebeda2022}]
-The value for $b_j$ which minimized expected $l_2$ error $\ee{\eta}$ of the Elliptical Gaussian Mechanism is as follows
+The value for $b_j$ which minimizes the expected $l_2$ error $\ee{\eta}$ of the Elliptical Gaussian Mechanism is as follows
 \[
     b_j = \sqrt{\frac{\Delta_j}{\sum_{j \in [d]} \Delta_j}}
 \]
 which leads the error to be
 \begin{equation}
 \label{eq:EGMErr}
-    \ee{\eta} =  \sigma_{opt} \cdot \| \bm{\Delta} \|_1^2
+    \ee{\eta} =  \sigma_{opt}^2 \cdot \| \bm{\Delta} \|_1^2
 \end{equation}
 where $\| \cdot \|_1$ is the $l_1$ norm.
 
@@ -345,7 +343,7 @@ where $\| \cdot \|_1$ is the $l_1$ norm.
 
 Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} we have the following ratio
 \[
-    \frac{d \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 }{\sigma_{opt} \cdot \| \bm{\Delta} \|_1^2} = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2
+    \frac{d \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 }{\sigma_{opt}^2 \cdot \| \bm{\Delta} \|_1^2} = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2
 \]
 in which it can be seen that they are equal when all entries of $\bm{\Delta}$ are the same. Otherwise the error for the Elliptical Gaussian Mechanism is lower
 when $\bm{\Delta}$ is skewed. As argued in \cite{Lebeda2022} Algorithm \ref{alg:EllipGM} improves Algorithm \ref{alg:gaussmech} by a factor in $[1,d)$.
@@ -402,29 +400,29 @@ Say there are $n$ points in a dataset, I will thus set the probability of clippi
     \ee{\lr{\widehat{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
 \]
 \todo{rewrite and introduce better}
-The intuition in this context is the same as that for the Elliptical Gaussian Mechanism, that dimensions with high variance should have more noise
-added. Therefore I will use the same approach as that used by the Elliptical Gaussian Mechanism to achieve \edp.
+In this setting, we again have the intuition that addding equal noise in all dimensions is non optimal, and instead the noise in a dimension should be proportional
+to the variance $\sigma_j^2$ in that dimension. In a desire to achieve similair results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
+I will use somewhat the same approach to achieve \edp.
 They achieve \edp by finding a transformation of points such that they all lie within the unit ball centered at the origin. 
-There does not exist such a transformation which is linear, as some points will always lie outside the unit ball with at least a small probability. 
-Instead I will introduce the constraint that the expected norm of vectors after the transformation is $1$. 
+There does not exist such a transformation which is linear (I think I mean Continous/Homeomorphic), as there will always be a non-zero 
+probability of observing points outside the unit ball.
+Instead I will introduce the constraint that the expected norm of vectors after the transformation should be $1$. 
 I whish to find a scaling of each dimension $b_j$ s.t.
-\todo{Introduce $\sigma_j$ before here}
 \begin{align}
 \label{eq:Alg3Con}
     &\Exp{\| x_i \odot \bm{b} \|} = 1  \iff \ee{x_i \odot \bm{b}} = \sum_{j \in [d]} (\sigma_jb_j)^2 = 1
 \end{align}
-where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product.
+where $\bm{b} = (b_1, b_2, \dots, b_d)$, $\odot$ is the element-wise product, and $\sigma_j$ is the standard deviation of the $j$'th dimension.
 Then $\widehat{f}$ can be computed on this transformed dataset, where the probability of clipping is less than $\frac{1}{n}$.
 As Theorem \ref{theo:PostProc} shows, \edp is preserved under post processing, 
 we can therefore add noise to each coordinate drawn from $\mathcal{N}(0,(2C\sigma_{opt})^2)$ in the transformed space to achieve \edp.
-The transformation back to the original space is the done by multiplying each dimension with $b_j^{-1}$, and due to the linearity of transformation 
+The transformation back to the original space is then done by multiplying each dimension with $b_j^{-1}$, and due to the linearity of transformation 
 this is also done to the noise added.
 We end up with the following noise vector being added
 \[
     \bm{\eta} = \lr{ b_1^{-1}\eta_1, b_2^{-1}\eta_2, \dots, b_d^{-1}\eta_d }
 \]
-\todo{Explain that multiplying Gaussian with factor is multiplying std with factor (perhaps make lemma)}
-in which all $\eta_j \sim \mathcal{N}(0,(2C\sigma_{opt})^2)$, and then by Lemma \ref{lem:GaussTransform} we have $b_j^{-1}\eta_j \sim \mathcal{N}(0, (b_j^{-1} \cdot 2C\sigma_{opt})^2)$.
+in which all $\eta_j \sim \mathcal{N}(0,(2C\sigma_{opt})^2)$, and then by lemma \ref{lem:GaussTrans} we have $b_j^{-1}\eta_j \sim \mathcal{N}(0, (b_j^{-1} \cdot 2C\sigma_{opt})^2)$.
 As the error is approximately given by $\| \bm{\eta} \|$ we have due to Corollary \ref{cor:expNorm} that the expected error is 
 \begin{equation}
 \label{eq:Alg3Err}
@@ -436,8 +434,8 @@ under the constraint given in equation \eqref{eq:Alg3Con}. This leads to the fol
 
 \begin{lemma}
 \label{lem:Optb}
-Let $X \in \R^{n \times d}$ be a dataset where each dimension $X^{(j)}$ is independently gaussianly distributed, i.e.
-$X^{(j)} \sim \mathcal{N}(\mu_j, \sigma_j^2)$. Then the expected error of Algorithm \ref{alg:EGM2} is minimized when
+Let $X \in \R^{n \times d}$ be a dataset where each dimension is independently gaussianly distributed, i.e.
+$x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$. Then the expected error of Algorithm \ref{alg:EGM2} is minimized when
 \[
     b_j = \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i}}
 \]
@@ -500,8 +498,8 @@ again where $n$ denotes the number of points in the dataset.
 As $x_i$ is a multivariate gaussian distribution, so is $x_i \odot \bm{b}$, and $\|x_i \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
 Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form.
 These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms}, and some special cases does have closed forms.
-Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, however there was none which were of use in this setting.
-However there does exist several numerial algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
+Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately there was none which were of use in this setting.
+However, there does exist several numerial algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
 I would recommend using one of these algorithms in practice, but for the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
 \todo{Should I give the general definition of Bernsteins inequality before here? Or just inside the proof}
 
@@ -510,7 +508,7 @@ I would recommend using one of these algorithms in practice, but for the sake of
 Let $X_1, X_2, \dots , X_d$ be $d$ independent random gaussian variables 
 where for $ 1 \le j \le d$ we have that $X_j \sim \mathcal{N}(0, \sigma_j^2)$.
 Let thereafter the largest standard deviation be denoted as $\sigma_* := \max_{j \in [d]} \sigma_j$,
-and as long as $\sigma_* \le \frac{2}{3}$ we can bound the probability for the sum of variables squared as follows 
+we can then bound the probability for the sum of variables squared as follows 
 \[
 \prob{\sum_{j \in [d]} X_j^2  \ge 
     t \sqrt{8 \sum_{j \in [d]} \sigma_j^4} +
@@ -560,30 +558,30 @@ Concluding that $\Exp{ |Y_j^k| } \le \frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdo
 \begin{align}
 \label{eq:ExpY2:1}
     &\Exp{Y_j^2} = 
-    \Exp{\lr{X_j^2 - \Exp{X_j^2}}^2} =
-    \Exp{\lr{X_j^2 - \Exp{X_j^2}}^2} = \\
-    &\Exp{X_j^4 + \Exp{X_j^2}^2 - 2X_j^2\Exp{X_j^2}} = 
-    \Exp{X_j^4} + \Exp{X_j^2}^2 - 2\Exp{X_j^2}^2 = \\
-    &\Exp{X_j^4}  - \Exp{X_j^2}^2 =
-    \sigma_j^4\Exp{Z^2}  - \lr{\sigma_j^2\Exp{Z}}^2 = \\
+    \Exp{\lr{X_j^2 - \Exp{X_j^2}}^2} \\
+    &=\Exp{X_j^4 + \Exp{X_j^2}^2 - 2X_j^2\Exp{X_j^2}} \\
+    &=\Exp{X_j^4} + \Exp{X_j^2}^2 - 2\Exp{X_j^2}^2 \\
+    &=\Exp{X_j^4}  - \Exp{X_j^2}^2 =
+    \sigma_j^4\Exp{Z^2}  - \lr{\sigma_j^2\Exp{Z}}^2 \\
 \label{eq:ExpY2:2}
-    &3\sigma_j^4  - \sigma_j^4 =
+    &=3\sigma_j^4  - \sigma_j^4 =
     2\sigma_j^4
 \end{align}
 
-Equation \ref{eq:BernCon} is therefore rewritten to 
+Equation \eqref{eq:BernCon} is therefore rewritten to 
 \begin{align*}
-    &\frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdot k! \le \frac{1}{2} \cdot 2 \sigma_j^4 L^{k-2} k! \iff \\
-    &\frac{3}{2} \sigma_j^{2k-4} \cdot 2^{k-2} \le L^{k-2} \iff \\
-    &\begin{cases}
-        \frac{3}{2} \sigma_j \le 1 & \text{when $k=2$} \\
-        \lr{\frac{3}{2}}^{\frac{1}{k-2}} \sigma_j^2 \cdot 2 \le L & \text{when $k>2$}
-    \end{cases}
+    \frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdot k! \le \frac{1}{2} \cdot 2 \sigma_j^4 L^{k-2} k! 
+    \iff \frac{3}{2} \sigma_j^{2k-4} \cdot 2^{k-2} \le L^{k-2}
 \end{align*}
+This expression is then split into two cases, when $k=2$, in which it can be seen from equation \eqref{eq:BernCon} that this holds for any $L$.
+The other case is $k>2$, where we have that 
+\[
+    \lr{\frac{3}{2}}^{\frac{1}{k-2}} \sigma_j^2 \cdot 2 \le L
+\]
+
 As $\lim_{k \rightarrow \infty} \lr{\frac{3}{2}}^{\frac{1}{k-2}} = 1$, 
 and these constraints must hold for all $j \in [d]$, we can define $\sigma_* = \max_{j \in [d]} \sigma_j$ and finally have that
 \begin{align*}
-    &\sigma_* \le \frac{2}{3} \\
     &L = 3\sigma_*^2 
 \end{align*}
 
@@ -611,7 +609,7 @@ Finally giving us that
     t \sqrt{ 8 \sum_{j \in [d]}  \sigma_j^4} +
     \sum_{j \in [d]} \sigma_j^2 } < e^{-t^2}
 \]
-as long as $\sigma_* \le \frac{2}{3}$, where t must lie within
+as long as $t$ lies within the following bounds
 \[
     0 \le t \le \frac{1}{2L} \sqrt{\sum_{j \in [d]} \Exp{Y_j^2}} =
     \frac{1}{6 \sigma_*^2} \sqrt{2 \sum_{j \in [d]} \sigma_j^4}
@@ -624,11 +622,9 @@ we have can conclude the following:
 
 \begin{theorem}
 \label{theo:Alg3OptErr}
-Let $\sigma_* := \max_{j \in [d]} \sigma_j$ be the maximal standard deviation.
-When $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}$
-    
-and $\frac{\sigma_*}{\sum_{j \in [d]} \sigma_j} \le \frac{4}{9}$
-the expected error of algorithm 3 can be upper bounded by 
+Let $X \in \R^{n \times d}$ be a dataset in which all dimensions are independently gaussian random variables, i.e. $x_{i,j} \sim \mathcal{N}(0, \sigma_j^2)$. 
+Let $\sigma_* := \max_{j \in [d]} \sigma_j$ be the maximal standard deviation of all dimensions. We then have that
+when $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}$ the expected error of algorithm \ref{alg:EGM2} can be upper bounded by 
 \[
     \ee{\bm{\eta}} \le 4\sigma_{opt}^2  \cdot \sum_{j \in [d]} \sigma_j \cdot
     \lr{ \sqrt{8\ln(n) \sum_{i \in [d]} \sigma_i^2} + \sum_{j \in [d]} \sigma_j }
@@ -643,11 +639,10 @@ By equation \eqref{eq:Alg3Err} the error is given by
     \sum_{i=1}^d b_j^{-2} 
 \end{equation}
 When clipping is performed to remove less than $n^{-1}$ we have the following 
-\todo{is this legal?}
 \[
-    \prob{ \| X \| \ge C} =
-    \prob{ \| X \|^2 \ge C^2} =
-    \prob{ \sum_{j \in [d]} X_j^2 \ge C^2}
+    \prob{ \| x_i \| \ge C} =
+    \prob{ \| x_i \|^2 \ge C^2} =
+    \prob{ \sum_{j \in [d]} x_{i,j}^2 \ge C^2}
 \]
 \todo{clean up sigma notation}
 Which means I can give an upper bound on $C^2$ by using
