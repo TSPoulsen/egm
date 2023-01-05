@@ -166,15 +166,15 @@ specially in the case of multivariate gaussian varaibles \cite{IowaQuadNormForms
 Even more research has been done in evaluating the CDF of these quadratic forms
 for Gaussian random vectors \cite{QuadFormsNume,QaudFormsBounds}.
 
-\begin{theorem}[Expectation of a quadratic random variable \cite{BatesQuadForm}]
-\label{theo:ExpQuad}
+\begin{lemma}[Expectation of a quadratic random variable \cite{BatesQuadForm}]
+\label{lem:ExpQuad}
 Let $X$ be a $d$-dimensional random vector with expected value $\Exp{X} =  \bm{\mu_{X}}$
 and covariance matrix $\var{X} = \bm{\Sigma_{X}}$. Let also $A$ be a constant 
 $d \times d$ symmetric matrix, then 
 \[
     \Exp{X^T A X} = tr \lr{A \bm{\Sigma_X}} + \bm{\mu}^T A\bm{\mu}
 \]
-\end{theorem}
+\end{lemma}
 
 \begin{proof}
 Blah blah
@@ -195,7 +195,7 @@ blah
 Let $X \sim \mathcal{N}(\bm{0}, \bm{\Sigma_X})$ be a $d$-dimensional gaussian vector
 with expected value $\bm{0}$, and let $\sigma_j^2$ denote the variance of the 
 $j$'th dimension where $1 \le j \le d$.
-By theorem \ref{theo:ExpQuad} we have that the expected $l_2$-norm 
+By theorem \ref{lem:ExpQuad} we have that the expected $l_2$-norm 
 of such a vector is given by
 \[
     \ee{X} = \text{tr} (\bm{\Sigma_X}) = \sum_{j=1}^d \sigma_j^2
@@ -205,7 +205,7 @@ of such a vector is given by
 
 \section{Algorithms}
 \subsection{The Gaussian Mechanism}
-One of the most foundational algorithms for achieving 
+One of the most fundamental algorithms for achieving 
 \edp is the Gaussian Mechanism \cite{dpbasic}. It computes the real
 value of a statistic, where the $l_2$-sensitivity is known.
 That is it produces a \edp estimate of a function 
@@ -230,14 +230,16 @@ Pseudo code for the algorithm can be seen in Algorithm \ref{alg:gaussmech}.
     \Output
     \State\edp estimate of $g(X)$
     \EndOutput
-    \State$\eta \gets \textnormal{sample from } \mathcal{N}(\overrightarrow{0}, \sigma_{\epsilon,\delta}^2I)$ \\
-    \Return$g(X) + \eta$
+    \For{$j \in [d]$}
+        \State$\eta_j \gets \textnormal{sample from } \mathcal{N}(0, \sigma_{\epsilon,\delta}^2)$
+    \EndFor \\
+    \Return$g(X) + \bm{\eta}$
 \end{algorithmic}
 \end{algorithm}
 \noindent The algorithm quite intuitively prodcues error which is purely given by the norm of the noise added, and the expected error can be calculated to be
 \[
-    \ee{(g(X) + \eta) - g(X)} = 
-    \ee{\eta}
+    \ee{(g(X) + \bm{\eta}) - g(X)} = 
+    \ee{\bm{\eta}}
 \]
 Which by corollary \ref{cor:expNorm} is 
 \begin{equation}
@@ -264,21 +266,20 @@ The proof is rather long and is therefore ommitted here. A few years later it wa
 \label{theo:OptSig}
 The Gaussian Mechanism is differentially private if and only if $\sigma_{\epsilon, \delta} \ge \Delta(g) \cdot \sigma_{opt}$ where
 $\sigma_{opt} \in \R$ is the smallest value greater than 0, which satisfies
-\[
+\begin{equation}
+\label{eq:sigopt}
     \Phi \lr{\frac{1}{2\sigma_{opt}} - \epsilon\sigma_{opt}} - e^{\epsilon} \Phi \lr{-\frac{1}{2\sigma_{opt}} - \epsilon\sigma_{opt}} \le \delta
-\]
+\end{equation}
 \end{theorem}
-In \cite{BalleWang} it is also shown how to compute this value, and since this is of no importance to this project it will therefore not be covered.
-For the rest of the report I will only be reffering to $\sigma_{\epsilon, \delta}$ as the minimal value given by theorem \ref{theo:OptSig} 
-and not that given by theorem \ref{theo:gaussMech}.
-
+In \cite{BalleWang} it is also shown how to compute this value, but since this is of no importance to this project it will therefore not be covered here.
+For the rest of the report I will only be referring to $\sigma_{opt}$ as the minimal value given by equation \eqref{eq:sigopt}.
 
 The main downside of the Gaussian Mechanism is that it adds equal noise to all dimensions, regardless of the sensitivity in that dimension.
 As this report focuses on giving differentially private estimates of sums of vectors, it is natural to ask whether adding equal noise in all dimensions
 is optimal in this setting. Let us define the function of interest $f(X) = \sum_{i \in [n]} x_i$, for a dataset $X \in \R^{n \times d}$. 
 The sensitivity of this function must be twice the largest possible norm of any vector.
 Therefore if the largest difference between any two neighbouring datasets 
-in the $j$'th dimension is given by 
+in the $j$'th dimension can be limited as follows
 \begin{equation}
 \label{eq:DimCon}
     \Delta_j := \max_{X \sim X'}|X^{(j)} - X'^{(j)}|
@@ -289,10 +290,12 @@ and we say that $X$ and $X'$ differ in the $i$'th entry we conclude that
     \Delta(f) = \max_{X \sim X'} \| f(X) - f(X') \| = 
     \max_{X \sim X'} \| x_i - x_i' \| = \sqrt{\sum_{j \in [d]} \Delta_j^2} = \|\bm{\Delta}\|
 \end{equation}
-This means that by equation \ref{eq:ExpErrGM} the expected error of the Gaussian Mechanism when estimating $f(X)$ is given by
+where $\bm{\Delta} = (\Delta_1, \Delta_2, \dots, \Delta_d)$.
+
+\noindent This means that by equation \ref{eq:ExpErrGM} the expected error of the Gaussian Mechanism when estimating $f(X)$ is given by
 \begin{equation}
 \label{eq:GMErr}
-    \ee{\eta} = d \cdot \sigma_{\epsilon, \delta}^2 = d \cdot \lr{\Delta(f) \sigma_{opt}}^2 =
+    \ee{\eta} = d \cdot \sigma_{\epsilon, \delta}^2 = d \cdot \lr{\Delta(f) \cdot \sigma_{opt}}^2 =
     d  \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 
 \end{equation}
 A logical next step would be to add noise to each dimensions such that it is proportional to the sensitivity of that dimension.
@@ -321,7 +324,7 @@ The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
 \end{algorithmic}
 \end{algorithm}
 
-Though the algorithm seems short and simple as the the only thing which distinguishes it from The Gaussian Mechanism 
+Though the algorithm seems short and simple, as the the only thing which distinguishes it from The Gaussian Mechanism 
 is to draw samples from $\mathcal{N}(0, \lr{\sigma_{opt} \cdot \frac{\Delta_j}{b_j}}^2)$, 
 it can be seen as a transformation of space. Consider transforming the data by the factor $\frac{b_j}{\Delta_j}$ in each dimension. 
 Then you would have that each dimension is bounded
@@ -334,8 +337,8 @@ and in this space the sensitivity of $f(X)= \sum_{i \in [n]} x_i$ is then
 \]
 This means that all points in $X$ are mapped to lie withing the unit ball, and in this space one can simply add noise to each 
 dimension drawn from $\eta_j \sim \mathcal{N}(0, \sigma_{opt})$. Then the inverse transformation $\frac{\Delta_j}{b_j}$ 
-can then be applied to each dimension of $f(\widehat{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
-because differential privacy is preserved under post processing as per theorem \ref{theo:PostProc}. \\
+can then be applied to each dimension of $f(\overline{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
+because differential privacy is preserved under post processing as per Theorem \ref{theo:PostProc}. \\
 
 
 The main thing that really differentiates Algorithm \ref{alg:EllipGM} from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
@@ -343,19 +346,19 @@ This is the scaling of how much weight should be attributed to each dimension wh
 in \cite{Lebeda2022}, and what the expected error of the mechanism then is.
 
 \begin{theorem}[Optimality and error of the Elliptical Gaussian Mechanism \cite{Lebeda2022}]
-The value for $b_j$ which minimizes the expected $l_2$ error $\ee{\eta}$ of the Elliptical Gaussian Mechanism is as follows
+The value for $b_j$ which minimizes the expected $l_2$ error $\ee{\bm{\eta}}$ of Algorithm \ref{alg:EllipGM} is as follows
 \[
     b_j = \sqrt{\frac{\Delta_j}{\sum_{j \in [d]} \Delta_j}}
 \]
 which leads the error to be
 \begin{equation}
 \label{eq:EGMErr}
-    \ee{\eta} =  \sigma_{opt}^2 \cdot \| \bm{\Delta} \|_1^2
+    \ee{\bm{\eta}} =  \sigma_{opt}^2 \cdot \| \bm{\Delta} \|_1^2
 \end{equation}
 where $\| \cdot \|_1$ is the $l_1$ norm.
 
 \end{theorem}
-The proof will be ommitted here, but it is very similair to the proofs for lemma \ref{lem:Optb} and theorem \ref{theo:Alg3OptErr}.
+The proof will be ommitted here, but it is very similair to the proofs for lemma \ref{lem:Optb} and Theorem \ref{theo:Alg3OptErr} which are in section \ref{seq:problem}.
 
 Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} we have the following ratio
 \[
@@ -367,6 +370,7 @@ in which it can be seen that they are equal when all entries of $\bm{\Delta}$ ar
 when $\bm{\Delta}$ is skewed. As argued in \cite{Lebeda2022} Algorithm \ref{alg:EllipGM} improves Algorithm \ref{alg:gaussmech} by a factor in $[1,d)$.
 
 \section{Problem setup}
+\label{seq:problem}
 As previously mentioned the problem investigated here consists of realeasing the sum of vectors 
 in a dataset under differential privacy.
 More formally we whish to release the value of 
@@ -389,33 +393,33 @@ This means that $x_i \sim \mathcal{N}(\bm{\mu}, \Sigma ) $,
 where $\Sigma$ is a diagonal matrix with the variance of each 
 dimension along its diagonal.
 It is quite apparent that determining a limit $ \Delta_j $ is impossible 
-in this setting as the Gaussian distribution is continously defined 
+in this setting as the gaussian distribution is continously defined 
 on the range $ (-\infty, \infty)$.
 Several recent papers has combatted this by doing something called 
 \textit{clipping} \cite{Huang2021,coinpress}. 
 Clipping is the process of limiting the norm of any one entry 
 to be at most a chosen threshold $C$. This means that every vector is transformed as such
 \[
-    \widehat{x}_i := \min \lrc{\frac{C}{\| x_i \|}, 1} \cdot x_i
+    \overline{x}_i := \min \lrc{\frac{C}{\| x_i \|}, 1} \cdot x_i
 \]
 Clipping entries by a factor $C$ thus means that $ \Delta(f) = 2C $ 
 as any one entry cannot have more impact on the summation than $C$.
 If the summation $f(X)$ is 
-performed on a clipped dataset $\widehat{X}$ it is equivalent to
-defining the summation function $\widehat{f}: \R^{n \times d} \rightarrow \R^d$ as
+performed on a clipped dataset $\overline{X}$ it is equivalent to
+defining the summation function $\overline{f}: \R^{n \times d} \rightarrow \R^d$ as
 \[
-    \widehat{f}(X) = \sum_i^n \min \lrc{ \frac{C}{\| x_i \|}, 1} \cdot x_i
+    \overline{f}(X) = \sum_i^n \min \lrc{ \frac{C}{\| x_i \|}, 1} \cdot x_i
 \]
-Then by theorem \ref{theo:OptSig} the 
-gaussian mechanism with the function $\widehat{f}$ is \edp with
-$\sigma_{\epsilon, \delta} = \Delta\lr{\widehat{f}} \sigma_{opt} = 2C \sigma_{opt}$.
+Then by Theorem \ref{theo:OptSig} the 
+gaussian mechanism with the function $\overline{f}$ is \edp with
+$\sigma_{\epsilon, \delta} = \Delta\lr{\overline{f}} \sigma_{opt} = 2C \sigma_{opt}$.
 Though the mechanism is still \edp it will now have 
 a larger error when regarding the true sum
 $f(X) = \sum_i^n x_i$ as the actual answer. If the probability of clipping is set
-so low that we actually don't expect to clip any entries we can use $\widehat{f}$ as an approximation of $f$.
+so low that we actually don't expect to clip any entries we can use $\overline{f}$ as an approximation of $f$.
 Say there are $n$ points in a dataset, I will thus set the probability of clipping to be less than $\frac{1}{n}$ and get that
 \[
-    \ee{\lr{\widehat{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
+    \ee{\lr{\overline{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
 \]
 In this setting, we again have the intuition that addding equal noise in all dimensions is non optimal, and instead the noise in a dimension should be proportional
 to the variance $\sigma_j^2$ in that dimension. In a desire to achieve similair results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
@@ -426,11 +430,12 @@ probability of observing points outside the unit ball.
 Instead I will introduce the constraint that the expected norm of vectors after the transformation should be $1$. 
 I whish to find a scaling of each dimension $b_j$ s.t.
 \begin{align}
+    &\widehat{x}_i := x_i \odot \bm{b} \\
 \label{eq:Alg3Con}
-    &\Exp{\| x_i \odot \bm{b} \|} = 1  \iff \ee{x_i \odot \bm{b}} = \sum_{j \in [d]} (\sigma_jb_j)^2 = 1
+    \Exp{\| \widehat{x} \|} &= 1  \iff \ee{\widehat{x}} = 1
 \end{align}
-where $\bm{b} = (b_1, b_2, \dots, b_d)$, $\odot$ is the element-wise product, and $\sigma_j$ is the standard deviation of the $j$'th dimension.
-Then $\widehat{f}$ can be computed on this transformed dataset, where the probability of clipping is less than $\frac{1}{n}$.
+where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product. 
+Then $\overline{f}$ can be computed on this transformed dataset $\widehat{X}$, where the probability of clipping is less than $\frac{1}{n}$.
 As Theorem \ref{theo:PostProc} shows, \edp is preserved under post processing, 
 we can therefore add noise to each coordinate drawn from $\mathcal{N}(0,(2C\sigma_{opt})^2)$ in the transformed space to achieve \edp.
 The transformation back to the original space is then done by multiplying each dimension with $b_j^{-1}$, and due to the linearity of transformation 
@@ -440,7 +445,7 @@ We end up with the following noise vector being added
     \bm{\eta} = \lr{ b_1^{-1}\eta_1, b_2^{-1}\eta_2, \dots, b_d^{-1}\eta_d }
 \]
 in which all $\eta_j \sim \mathcal{N}(0,(2C\sigma_{opt})^2)$, and then by lemma \ref{lem:GaussTrans} we have $b_j^{-1}\eta_j \sim \mathcal{N}(0, (b_j^{-1} \cdot 2C\sigma_{opt})^2)$.
-As the error is approximately given by $\| \bm{\eta} \|$ we have due to Corollary \ref{cor:expNorm} that the expected error is 
+As the error is approximately given by $\| \bm{\eta} \|^2$ we have due to Corollary \ref{cor:expNorm} that the expected error is 
 \begin{equation}
 \label{eq:Alg3Err}
     \ee{\bm{\eta}} = \sum_{j=1}^d \lr{b_j^{-1} \cdot 2C\sigma_{opt}}^2   = \lr{2C\sigma_{opt}}^2 \sum_{j=1}^d b_j^{-2}
@@ -450,7 +455,7 @@ As the error is approximately given by $\| \bm{\eta} \|$ we have due to Corollar
 \caption{The Elliptical Gaussian Mechanism for Gaussian data}\label{alg:EGM2}
 \begin{algorithmic}
     \Input
-    \Desc{$\sigma_{opt} \in \R$}{Standard deviation as defined by theorem \ref{theo:OptSig}}
+    \Desc{$\sigma_{opt} \in \R$}{Standard deviation as defined by Theorem \ref{theo:OptSig}}
     \Desc{$\bm{\sigma} \in \R^{d}$}{Standard deviations of all dimension}
     \Desc{$X \in \R^{n \times d}$}{Dataset, where $x_{i,j} \sim \mathcal{N}(\mu_j,\sigma_j^2)$}
     \Desc{$\bm{b} \in \R^{d}$}{Scaling vector, s.t. $\ee{x_i \odot \bm{b}} = 1$}
@@ -480,11 +485,16 @@ despite it being very similiar. The most notable thing here
 is that the transformation has to be performed on the dataset,
 as it is important which points are being clipped, in order to ensure that the mechanism is \edp.
 In Algorithm \ref{alg:EllipGM} only the inverse transformation, $b_j^{-1}$, is being
-applied on the noise to be added.
+applied on the noise to be added. \\
 
-
-Now we are back to a very similiar problem to the one solved in \cite{Lebeda2022}. Minimize the error described in equation \eqref{eq:Alg3Err}
-under the constraint given in equation \eqref{eq:Alg3Con}. This leads to the following Lemma
+\noindent Now we are back to a very similiar problem to the one solved in \cite{Lebeda2022}. Minimize the error described in equation \eqref{eq:Alg3Err}
+under the constraint given in equation \eqref{eq:Alg3Con}. The constraint can be given as
+\begin{equation}
+\label{eq:normcon}
+    \ee{x_i \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 = 1
+\end{equation}
+due to Corollary \ref{cor:expNorm}
+\noindent This leads to the following Lemma
 
 \begin{lemma}
 \label{lem:Optb}
@@ -498,7 +508,7 @@ $x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$. Then the expected error of Algori
 Using lagrangian multipliers we find the local maxima or 
 minia of the function subject to equality constraints.
 To do so we construct the lagrangian function $\mathcal{L}: \R^{d+1} \rightarrow \R$ from the optimization problem given by
-equation \eqref{eq:Alg3Err} and the constraint given by \eqref{eq:Alg3Con} for ease of notation we define 
+equation \eqref{eq:Alg3Err} and the constraint given by \eqref{eq:normcon} for ease of notation we define 
 $\sigma_{\epsilon, \delta} := 2C\sigma_{opt}$.
 \[
     \mathcal{L}(\bm{b},\lambda) = \sigma_{\epsilon,\delta}^2\sum_{j \in [d]} b_j^{-2}
@@ -513,7 +523,7 @@ The derivative with respect to $b_j$ is
     + \lambda \lr{\sigma_j b_j}^2} =
     -2 \sigma_{\epsilon,\delta}^2 b_j^{-3} + 2 \lambda \sigma_j^2b_j
 \]
-I then solve $\frac{\partial \mathcal{L}}{\partial b_j} = 0$ for $b_j$
+I then solve $\frac{\partial \mathcal{L}}{\partial b_j}(\bm{b},\lambda) = 0$ for $b_j$
 \begin{align}
     &-2\sigma_{\epsilon,\delta}^2 b_j^{-3} + 2 \lambda \sigma_j^2b_j = 0 \iff
     \lambda \sigma_j^2b_j = \sigma_{\epsilon,\delta}^2 b_i^{-3}  \\
@@ -522,18 +532,18 @@ I then solve $\frac{\partial \mathcal{L}}{\partial b_j} = 0$ for $b_j$
     b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} 
 \end{align}
 I now have the last partial derivative 
-$\frac{\partial \mathcal{L}}{\partial \lambda} = 0$ which I solve for
+$\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 0$ which I solve for
 $\lambda$ using the previous expression for $b_j$.
 
 \begin{align*}
-    &\frac{\partial \mathcal{L}}{\partial \lambda} = 
+    &\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 
     \sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 \\
     &\sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 = 0 \iff
     \sum_{j=1}^d \sigma_j^2 \lr{\frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
     &\frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}} \sum_{j=1}^d \frac{\sigma_j^2}{\sigma_j} = 1 \iff
     \sigma_{\epsilon,\delta} \sum_{j=1}^d \sigma_j = \sqrt{\lambda}
 \end{align*}
-Inserting back into equation \ref{eq:solvbi}
+Inserting back into equation \eqref{eq:solvbi}
 \[
     b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} =
     \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
@@ -553,7 +563,7 @@ As $x_i$ is a multivariate gaussian distribution, so is $x_i \odot \bm{b}$ by le
 Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form in the general case.
 These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms}, and some special cases does have closed forms.
 Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately there was none which were of use in this setting.
-However, there does exist several numerial algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
+However, there does exist several numerical algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
 I would recommend using one of these algorithms in practice, and will do so in the emperical analysis in section \ref{seq:emp}.
 For the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
 
@@ -580,13 +590,14 @@ using the $j$'th gaussian random variable.
 As $\Exp{Y_j} = \Exp{X_j^2 - \Exp{X_j^2}} = \Exp{X_j^2} - \Exp{X_j^2} = 0$ 
 we have that $Y_j$ is zero centered. We are thus interested in giving bounds on
 $\prob{\sum_{j \in [d]} Y_j}$. 
-We can use Bernsteins inequality, if the following constraint holds for all $k \in \N$ with $k \ge 2$
- and for all $j \in [d]$, and for some $L \in \R$
+We can use Bernsteins inequality, if there exists some $L \in \R$ which satisfies 
 \begin{equation}
 \label{eq:BernCon}
     \Exp{ |Y^k_j| } \le \frac{1}{2} \Exp{Y_j^2} L^{k-2} k!
 \end{equation}
+for all $k \in \N$ with $k \ge 2$ and for all $j \in [d]$.
 \todo{I would like to cite where I got the Bernstein Inequality from, around here. Haven't found any good source (except for wikipedia)}
+
 Initially we have that $\Exp{ |Y_j^k| } = \Exp{ |\lr{X_j^2 - \Exp{X_j^2}}^k|}$
 and since $X_j^2 \ge 0$ and therefore also $\Exp{X_j^2} \ge 0$ 
 we can therefore bound it by
@@ -628,7 +639,7 @@ Equation \eqref{eq:BernCon} is therefore rewritten to
     \frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdot k! \le \frac{1}{2} \cdot 2 \sigma_j^4 L^{k-2} k! 
     \iff \frac{3}{2} \sigma_j^{2k-4} \cdot 2^{k-2} \le L^{k-2}
 \end{align*}
-This expression is then split into two cases, when $k=2$, in which it can be seen from equation \eqref{eq:BernCon} that this holds for any $L$.
+This expression is then split into two cases, when $k=2$, in which it can be seen from equation \eqref{eq:BernCon} that this holds for any $L \in \R$.
 The other case is $k>2$, where we have that 
 \[
     \lr{\frac{3}{2}}^{\frac{1}{k-2}} \sigma_j^2 \cdot 2 \le L
@@ -671,9 +682,8 @@ as long as $t$ lies within the following bounds
 \]
 \end{proof}
 
-\noindent Combining lemma \ref{lem:Bernstein} with theorem \ref{lem:Optb} 
+\noindent Combining lemma \ref{lem:Bernstein} with lemma \ref{lem:Optb} 
 we have can conclude the following:
-\todo{Introduce variables better}
 
 \begin{theorem}
 \label{theo:Alg3OptErr}
@@ -684,6 +694,7 @@ when $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}$ the expecte
     \ee{\bm{\eta}} \le 4\sigma_{opt}^2  \cdot \sum_{j \in [d]} \sigma_j \cdot
     \lr{ \sqrt{8\ln(n) \sum_{i \in [d]} \sigma_i^2} + \sum_{j \in [d]} \sigma_j }
 \]
+when each $b_j$ is chosen according to lemma \ref{lem:Optb}.
 \end{theorem}
 
 \begin{proof}
@@ -693,40 +704,39 @@ By equation \eqref{eq:Alg3Err} the error is given by
     \ee{\bm{\eta}} = \lr{2C\sigma_{opt}}^2 \cdot 
     \sum_{i=1}^d b_j^{-2} 
 \end{equation}
-When clipping is performed to remove less than $n^{-1}$ we have the following 
-\[
-    \prob{ \| x_i \| \ge C} =
-    \prob{ \| x_i \|^2 \ge C^2} =
-    \prob{ \sum_{j \in [d]} x_{i,j}^2 \ge C^2}
-\]
-\todo{clean up sigma notation}
-Which means I can give an upper bound on $C^2$ by using
-lemma \ref{lem:Bernstein}, and inserting that $\widehat{\sigma}_j := \sigma_j \cdot b_j = \sqrt{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}$ 
-when $b_i$ is given by theorem \ref{lem:Optb}. I wish the clipping 
-probability to be less than $n^{-1}$, giving me
+We thus need to determine an upper bound for $C$, we begin by looking at the transformed data
+\begin{align*}
+    &\widehat{x}_i := x_i \odot \bm{b} \textnormal{ , giving } \widehat{x}_{i,j} \sim \mathcal{N}\lr{0,\lr{b_j\sigma_j}^2} \\
+    &\prob{ \| \widehat{x}_i \| \ge C} =
+    \prob{ \| \widehat{x}_i \|^2 \ge C^2} =
+    \prob{ \sum_{j \in [d]} \widehat{x}_{i,j}^2 \ge C^2}
+\end{align*}
+
+Which means I can give an upper bound on $C^2$, whilst having
+$b_j \sigma_j = \sqrt{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}$ 
+as the standard deviation.
+Furthermore, I wish the clipping probability to be less than $n^{-1}$, giving me
 \[
     e^{-t^2} = \frac{1}{n} \implies t = \sqrt{\ln (n)}
 \]
-Combining these results I get that
+Combining these results and using the upper bound on $C$ from lemma \ref{lem:Bernstein} I get the following
 \begin{align*}
-    C^2 &\le 2 \sqrt{\ln(n)} \sqrt{2\sum_{j \in [d]}  \lr{\widehat{\sigma}_j^4}} + 
-    \sum_{j \in [d]} \widehat{\sigma}_j^2 \\
-    &=\sqrt{8 \ln(n) \sum_{j \in [d]}  \lr{\widehat{\sigma}_j^4}} + 
-    \sum_{j \in [d]} \widehat{\sigma}_j^2 \\
+    C^2 &\le 2 \sqrt{\ln(n)} \sqrt{2\sum_{j \in [d]}  \lr{\lr{b_j\sigma_j}^4}} + 
+    \sum_{j \in [d]} \lr{b_j\sigma_j}^2 \\
     &=\sqrt{8 \ln(n) \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} + 
     \sum_{j \in [d]} \frac{\sigma_j}{\sum_{i \in [d]} \sigma_i} \\
-    &=\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
+    &=\frac{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2}}{\sum_{i \in [d]} \sigma_i}
     + 1
 \end{align*}
 Inserting this back into equation \ref{eq:Alg3Err2} we conclude
 \begin{align*}
-    \ee{\eta} &= 4\sigma_{opt}^2 \cdot 
+    \ee{\bm{\eta}} &= 4\sigma_{opt}^2 \cdot 
     C^2 \cdot \sum_{i=1}^d b_j^{-2} \\
     &\le 4\sigma_{opt}^2 \cdot 
-    \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
+    \lr{\frac{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2}}{\sum_{i \in [d]} \sigma_i}
     + 1} \cdot \sum_{i=1}^d \lr{\sigma_i \cdot \sum_{j \in [d]} \sigma_j} \\
-    &\le 4\sigma_{opt}^2 \cdot 
-    \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
+    &= 4\sigma_{opt}^2 \cdot 
+    \lr{\frac{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2}}{\sum_{i \in [d]} \sigma_i}
     + 1} \cdot \lr{\sum_{i=1}^d \sigma_i}^2 \\
     &= 4\sigma_{opt}^2 \cdot \sum_{i=1}^d \sigma_i \cdot 
     \lr{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2}
@@ -734,25 +744,25 @@ Inserting this back into equation \ref{eq:Alg3Err2} we conclude
 \end{align*}
 And the constraint on $t = \sqrt{\ln (n)}$ from lemma \ref{lem:Bernstein} is
 \begin{align*}
-    &0 \le t \le \frac{1}{6 \sigma_*^2} \sqrt{2\sum_{j \in [d]} \sigma_j^4} \iff \\
+    &0 \le t \le \frac{1}{6 (b_j\sigma_*)^2} \sqrt{2\sum_{j \in [d]} (b_j\sigma_j)^4} \iff \\
+    &\sqrt{\ln (n)} \le \frac{1}{6} \frac{\sum_{j \in [d]} \sigma_j}{\sigma_*} \sqrt{\sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
     &\sqrt{\ln (n)} \le \sqrt{\lr{\frac{\sum_{j \in [d]} \sigma_j}{\sigma_*}}^2 \cdot \frac{2}{36} \cdot \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
     &\ln (n) \le \frac{1}{18\sigma_*^2} \cdot \sum_{j \in [d]} \sigma_j^2 \iff \\
     &\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}
 \end{align*}
+\end{proof}
 
 At this point it would be preferable to compare the error of algorithm 3, to that of doing no transformation, and similairly deciding on a bound $C$ 
-such that the clipping probability was less than $n^{-1}$. However as I can only give upper bounds on these errors there is little to no value in comparing 
-upper bounds as there is no guarentee of the bounds. So even if I were to determine an upper bound for the error without transformation which was lower than that of algorithm 3, 
-it could very well still be that the error was less in reality. Secondly to produce the upper bound in as in \ref{theo:Alg3OptErr} using Bernstein's inequality, I
-have the constraint that all $\sigma_j \le \frac{2}{3}$, which is unlikely to happen in reality, whereas $\frac{\sigma_j}{\sum_{j \in [d]} \sigma_j} \le \frac{4}{9}$ 
-is much more likely to be satisfied for all $j$.
-As numerical solutions exist for evaluating $\prob{\|x_i\| > C^2}$ it is evident (oplagt) that emperically evaluating these errors and comparing them, would yield
-whether doing the transformation is beneficial.
+such that the clipping probability was less than $n^{-1}$ on $X$. However as I can only give upper bounds on these errors there is little to no value in comparing 
+upper bounds as there is no guarentee on the thighness of these bounds. So even if I were to determine an upper bound for the error without transformation which was higher than that of algorithm 3, 
+it could very well still be that the error was less in reality.
+As previously mention, there exists numerical solutions for evaluating $\prob{\|x_i\| > C^2}$ so it is natural to perform an emperically evaluation of these errors
+ and investigating whether the transformation lessen the error.
 Intuitively it makes sense that allowing different noise to be added for each dimension, can only produce better results.
-\end{proof}
 \todo{Write and discuss restrictiveness of the bound}
 \todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
 \todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
+\todo{Write emperical evaluation section} 
 
 
 \newpage
