@@ -44,6 +44,7 @@
 \begin{document}
 
 \maketitle
+\todo{Write introduction, mention relation to average vector}
 
 \section{Preliminaries}
 \subsection{Definitions}
@@ -310,18 +311,18 @@ The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
     \Desc{$\bm{\Delta} \in \R^{d}$}{Sensitivies of all dimensions}
     \EndInput
     \Output
-    \State \edp estimate of $f(X)$
+    \State \edp estimate of $f(X) = \sum_{i \in [n]} x_i$
     \EndOutput
     \For{$j \in [d]$}
         \State $\sigma_j \gets \sigma_{opt} \cdot \frac{\Delta_j}{b_j}$
         \State $\eta_j \gets \textnormal{sample from } \mathcal{N}(0, \sigma_j^2)$
     \EndFor \\
-    \Return $g(X) + \eta$
+    \Return $f(X) + \eta$
 \end{algorithmic}
 \end{algorithm}
 
-\todo{add lemma/theorem/proof of why this is \edp (figure out if needed). It is very similair to why it works for Gaussian data.}
-Though the algoritghm seems short and simple as the the only thing thats really done is to draw samples from $\mathcal{N}(0, \lr{\sigma_{opt} \cdot \frac{\Delta_j}{b_j}}^2)$, 
+Though the algorithm seems short and simple as the the only thing which distinguishes it from The Gaussian Mechanism 
+is to draw samples from $\mathcal{N}(0, \lr{\sigma_{opt} \cdot \frac{\Delta_j}{b_j}}^2)$, 
 it can be seen as a transformation of space. Consider transforming the data by the factor $\frac{b_j}{\Delta_j}$ in each dimension. 
 Then you would have that each dimension is bounded
 \[
@@ -334,9 +335,10 @@ and in this space the sensitivity of $f(X)= \sum_{i \in [n]} x_i$ is then
 This means that all points in $X$ are mapped to lie withing the unit ball, and in this space one can simply add noise to each 
 dimension drawn from $\eta_j \sim \mathcal{N}(0, \sigma_{opt})$. Then the inverse transformation $\frac{\Delta_j}{b_j}$ 
 can then be applied to each dimension of $f(\widehat{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
-because differential privacy is preserved under post processing as per theorem \ref{theo:PostProc}.
+because differential privacy is preserved under post processing as per theorem \ref{theo:PostProc}. \\
 
-The main thing that really differentiates itself from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
+
+The main thing that really differentiates Algorithm \ref{alg:EllipGM} from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
 This is the scaling of how much weight should be attributed to each dimension when adding noise. It is shown how to determine the optimal values for $b_j$
 in \cite{Lebeda2022}, and what the expected error of the mechanism then is.
 
@@ -547,13 +549,13 @@ As $C$ should be given by the minimal value which satisfies the inequality
    \prob{ \| x_i \odot \bm{b} \| > C } = \prob{ \| x_i \odot \bm{b} \|^2 > C^2} < \frac{1}{n}
 \]
 again where $n$ denotes the number of points in the dataset.
-As $x_i$ is a multivariate gaussian distribution, so is $x_i \odot \bm{b}$, and $\|x_i \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
-Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form.
+As $x_i$ is a multivariate gaussian distribution, so is $x_i \odot \bm{b}$ by lemma \ref{lem:GaussTrans}, and $\|x_i \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
+Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form in the general case.
 These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms}, and some special cases does have closed forms.
 Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately there was none which were of use in this setting.
 However, there does exist several numerial algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
-I would recommend using one of these algorithms in practice, but for the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
-\todo{Should I give the general definition of Bernsteins inequality before here? Or just inside the proof}
+I would recommend using one of these algorithms in practice, and will do so in the emperical analysis in section \ref{seq:emp}.
+For the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
 
 \begin{lemma}
 \label{lem:Bernstein}
@@ -584,6 +586,7 @@ We can use Bernsteins inequality, if the following constraint holds for all $k \
 \label{eq:BernCon}
     \Exp{ |Y^k_j| } \le \frac{1}{2} \Exp{Y_j^2} L^{k-2} k!
 \end{equation}
+\todo{I would like to cite where I got the Bernstein Inequality from, around here. Haven't found any good source (except for wikipedia)}
 Initially we have that $\Exp{ |Y_j^k| } = \Exp{ |\lr{X_j^2 - \Exp{X_j^2}}^k|}$
 and since $X_j^2 \ge 0$ and therefore also $\Exp{X_j^2} \ge 0$ 
 we can therefore bound it by
@@ -698,13 +701,18 @@ When clipping is performed to remove less than $n^{-1}$ we have the following
 \]
 \todo{clean up sigma notation}
 Which means I can give an upper bound on $C^2$ by using
-lemma \ref{lem:Bernstein}, and inserting that $\sigma_j = \sigma_j \cdot b_j$ 
-where $b_i$ is given by theorem \ref{lem:Optb}. I whish the clipping 
-probability to be less than $n^{-1}$, which implies $t = \sqrt{\ln(n)}$. 
+lemma \ref{lem:Bernstein}, and inserting that $\widehat{\sigma}_j := \sigma_j \cdot b_j = \sqrt{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}$ 
+when $b_i$ is given by theorem \ref{lem:Optb}. I wish the clipping 
+probability to be less than $n^{-1}$, giving me
+\[
+    e^{-t^2} = \frac{1}{n} \implies t = \sqrt{\ln (n)}
+\]
 Combining these results I get that
 \begin{align*}
-    C^2 &\le \sqrt{8 \ln(n) \sum_{j \in [d]}  \lr{\sigma_j^4}} + 
-    \sum_{j \in [d]} \sigma_j^2 \\
+    C^2 &\le 2 \sqrt{\ln(n)} \sqrt{2\sum_{j \in [d]}  \lr{\widehat{\sigma}_j^4}} + 
+    \sum_{j \in [d]} \widehat{\sigma}_j^2 \\
+    &=\sqrt{8 \ln(n) \sum_{j \in [d]}  \lr{\widehat{\sigma}_j^4}} + 
+    \sum_{j \in [d]} \widehat{\sigma}_j^2 \\
     &=\sqrt{8 \ln(n) \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} + 
     \sum_{j \in [d]} \frac{\sigma_j}{\sum_{i \in [d]} \sigma_i} \\
     &=\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2} \cdot \frac{1}{\sum_{i \in [d]} \sigma_i}
@@ -742,8 +750,7 @@ As numerical solutions exist for evaluating $\prob{\|x_i\| > C^2}$ it is evident
 whether doing the transformation is beneficial.
 Intuitively it makes sense that allowing different noise to be added for each dimension, can only produce better results.
 \end{proof}
-\todo{Compare error with upper bound to the one which we be if no transformation was done.
- i.e clipping in the original space. Impossible due to the constraint on $\sigma_*$}
+\todo{Write and discuss restrictiveness of the bound}
 \todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
 \todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
 

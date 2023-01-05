@@ -69,10 +69,11 @@ Bernstein inequality
 ##### Next
 - Include proofs/explanation of why EGM is DP
 - Include other definitions of DP
-- Bound is not very good as it is restrictive
-    - Should I mention that this bound is very restrictive
 - Is there any value in giving bounds on not doing transformation and comparing it to doing transformation
 - Show that stationary point is minimum
+- Also calculate upper bound value in experiment
+TODO:
+- Should I mention that this bound is very restrictive
 ##### Not next anymore
 - How do I handle $c_i$, the max limit on all dimensions, if I set that only 0.0001 fraction of points are outside, then is clipping these alright? Otherwise I have no clue on how to set the bound
 - Proofs of theorems from other sources (both your article and other)?
