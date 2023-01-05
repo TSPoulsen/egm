@@ -275,7 +275,7 @@ and not that given by theorem \ref{theo:gaussMech}.
 The main downside of the Gaussian Mechanism is that it adds equal noise to all dimensions, regardless of the sensitivity in that dimension.
 As this report focuses on giving differentially private estimates of sums of vectors, it is natural to ask whether adding equal noise in all dimensions
 is optimal in this setting. Let us define the function of interest $f(X) = \sum_{i \in [n]} x_i$, for a dataset $X \in \R^{n \times d}$. 
-The sensitivity of this function must be given by the largest possible norm of any vector.
+The sensitivity of this function must be twice the largest possible norm of any vector.
 Therefore if the largest difference between any two neighbouring datasets 
 in the $j$'th dimension is given by 
 \begin{equation}
@@ -321,6 +321,20 @@ The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
 \end{algorithm}
 
 \todo{add lemma/theorem/proof of why this is \edp (figure out if needed). It is very similair to why it works for Gaussian data.}
+Though the algoritghm seems short and simple as the the only thing thats really done is to draw samples from $\mathcal{N}(0, \lr{\sigma_{opt} \cdot \frac{\Delta_j}{b_j}}^2)$, 
+it can be seen as a transformation of space. Consider transforming the data by the factor $\frac{b_j}{\Delta_j}$ in each dimension. 
+Then you would have that each dimension is bounded
+\[
+    x_{i,j} \le \frac{\Delta_j}{2} \implies \widehat{x}_{i,j} := x_{i,j} \cdot \frac{b_j}{\Delta_j} \le \frac{b_j}{2}
+\]
+and in this space the sensitivity of $f(X)= \sum_{i \in [n]} x_i$ is then
+\[
+    \Delta(f) = \sqrt{\sum_{j \in [d]}\lr{\frac{b_j}{2} - \lr{-\frac{b_j}{2}}}^2} = \sqrt{\sum_{j \in [d]} b_j^2} = \|\bm{b}\| =  1
+\]
+This means that all points in $X$ are mapped to lie withing the unit ball, and in this space one can simply add noise to each 
+dimension drawn from $\eta_j \sim \mathcal{N}(0, \sigma_{opt})$. Then the inverse transformation $\frac{\Delta_j}{b_j}$ 
+can then be applied to each dimension of $f(\widehat{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
+because differential privacy is preserved under post processing as per theorem \ref{theo:PostProc}.
 
 The main thing that really differentiates itself from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
 This is the scaling of how much weight should be attributed to each dimension when adding noise. It is shown how to determine the optimal values for $b_j$
@@ -339,11 +353,13 @@ which leads the error to be
 where $\| \cdot \|_1$ is the $l_1$ norm.
 
 \end{theorem}
-\todo{write the proof or skip it, it is going to be very similair to that which I will make}
+The proof will be ommitted here, but it is very similair to the proofs for lemma \ref{lem:Optb} and theorem \ref{theo:Alg3OptErr}.
 
 Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} we have the following ratio
 \[
-    \frac{d \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 }{\sigma_{opt}^2 \cdot \| \bm{\Delta} \|_1^2} = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2
+    \frac{d \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 }{\sigma_{opt}^2 \cdot \| \bm{\Delta} \|_1^2} 
+    = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2
+    = \frac{d \sum_{j \in [d]} \Delta_j^2}{\lr{\sum_{j \in [d]} \Delta_j}^2}
 \]
 in which it can be seen that they are equal when all entries of $\bm{\Delta}$ are the same. Otherwise the error for the Elliptical Gaussian Mechanism is lower
 when $\bm{\Delta}$ is skewed. As argued in \cite{Lebeda2022} Algorithm \ref{alg:EllipGM} improves Algorithm \ref{alg:gaussmech} by a factor in $[1,d)$.
@@ -399,7 +415,6 @@ Say there are $n$ points in a dataset, I will thus set the probability of clippi
 \[
     \ee{\lr{\widehat{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
 \]
-\todo{rewrite and introduce better}
 In this setting, we again have the intuition that addding equal noise in all dimensions is non optimal, and instead the noise in a dimension should be proportional
 to the variance $\sigma_j^2$ in that dimension. In a desire to achieve similair results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
 I will use somewhat the same approach to achieve \edp.
@@ -428,7 +443,44 @@ As the error is approximately given by $\| \bm{\eta} \|$ we have due to Corollar
 \label{eq:Alg3Err}
     \ee{\bm{\eta}} = \sum_{j=1}^d \lr{b_j^{-1} \cdot 2C\sigma_{opt}}^2   = \lr{2C\sigma_{opt}}^2 \sum_{j=1}^d b_j^{-2}
 \end{equation}
-\todo{Give pseudo code for algorithm}
+
+\begin{algorithm}
+\caption{The Elliptical Gaussian Mechanism for Gaussian data}\label{alg:EGM2}
+\begin{algorithmic}
+    \Input
+    \Desc{$\sigma_{opt} \in \R$}{Standard deviation as defined by theorem \ref{theo:OptSig}}
+    \Desc{$\bm{\sigma} \in \R^{d}$}{Standard deviations of all dimension}
+    \Desc{$X \in \R^{n \times d}$}{Dataset, where $x_{i,j} \sim \mathcal{N}(\mu_j,\sigma_j^2)$}
+    \Desc{$\bm{b} \in \R^{d}$}{Scaling vector, s.t. $\ee{x_i \odot \bm{b}} = 1$}
+    \Desc{$p_C \in \R$}{Probability of clipping points}
+    \EndInput
+    \Output
+    \State \edp estimate of $f(X)$
+    \EndOutput
+    \State $\widehat{\bm{\sigma}} \gets \bm{\sigma} \odot \bm{b}$
+    \State $C \gets \textnormal{ Minimal $C$ satisfying } \prob{\|\widehat{x}\| > C} \le p_C \textnormal{, for } \widehat{x} \sim \mathcal{N}(\bm{0},\widehat{\bm{\sigma}})$
+    \State $T \gets \bm{0}$
+    \For{$i \in [n]$}
+        \State $\widehat{x}_i \gets x_i \odot \bm{b}$
+        \State $T \gets T + \min \lr{\frac{C}{\|\widehat{x}_i\|}, 1} \cdot \widehat{x}_i$
+    \EndFor
+    \For{$j \in [d]$}
+        \State $T_j \gets T_j \cdot b_j^{-1}$
+        \State $\sigma_{\epsilon, \delta, j} \gets 2C\sigma_{opt} \cdot b_j^{-1}$
+        \State $\eta_j \gets \textnormal{sample from } \mathcal{N}(0, \sigma_{\epsilon, \delta, j}^2)$
+    \EndFor \\
+    \Return $T + \bm{\eta}$
+\end{algorithmic}
+\end{algorithm}
+
+The pseudo code for the mechanism is given in Algorithm \ref{alg:EGM2}. At first glance it seems quite different from Algorithm \ref{alg:EllipGM}
+despite it being very similiar. The most notable thing here
+is that the transformation has to be performed on the dataset,
+as it is important which points are being clipped, in order to ensure that the mechanism is \edp.
+In Algorithm \ref{alg:EllipGM} only the inverse transformation, $b_j^{-1}$, is being
+applied on the noise to be added.
+
+
 Now we are back to a very similiar problem to the one solved in \cite{Lebeda2022}. Minimize the error described in equation \eqref{eq:Alg3Err}
 under the constraint given in equation \eqref{eq:Alg3Con}. This leads to the following Lemma
 
