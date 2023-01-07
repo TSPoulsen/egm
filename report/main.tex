@@ -493,7 +493,8 @@ under the constraint given in equation \eqref{eq:Alg3Con}. The constraint can be
 \label{eq:normcon}
     \ee{x_i \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 = 1
 \end{equation}
-due to Corollary \ref{cor:expNorm}
+due to Corollary \ref{cor:expNorm}.
+
 \noindent This leads to the following Lemma
 
 \begin{lemma}
@@ -762,10 +763,38 @@ Intuitively it makes sense that allowing different noise to be added for each di
 \todo{Write and discuss restrictiveness of the bound}
 \todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
 \todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
+Earlier when I defined the problem at hand I also defined the constraint that the expected norm after 
+transforming the data should be 1, i.e. the constraint given by equation \eqref{eq:normcon}. 
+This constraint is perhaps not optimal in terms of how the problem should be restricted. The idea behind the constraint
+is to force the data to become more symmetrical in the transformed space, however it does not necessarily enforce this. 
+An alternative constraint which I initially investigated for this project was to find a transformation, such that the majority of 
+data entries lie within a ball with diameter 1, and entries outside would be clipped.
+In this transformed space it would be sufficient to add noise drawn from
+$\mathcal{N}(0, \sigma_{opt}^2)$. The constraint would thus be the following
+\begin{equation}
+\label{eq:AltCon}
+    \prob{ \| x_i \odot \bm{b} \| > \frac{1}{2}} \le \frac{1}{n} 
+\end{equation}
+To achieve optimal results with this constraint it would be required to know the cumulative density function of $\| x_i \odot \bm{b} \|$, 
+which as discussed earlier is distributed as a generalized chi square and does not have a closed form. 
+So without a closed form there would be no way of finding optimal values for $b_j$. 
+Another option would be to have the same constraint, but instead define it in terms of a tail inequality such as the one
+given by lemma \ref{lem:Bernstein}. However the constraint on $t$ in that lemma can be quite restrictive for some inputs, 
+and the method would not be applicable to all datasets.
+I also attempted to find optimal values for $b_j$ whilst using Chebyshev's inequality to give closed forms for equation \eqref{eq:AltCon}, 
+unfortunately this lead to a very complicated optimization problem, which I did not attempt to solve.
+The benefit os using Chebyshev's inequality would be that it is very generalized and would be applicable to any dataset, 
+but it is also quite well known that the bounds given by Chebyshev's inequality are usually quite loose. 
+I settled for the constraint where the expected norm is $1$, which intuitively seemed quite good and was much easier to solve. 
+In the next section I will investigate the benefit of transforming the data in an emperical setting.
+
+
+
 \todo{Write emperical evaluation section} 
 
 
 \newpage
+\section{It is a mess, don't look here}
 \subsection{Gaussian data}
 Let $X^{(j)} \sim \mathcal{N}(0, \sigma_j^2)$ 
 As the expected $l_2$-norm of $x_i$ is given by
