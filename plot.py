@@ -72,7 +72,7 @@ def generate_improve_plot(n_pows):
         axs[i].set_title(r"$d=10^{" + str(i+1) + r"}$")
         axs[i].set_xscale("log")
         axs[i].set_yscale("log")
-        axs[i].set_xlabel(r"Scew ($\alpha$)")
+        axs[i].set_xlabel(r"Skew ($\alpha$)")
         #axs[i].vlines(1.0,0,2000, linestyles="dashed")
         axs[i].grid()
 
@@ -81,7 +81,7 @@ def generate_improve_plot(n_pows):
     fig.tight_layout(pad=1)
     axs[0].set_ylabel(r"Improvement $\left( \frac{E_n}{E_t} \right)$", fontsize=16)
     axs[0].legend(loc="upper left")
-    fig.savefig("result.svg", bbox_inches='tight')
+    fig.savefig("result.png", bbox_inches='tight')
     #plt.show()
 
 def generate_skew_plot(scew):
@@ -94,7 +94,7 @@ def generate_skew_plot(scew):
         axs[i].set_title(r"$\alpha = " + str(scew) + r"$")
         axs[i].set_xlabel(r"Index $i$ of $\sigma_i$")
     axs[0].set_ylabel(r"Contribution of $\sigma_i$", fontsize=10)
-    plt.savefig("scew_dist.svg", bbox_inches="tight")
+    plt.savefig("scew_dist.png", bbox_inches="tight")
 """
 blacklist = {   "d":[250],
                 "n_pow":[2,4,5],

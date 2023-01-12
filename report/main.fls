@@ -336,6 +336,12 @@ INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm5.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx5.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmmib5.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm
+INPUT /home/tim/repositories/uni/egm/report/plots/scew_dist.png
+INPUT /home/tim/repositories/uni/egm/report/plots/scew_dist.png
+INPUT /home/tim/repositories/uni/egm/report/plots/scew_dist.png
+INPUT /home/tim/repositories/uni/egm/report/plots/result.png
+INPUT /home/tim/repositories/uni/egm/report/plots/result.png
+INPUT /home/tim/repositories/uni/egm/report/plots/result.png
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
 INPUT /home/tim/repositories/uni/egm/report/main.bbl
 INPUT /home/tim/repositories/uni/egm/report/main.bbl
