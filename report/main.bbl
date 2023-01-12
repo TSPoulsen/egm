@@ -62,4 +62,10 @@
 \newblock Private vector aggregation when coordinates have different
   sensitivity.
 
+\bibitem{wainwright_2019}
+{\sc Wainwright, M.~J.}
+\newblock {\em Basic tail and concentration bounds}.
+\newblock Cambridge Series in Statistical and Probabilistic Mathematics.
+  Cambridge University Press, 2019, p.~21–57.
+
 \end{thebibliography}

@@ -6,45 +6,45 @@ Database file #1: refs.bib
 Warning--empty journal in Huang2021
 Warning--empty journal in MathaiQaudForms
 Warning--empty journal in Lebeda2022
-You've used 12 entries,
+You've used 13 entries,
             2253 wiz_defined-function locations,
-            608 strings with 5813 characters,
-and the built_in function-call counts, 3394 in all, are:
-= -- 324
-> -- 164
+            615 strings with 6033 characters,
+and the built_in function-call counts, 3790 in all, are:
+= -- 369
+> -- 171
 < -- 0
-+ -- 71
-- -- 56
-* -- 254
-:= -- 585
-add.period$ -- 32
-call.type$ -- 12
-change.case$ -- 61
++ -- 74
+- -- 58
+* -- 267
+:= -- 637
+add.period$ -- 36
+call.type$ -- 13
+change.case$ -- 64
 chr.to.int$ -- 0
-cite$ -- 15
-duplicate$ -- 112
-empty$ -- 265
-format.name$ -- 56
-if$ -- 677
+cite$ -- 16
+duplicate$ -- 140
+empty$ -- 299
+format.name$ -- 58
+if$ -- 778
 int.to.chr$ -- 0
-int.to.str$ -- 12
-missing$ -- 13
-newline$ -- 59
-num.names$ -- 24
-pop$ -- 65
+int.to.str$ -- 13
+missing$ -- 15
+newline$ -- 64
+num.names$ -- 26
+pop$ -- 73
 preamble$ -- 1
-purify$ -- 51
+purify$ -- 54
 quote$ -- 0
-skip$ -- 65
+skip$ -- 91
 stack$ -- 0
-substring$ -- 194
-swap$ -- 21
+substring$ -- 213
+swap$ -- 37
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 44
+type$ -- 46
 warning$ -- 3
-while$ -- 34
-width$ -- 14
-write$ -- 110
+while$ -- 37
+width$ -- 15
+write$ -- 122
 (There were 3 warnings)
