@@ -62,6 +62,12 @@
 \newblock Private vector aggregation when coordinates have different
   sensitivity.
 
+\bibitem{zipf}
+{\sc Powers, D. M.~W.}
+\newblock Applications and explanations of {Z}ipf{'}s law.
+\newblock In {\em New Methods in Language Processing and Computational Natural
+  Language Learning\/} (1998).
+
 \bibitem{wainwright_2019}
 {\sc Wainwright, M.~J.}
 \newblock {\em Basic tail and concentration bounds}.

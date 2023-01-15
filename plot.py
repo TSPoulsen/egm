@@ -60,7 +60,7 @@ def generate_improve_plot(n_pows):
     df = pd.read_csv("results.csv")
     df = df[df["sigma_total"] == 1]
 
-    fig, axs = plt.subplots(1,3, sharey=True, figsize=(15,7))
+    fig, axs = plt.subplots(1,3, sharey=True, figsize=(10,4))
     for i, d in enumerate([10,100,1000]):
         d_df = df[df["d"] == d]
         for n_pow in n_pows:
@@ -79,18 +79,18 @@ def generate_improve_plot(n_pows):
         axs[i].set_ylim(1,2000)
 
     fig.tight_layout(pad=1)
-    axs[0].set_ylabel(r"Improvement $\left( \frac{E_n}{E_t} \right)$", fontsize=16)
+    axs[0].set_ylabel(r"Improvement $\left( \frac{\mathcal{E}_n}{\mathcal{E}_t} \right)$", fontsize=16)
     axs[0].legend(loc="upper left")
     fig.savefig("result.png", bbox_inches='tight')
     #plt.show()
 
-def generate_skew_plot(scew):
+def generate_skew_plot():
     dims = 100
-    fig, axs = plt.subplots(1,3, figsize=(15,3))
+    fig, axs = plt.subplots(1,3, figsize=(10,2))
     for i, scew in enumerate([0.1, 1, 3]):
         xs = np.arange(1,dims+1,1).astype("int16", copy=False)
         sigmas = zipfian.pmf(xs, scew, dims)
-        axs[i].bar(xs,sigmas, width=0.7)
+        axs[i].bar(xs,sigmas, width=0.85)
         axs[i].set_title(r"$\alpha = " + str(scew) + r"$")
         axs[i].set_xlabel(r"Index $i$ of $\sigma_i$")
     axs[0].set_ylabel(r"Contribution of $\sigma_i$", fontsize=10)
@@ -104,5 +104,5 @@ blacklist = {   "d":[250],
 
 #generate_improve()
 """
-#generate_improve_plot(n_pows=[2,3,6])
-generate_skew_plot(0.1)
+generate_improve_plot(n_pows=[2,3,6])
+generate_skew_plot()

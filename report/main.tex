@@ -44,6 +44,7 @@
 \begin{document}
 
 \maketitle
+\todo{datasets -> dataset}
 \todo{Write introduction, mention relation to average vector}
 
 \section{Preliminaries}
@@ -791,22 +792,95 @@ In the next section I will investigate the benefit of transforming the data in a
 
 \todo{Write emperical evaluation section} 
 \section{Emperical Evaluation}
-
+For the emperical evaluation I wanted to investigate the 
+improvement by calculating the expected error on hypothetical datasets. 
+This is as a contrast to using real world datasets, where it is uncertain whether
+the data is distributed according to a multivariate gaussian mechanism with independent dimensions.
+Secondly I gain the benefit of creating a wide range of hypothetical scenarios and evaluating these.
+When creating hypothetical dataset I am merely interested in the standard deviations of each dimension,
+thus there is no need to truly create a dataset but instead I chose to 
+synthetically create the parameters of a hypothetical dataset.
+So I chose to have the standard deviation of each dimension be chosen according 
+to Zipf's law \cite{zipf}. The distribution is often used to describe 
+sizes of cities or frequencies of words in texts, but it can also be used to 
+describe discrete distributions with different levels of skewness. 
+This propoerty is what I will be utilizing, as I will chose the 
+standard deviation of dimension $i \in [d]$ as
+\[
+    \sigma_i = \frac{ \frac{1}{i^\alpha}}{\sum_{j \in [d]} \frac{1}{j^\alpha}}
+\]
+The parameter $\alpha$ thus decides the skewness of how much each dimension contributes to the total amount of variance.
+Figure \ref{fig:skew} shows how much each dimension contributes to the total variance for
+$\alpha \in \{0.1,1,3\}$ and $d = 100$. This means that for high $\alpha$ only a few dimensions has any variance, 
+and for low $\alpha$ it is almost uniformly distributed.
 \begin{figure}[h!]
 \label{fig:skew}
-\includegraphics[scale=0.52]{plots/scew_dist.png}
+\includegraphics[scale=0.73]{plots/scew_dist.png}
 \caption{Examples of how standard deviations are distributed according to 
 zipf's law for different skewness levels ($\alpha$).} 
 \end{figure}
 
+So the needed parameters to describe a hypothetical are $\alpha$, $d$ the number of dimensions, and 
+$n$ the number of points which is needed to decide the clipping probability.
+
+I then calculated the expected error as described by equation 
+\eqref{eq:Alg3Err2} denoting this as $\mathcal{E}_t$ and compare that to
+\[
+    \mathcal{E}_n = \lr{2C_n\sigma_{opt}}^2
+\]
+In which $C_n$ is choose as the minimal value satisfying 
+$\prob{ \|x_i\|^2 > C_n^2} \le \frac{1}{n}$. 
+I then calculate the fraction $\frac{\mathcal{E}_n}{\mathcal{E}_t}$ to compare 
+the expected errors, and as I have $\sigma_{opt}^2$ in both the denominator and the numerator I 
+can ommit caluclating this as doing so is not a trivial task. 
+Figure \ref{fig:result} shows calculating this fraction for varying $\alpha \in [10^{-2}, 10^2]$, and for 
+$d \in \{10, 100, 1000\}$ and $n \in \{10^2, 10^3, 10^6\}$.
+It shows that when few dimensions have much more variance than the rest,
+performing the transformation improes the expected error, for all 
+configurations of $n$ and $d$.
 \begin{figure}[h!]
 \label{fig:result}
-\includegraphics[scale=0.42]{plots/result.png}
+\includegraphics[scale=0.62]{plots/result.png}
 \caption{Improvement of applying the transformation. 
 Each subplot shows for a fixed number of dimensions $d$, how much the improvement is for different 
 skewness paramters $\alpha$ and number of data points $n$,
  which is used to decide the clipping probability.}
 \end{figure}
+
+
+
+More generally it seems as though $n$ has no impact on the improvement of the method, 
+which is not trivial as the clipping probability is chosen as $\frac{1}{n}$. 
+It could perhaps have been that the transformation changed the distribution in such a way
+that the tail was much longer.
+Interestingly I observe that the method improves by a factor of $[1,d]$ 
+quite like how the Elliptical Gaussian Mechanism improves the Gaussian Mechanism by a 
+factor of $[1,d)$. Perhaps a similiar argument could be made in this case, 
+if the distribution of the norms had a closed form or more analysis of it was available.
+But the emperical evidence is quite strong in favor of this phenomenon being present here as well.
+
+
+
+% downside of not creating dataset and actually doing the algo
+% is that clipping bias is not taken into account
+
+In this setting To create these hypothetical dataset, I 
+
+
+in expected error by calculating 
+%- Zipf's law for different amount of skewness of standard deviation
+%- 10^-1 basically uniform and 10^1 basically only 1 dimension has variance
+%- Introduce how results are shown
+%- Skewness has great impact on improvement
+%- improvement of [1, d] just like original paper (and ref the equation)
+% In the future:
+%- Comparison to state of the art methods, including the clipping bias.
+\todo{Downside of not creating dataset adn doing algo is that clipping bias is not taken into account}
+\todo{Compare method to state of the art on hypothetical datasets.}
+\todo{Mention that method requires sigmas to be known as estimating would take up most of
+the privacy budget.}
+
+
 
 
 
