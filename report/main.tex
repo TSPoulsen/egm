@@ -131,6 +131,8 @@ We thus have that
     
 \end{proof}
 
+\todo{Add lemma for combining dp methods}
+
     
 
 \paragraph{Error Measure}
@@ -398,10 +400,12 @@ in this setting as the gaussian distribution is continously defined
 on the range $ (-\infty, \infty)$.
 Several recent papers has combatted this by doing something called 
 \textit{clipping} \cite{Huang2021,coinpress}. 
-Clipping is the process of limiting the norm of any one entry 
-to be at most a chosen threshold $C$. This means that every vector is transformed as such
+Clipping is the process of limiting all points to lie within a sphere with radius $C$.
+To perform clipping two things are required, (1) a center of the sphere which we call $\bm{\hat{\mu}}$
+which will become obvious why later, and (2) the radius $C$.
+This means that every vector is transformed as such
 \[
-    \overline{x}_i := \min \lrc{\frac{C}{\| x_i \|}, 1} \cdot x_i
+    \overline{x}_i := \mue + \min \lrc{\frac{C}{\| x_i - \mue \|}, 1} \cdot (x_i - \mue)
 \]
 Clipping entries by a factor $C$ thus means that $ \Delta(f) = 2C $ 
 as any one entry cannot have more impact on the summation than $C$.
@@ -409,7 +413,7 @@ If the summation $f(X)$ is
 performed on a clipped dataset $\overline{X}$ it is equivalent to
 defining the summation function $\overline{f}: \R^{n \times d} \rightarrow \R^d$ as
 \[
-    \overline{f}(X) = \sum_i^n \min \lrc{ \frac{C}{\| x_i \|}, 1} \cdot x_i
+    \overline{f}(X) = \sum_i^n \mue + \min \lrc{ \frac{C}{\| x_i - \mue \|}, 1} \cdot (x_i - \mue)
 \]
 Then by Theorem \ref{theo:OptSig} the 
 gaussian mechanism with the function $\overline{f}$ is \edp with
@@ -422,19 +426,30 @@ Say there are $n$ points in a dataset, I will thus set the probability of clippi
 \[
     \ee{\lr{\overline{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
 \]
+This is of course not correct as some error will come from clipping points, but in this report 
+I will solely focus on the error introduced by the noise added. Another source of error will come from
+determining a good estimate for the center of the sphere, which optimally is $\mue = \bm{\mu}$, i.e. 
+the mean of the distribution which the data originates from.
+As lemma \ref{lem:dpcombine} states that \edp methods can be combined,
+one can aquire such an estimate using some of the privacy budget.
+However, doing so is in essence almost the same problem as I am attempting to solve.
+The difference lies in the fact that this estimate could be given quite 
+losely and I am interested in the sum (or mean) of a specific dataset not that of the original distribution. \\
+
 In this setting, we again have the intuition that addding equal noise in all dimensions is non optimal, and instead the noise in a dimension should be proportional
 to the variance $\sigma_j^2$ in that dimension. In a desire to achieve similair results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
 I will use somewhat the same approach to achieve \edp.
-They achieve \edp by finding a transformation of points such that they all lie within the unit ball centered at the origin. 
-There does not exist such a transformation which is linear (I think I mean Continous/Homeomorphic), as there will always be a non-zero 
+They achieve \edp by finding scalings of each dimenion such that all points lie within a unit ball, i.e. a ball with radius $1$. 
+There does not exist such a transformation for gaussian data, as there will always be a non-zero 
 probability of observing points outside the unit ball.
-Instead I will introduce the constraint that the expected norm of vectors after the transformation should be $1$. 
+Instead I will introduce the constraint that the expected squared distance betwwen any point and the estimated mean $\mue$ after the transformation should be $1$. 
 I whish to find a scaling of each dimension $b_j$ s.t.
 \begin{align}
-    &\widehat{x}_i := x_i \odot \bm{b} \\
+    &\tilde{x}_i := (x_i - \mue) \odot \bm{b} \\
 \label{eq:Alg3Con}
-    \Exp{\| \widehat{x} \|} &= 1  \iff \ee{\widehat{x}} = 1
+    &\ee{\tilde{x}} = 1
 \end{align}
+\todo{fix the rest, I mean introduce the estimated mean}
 where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product. 
 Then $\overline{f}$ can be computed on this transformed dataset $\widehat{X}$, where the probability of clipping is less than $\frac{1}{n}$.
 As Theorem \ref{theo:PostProc} shows, \edp is preserved under post processing, 
@@ -446,7 +461,7 @@ We end up with the following noise vector being added
     \bm{\eta} = \lr{ b_1^{-1}\eta_1, b_2^{-1}\eta_2, \dots, b_d^{-1}\eta_d }
 \]
 in which all $\eta_j \sim \mathcal{N}(0,(2C\sigma_{opt})^2)$, and then by lemma \ref{lem:GaussTrans} we have $b_j^{-1}\eta_j \sim \mathcal{N}(0, (b_j^{-1} \cdot 2C\sigma_{opt})^2)$.
-As the error is approximately given by $\| \bm{\eta} \|^2$ we have due to Corollary \ref{cor:expNorm} that the expected error is 
+The error introduced by the noise is then given by $\| \bm{\eta} \|^2$ and due to Corollary \ref{cor:expNorm} we have that the expectation of this error is 
 \begin{equation}
 \label{eq:Alg3Err}
     \ee{\bm{\eta}} = \sum_{j=1}^d \lr{b_j^{-1} \cdot 2C\sigma_{opt}}^2   = \lr{2C\sigma_{opt}}^2 \sum_{j=1}^d b_j^{-2}
@@ -458,8 +473,9 @@ As the error is approximately given by $\| \bm{\eta} \|^2$ we have due to Coroll
     \Input
     \Desc{$\sigma_{opt} \in \R$}{Standard deviation as defined by Theorem \ref{theo:OptSig}}
     \Desc{$\bm{\sigma} \in \R^{d}$}{Standard deviations of all dimension}
+    \Desc{$\bm{\hat{\mu}} \in \R^{d}$}{Differentially private estimate of the mean of all dimensions}
     \Desc{$X \in \R^{n \times d}$}{Dataset, where $x_{i,j} \sim \mathcal{N}(\mu_j,\sigma_j^2)$}
-    \Desc{$\bm{b} \in \R^{d}$}{Scaling vector, s.t. $\ee{x_i \odot \bm{b}} = 1$}
+    \Desc{$\bm{b} \in \R^{d}$}{Scaling vector, s.t. $\ee{\lr{x_i - \bm{\hat{\mu}}} \odot \bm{b}} = 1$}
     \Desc{$p_C \in \R$}{Probability of clipping points}
     \EndInput
     \Output
@@ -469,8 +485,8 @@ As the error is approximately given by $\| \bm{\eta} \|^2$ we have due to Coroll
     \State $C \gets \textnormal{ Minimal $C$ satisfying } \prob{\|\widehat{x}\| > C} \le p_C \textnormal{, for } \widehat{x} \sim \mathcal{N}(\bm{0},\widehat{\bm{\sigma}})$
     \State $T \gets \bm{0}$
     \For{$i \in [n]$}
-        \State $\widehat{x}_i \gets x_i \odot \bm{b}$
-        \State $T \gets T + \min \lr{\frac{C}{\|\widehat{x}_i\|}, 1} \cdot \widehat{x}_i$
+        \State $\widehat{x}_i \gets \lr{x_i - \bm{\hat{\mu}}} \odot \bm{b}$
+        \State $T \gets T + \min \lr{\frac{C}{\|\widehat{x}_i\|}, 1} \cdot \widehat{x}_i + \bm{\hat{\mu}}$
     \EndFor
     \For{$j \in [d]$}
         \State $T_j \gets T_j \cdot b_j^{-1}$
@@ -488,20 +504,29 @@ as it is important which points are being clipped, in order to ensure that the m
 In Algorithm \ref{alg:EllipGM} only the inverse transformation, $b_j^{-1}$, is being
 applied on the noise to be added. \\
 
-\noindent Now we are back to a very similiar problem to the one solved in \cite{Lebeda2022}. Minimize the error described in equation \eqref{eq:Alg3Err}
-under the constraint given in equation \eqref{eq:Alg3Con}. The constraint can be given as
+\noindent If we try to minimize the error introduced by the noise, we are back to a very similiar problem to the one solved in \cite{Lebeda2022}. 
+Minimize the error described in equation \eqref{eq:Alg3Err}
+under the constraint given in equation \eqref{eq:Alg3Con}.
+The constraint can be given as
+\begin{equation*}
+    \ee{(x_i - \mue) \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 + \| \bm{\mu} - \mue \|^2 = 1
+\end{equation*}
+due to Corollary \ref{cor:expNorm}. We then relax this constraint by ommitting $\| \bm{\mu} - \mue \|^2$, 
+as this in terms of the algorithm is constant and will simply lead to a constant scaling of all $b_j$.
+Thus the constraint is
 \begin{equation}
 \label{eq:normcon}
-    \ee{x_i \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 = 1
+\sum_{j \in [d]} (b_j\sigma_j)^2 = 1
 \end{equation}
-due to Corollary \ref{cor:expNorm}.
 
 \noindent This leads to the following Lemma
 
 \begin{lemma}
 \label{lem:Optb}
 Let $X \in \R^{n \times d}$ be a dataset where each dimension is independently gaussianly distributed, i.e.
-$x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$. Then the expected error of Algorithm \ref{alg:EGM2} is minimized when
+$x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$.
+Then the expected squared norm of the noise $\ee{\bm{\eta}}$, 
+in Algorithm \ref{alg:EGM2} is minimized when
 \[
     b_j = \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i}}
 \]
@@ -558,15 +583,16 @@ Giving us the value of $b_j$ which minimizes the expected error.
 Now to evaluate the expected error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important important to determine the value $C$.
 As $C$ should be given by the minimal value which satisfies the inequality
 \[
-   \prob{ \| x_i \odot \bm{b} \| > C } = \prob{ \| x_i \odot \bm{b} \|^2 > C^2} < \frac{1}{n}
+   \prob{ \| (x_i - \mue) \odot \bm{b} \| > C } = \prob{ \| (x_i - \mue) \odot \bm{b} \|^2 > C^2} < \frac{1}{n}
 \]
 again where $n$ denotes the number of points in the dataset.
-As $x_i$ is a multivariate gaussian distribution, so is $x_i \odot \bm{b}$ by lemma \ref{lem:GaussTrans}, and $\|x_i \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
+As $x_i$ is a multivariate gaussian distribution, so is $(x_i - \mue) \odot \bm{b}$ by lemma \ref{lem:GaussTrans},
+and it is the case that $\|(x_i - \mue) \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
 Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form in the general case.
 These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms}, and some special cases does have closed forms.
 Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately there was none which were of use in this setting.
 However, there does exist several numerical algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
-I would recommend using one of these algorithms in practice, and will do so in the emperical analysis in section \ref{seq:emp}.
+I would recommend using one of these algorithms in practice, and will do so in the emperical analysis in section \ref{sec:emperical}.
 For the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
 
 \begin{lemma}
@@ -688,9 +714,10 @@ we have can conclude the following:
 
 \begin{theorem}
 \label{theo:Alg3OptErr}
-Let $X \in \R^{n \times d}$ be a dataset in which all dimensions are independently gaussian random variables, i.e. $x_{i,j} \sim \mathcal{N}(0, \sigma_j^2)$. 
+Let $X \in \R^{n \times d}$ be a dataset in which all dimensions are independently gaussian random variables, i.e. $x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$. 
 Let $\sigma_* := \max_{j \in [d]} \sigma_j$ be the maximal standard deviation of all dimensions. We then have that
-when $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}$ the expected error of algorithm \ref{alg:EGM2} can be upper bounded by 
+when $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}$ 
+the expected squared error of the noise in algorithm \ref{alg:EGM2} can be upper bounded by 
 \[
     \ee{\bm{\eta}} \le 4\sigma_{opt}^2  \cdot \sum_{j \in [d]} \sigma_j \cdot
     \lr{ \sqrt{8\ln(n) \sum_{i \in [d]} \sigma_i^2} + \sum_{j \in [d]} \sigma_j }
@@ -706,11 +733,12 @@ By equation \eqref{eq:Alg3Err} the error is given by
     \sum_{i=1}^d b_j^{-2} 
 \end{equation}
 We thus need to determine an upper bound for $C$, we begin by looking at the transformed data
+when $\mue = \bm{\mu}$.
 \begin{align*}
-    &\widehat{x}_i := x_i \odot \bm{b} \textnormal{ , giving } \widehat{x}_{i,j} \sim \mathcal{N}\lr{0,\lr{b_j\sigma_j}^2} \\
-    &\prob{ \| \widehat{x}_i \| \ge C} =
-    \prob{ \| \widehat{x}_i \|^2 \ge C^2} =
-    \prob{ \sum_{j \in [d]} \widehat{x}_{i,j}^2 \ge C^2}
+    &\tilde{x}_i := (x_i - \mue) \odot \bm{b} \textnormal{ , giving } \tilde{x}_{i,j} \sim \mathcal{N}\lr{0,\lr{b_j\sigma_j}^2} \\
+    &\prob{ \| \tilde{x}_i \| \ge C} =
+    \prob{ \| \tilde{x}_i \|^2 \ge C^2} =
+    \prob{ \sum_{j \in [d]} \tilde{x}_{i,j}^2 \ge C^2}
 \end{align*}
 
 Which means I can give an upper bound on $C^2$, whilst having
@@ -763,35 +791,12 @@ Intuitively it makes sense that allowing different noise to be added for each di
 \todo{Write and discuss restrictiveness of the bound}
 \todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
 \todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
-Earlier when I defined the problem at hand I also defined the constraint that the expected norm after 
-transforming the data should be 1, i.e. the constraint given by equation \eqref{eq:normcon}. 
-This constraint is perhaps not optimal in terms of how the problem should be restricted. The idea behind the constraint
-is to force the data to become more symmetrical in the transformed space, however it does not necessarily enforce this. 
-An alternative constraint which I initially investigated for this project was to find a transformation, such that the majority of 
-data entries lie within a ball with diameter 1, and entries outside would be clipped.
-In this transformed space it would be sufficient to add noise drawn from
-$\mathcal{N}(0, \sigma_{opt}^2)$. The constraint would thus be the following
-\begin{equation}
-\label{eq:AltCon}
-    \prob{ \| x_i \odot \bm{b} \| > \frac{1}{2}} \le \frac{1}{n} 
-\end{equation}
-To achieve optimal results with this constraint it would be required to know the cumulative density function of $\| x_i \odot \bm{b} \|$, 
-which as discussed earlier is distributed as a generalized chi square and does not have a closed form. 
-So without a closed form there would be no way of finding optimal values for $b_j$. 
-Another option would be to have the same constraint, but instead define it in terms of a tail inequality such as the one
-given by lemma \ref{lem:Bernstein}. However the constraint on $t$ in that lemma can be quite restrictive for some inputs, 
-and the method would not be applicable to all datasets.
-I also attempted to find optimal values for $b_j$ whilst using Chebyshev's inequality to give closed forms for equation \eqref{eq:AltCon}, 
-unfortunately this lead to a very complicated optimization problem, which I did not attempt to solve.
-The benefit os using Chebyshev's inequality would be that it is very generalized and would be applicable to any dataset, 
-but it is also quite well known that the bounds given by Chebyshev's inequality are usually quite loose. 
-I settled for the constraint where the expected norm is $1$, which intuitively seemed quite good and was much easier to solve. 
-In the next section I will investigate the benefit of transforming the data in an emperical setting.
 
 
 
 \todo{Write emperical evaluation section} 
 \section{Emperical Evaluation}
+\label{sec:emperical}
 For the emperical evaluation I wanted to investigate the 
 improvement by calculating the expected error on hypothetical datasets. 
 This is as a contrast to using real world datasets, where it is uncertain whether
@@ -856,13 +861,11 @@ that the tail was much longer.
 Interestingly I observe that the method improves by a factor of $[1,d]$ 
 quite like how the Elliptical Gaussian Mechanism improves the Gaussian Mechanism by a 
 factor of $[1,d)$. Perhaps a similiar argument could be made in this case, 
-if the distribution of the norms had a closed form or more analysis of it was available.
+if the distribution of the norms had a closed form or more analysis of it was done.
 But the emperical evidence is quite strong in favor of this phenomenon being present here as well.
 
 
 
-% downside of not creating dataset and actually doing the algo
-% is that clipping bias is not taken into account
 
 In this setting To create these hypothetical dataset, I 
 
@@ -881,6 +884,48 @@ in expected error by calculating
 the privacy budget.}
 
 
+\section{Discussion}
+% On the problem setup
+Earlier when I defined the problem at hand I also defined the constraint that the expected norm after 
+transforming the data should be 1, i.e. the constraint given by equation \eqref{eq:normcon}. 
+This constraint is perhaps not optimal in terms of how the problem should be restricted. The idea behind the constraint
+is to force the data to become more symmetrical in the transformed space, however it does not necessarily enforce this. 
+An alternative constraint which I initially investigated for this project was to find a transformation, such that the majority of 
+data entries lie within a ball with diameter 1, and entries outside would be clipped.
+In this transformed space it would be sufficient to add noise drawn from
+$\mathcal{N}(0, \sigma_{opt}^2)$. The constraint would thus be the following
+\begin{equation}
+\label{eq:AltCon}
+    \prob{ \| x_i \odot \bm{b} \| > \frac{1}{2}} \le \frac{1}{n} 
+\end{equation}
+To achieve optimal results with this constraint it would be required to know the cumulative density function of $\| x_i \odot \bm{b} \|$, 
+which as discussed earlier is distributed as a generalized chi square and does not have a closed form. 
+So without a closed form there would be no way of finding optimal values for $b_j$. 
+Another option would be to have the same constraint, but instead define it in terms of a tail inequality such as the one
+given by lemma \ref{lem:Bernstein}. However the constraint on $t$ in that lemma can be quite restrictive for some inputs, 
+and the method would not be applicable to all datasets.
+I also attempted to find optimal values for $b_j$ whilst using Chebyshev's inequality to give closed forms for equation \eqref{eq:AltCon}, 
+unfortunately this lead to a very complicated optimization problem, which I did not attempt to solve.
+The benefit os using Chebyshev's inequality would be that it is very generalized and would be applicable to any dataset, 
+but it is also quite well known that the bounds given by Chebyshev's inequality are usually quite loose. 
+I settled for the constraint where the expected norm is $1$, which intuitively seemed quite good and was much easier to solve. 
+The emperical data also support this intuition \\
+
+% On the empirical evaulation
+% downside of not creating dataset and actually doing the algo
+% is that clipping bias is not taken into account
+In the emperical evaluation of the method I chose to compare the method
+to that which I deemed the most natural thing to do if 
+one were to use the Gaussian Mechanism. Simply clip points with 
+probability $\frac{1}{n}$, and add noise according to this.
+This method nor doing it with a transformation does take into account
+the bias which comes from clipping the data in the first place.
+And preferably Algorithm \ref{alg:EGM2} (doing the transformation) should
+be compared to state of the art methods, such as the ones in \cite{coinpress, Huang2021}.
+In such as comparison the clipping bias should be taken into account as well, and
+in a more in depth analysis of the Algorithm \ref{alg:EGM2} it
+would interesting to investigate the bias-variance tradeoff and finding an
+optimal clipping probability $p_{C}$.
 
 
 

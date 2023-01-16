@@ -67,6 +67,14 @@ Bernstein inequality
     - Mention that in reality the CDF can be evaluated numerically
 
 ##### Next
+- Forside med titel og navn ku-navn
+- Write abstract
+- indholds fortegnelse
+- Argument that center point is known
+- Does mean not have to be known?
+- Argument that mean is O(sigma)? in [10]
+
+
 - Include proofs/explanation of why EGM is DP
 - Include other definitions of DP
 - Is there any value in giving bounds on not doing transformation and comparing it to doing transformation
