@@ -67,7 +67,7 @@ Bernstein inequality
     - Mention that in reality the CDF can be evaluated numerically
 
 ##### Next
-- Forside med titel og navn ku-navn
+- Forside med titel og navn + ku-navn
 - Write abstract
 - indholds fortegnelse
 - Argument that center point is known

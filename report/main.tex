@@ -46,34 +46,42 @@
 \maketitle
 \todo{datasets -> dataset}
 \todo{Write introduction, mention relation to average vector}
+\section{Introduction}
+In recent years there has been an increased focus on the privacy of individuals, as we live in the age of data.
+More and more data is collected about us to be used for solving real world problems be that through old school statistics or 
+advanced algorithmic systems, such as deep neural networks.
+Often it is also the situation that to solve the problem at hand, sensitive data is required. 
+In fact it is often the case that the more sensitive the data is the more useful it is.
+Many attempts have been made to combat this dilemma, preserve the privacy of the individuals involved whilst harvesting the 
+fruitful information which the sensitive data contains.
+It has been shown repeatdatly  that de-anonymizing the data by removing "person-
+ally identiﬁable information", such as names, PIN codes (Personal Identification Number) or the alike is not enough
+to protect individuals from advesaries \cite{medical,netflix}. 
+This project focuses releasing aggregate statistics from sensitive data to the public, which has also been shown to break privacy when released \cite{exposed}. \\
 
-\section{Preliminaries}
-\subsection{Definitions}
+In an desire to mathematically define what is meant by privacy and giving a basis for algorithms to be compared and measured on their degree of privacy preservation 
+the term \textit{Differential Privacy} was born. It is merely a mathematical definition (which will be covered shortly), but has been the golden standard on which
+algorithms can be proofed against.
+In essence it incapsulates that the effect of any individual on the output of a statistic,
+ should be limited preferably to such an extend that the individual is not reckognizable.
+As this project focuses on releasing the sum of vectors (with sensitive information) from a dataset, it specifically means in this setting
+that it should, to some extend, not be possible to deduce whether any one individual was part of the calculated sum or not.
+\todo{Why sums are important, its use cases and the relation to mean}
 
-\textbf{The dataset} is denoted by $X$, where 
-$X \in \R^{n \times d}$.
+\section{Definitions \& Preliminaries}
+Before I mathematically introduce the concept of Differential Privacy, there are some prerequistes in order to understand the definition.
+Firstly I must introduce:
+
+\textbf{The dataset} which will mostly be written as $X \in \R^{n \times d}$.
 I have that $n$ denotes the number of entries in the dataset and 
 $d$ is the number of dimensions of the dataset.
 I will throughout the report refer to a single entry of 
-the dataset as $x_i$ and a single dimension of the dataset as $\xj$, 
-and therefore $x^{(j)}_i$
-denotes the $j$'th dimension of the $i$'th entry.
+the dataset as $x_i$ and dimension $j \in [d]$ of entry $i \in [n]$ as $x_{i,j}$.
+I will also be using the notation $[n]$ which is the set $[n] = \{1,2,\dots,n-1, n\}$.
 \vspace*{0.3cm}
 
-\textbf{Differential privacy} is the heuristic of 
-releasing a database statistic whilst limiting the impact
-of any one entry. It builds on the intuition that computing
-a statistics on a private dataset should not reveal 
-any sensitive information about any one individual 
-as long as that individual has little to no effect on the outcome.
-Differential privacy has multiple slightly different
-formal definitions, 
-one such is $(\epsilon, \delta)$-Differential Privacy
-refered to as \edp which will be introduced later on.
-A prerequisite for almost all of the different differential privacy
-definitions relies on the concept of neighbouring dataset.
-\vspace*{0.3cm}
-
+\noindent The following two definitions are essential to the definition of differential privacy, and are used
+when arguing about privacy and proving that an algorithm satisfies differential privacy.
 \begin{definition}[Neighbouring dataset \cite{dwork2016}]
 Two dataset $X, X' \in \R^{n \times d}$ are said to be 
 neigbouring if they differ in at most a single entry.
@@ -92,10 +100,14 @@ We denote the sensitivity as
 \]
 and then the total $l_2$-sensitivity is then
 \end{definition}
-Throughout the report I will only be working with $l_2$-sensitivity and
-will just denote this as $\Delta(f)$ for ease of notation.
-    
+\noindent Throughout the report I will only be working with $l_2$-sensitivity and
+will just denote this as $\Delta(f)$ for ease of notation. \\
 
+Differential privacy has multiple slightly different
+formal definitions, all of which are very similair and there exists ways of
+defining one of them in terms of another.
+I will be working with the most standard on which is called $(\epsilon, \delta)$-Differential Privacy,
+refered to as \edp.
 \vspace*{0.3cm}
 \begin{definition}[$(\epsilon, \delta)$-Differential Privacy \cite{dwork2016}]
 
@@ -107,15 +119,18 @@ neighbouring dataset $X \sim X'$ we have that
 
 \end{definition}
 
-\begin{theorem}[ \edp under post-processing \cite{dpbasic}] %Proposition 2.1 in the cite
-\label{theo:PostProc}
+\noindent The definition of differential privacy lends itself to posses some very useful properties.
+I will cover two of these, which are of importance to this project.
 
-Let $\M: \R^{n \times d} \rightarrow \mathcal{R}$ be an \edp 
+\begin{lemma}[ \edp under post-processing \defcite{dpbasic}{Proposition 2.1}] %Proposition 2.1 in the cite
+\label{lem:PostProc}
+
+Let $\M: \R^{n \times d} \rightarrow \mathcal{R}$ be an $\ed$-differentially private 
 algorithm. Let $f: \mathcal{R} \rightarrow \mathcal{R}'$ 
-be an arbitrary mapping, then 
+be an arbitrary randomized mapping, then 
 $f \circ \mathcal{M}: \R^{n \times d} \rightarrow \mathcal{R}'$ is \edp.
 
-\end{theorem}
+\end{lemma}
 
 \begin{proof}
 
@@ -131,9 +146,17 @@ We thus have that
     
 \end{proof}
 
-\todo{Add lemma for combining dp methods}
 
-    
+
+\begin{lemma}[\edp under composition \defcite{dpbasic}{Theorem 3.16} ] % Theorem 3.16
+Let $\mathcal{M}_i: \R^{n \times d} \rightarrow \mathcal{R}_i$ be an $\lr{\epsilon_i, \delta_i}$-differentially private algorithm
+for $i \in [k]$. Then if $\mathcal{M}_{[k]} : \R^{n \times d} \rightarrow \prod_{i=1}^{k} \mathcal{R}_i$ is defined to be
+$\mathcal{M}_{[k]} = \lr{\mathcal{M}_1(X), \mathcal{M}_2(X), \dots, \mathcal{M}_{k}(X)}$ then we have that
+$\mathcal{M}_{[k]}$ is $\lr{ \sum_{i \in [k]} \epsilon_i , \sum_{i \in [k]} \delta_i }$-differentially private.
+\end{lemma}
+\noindent The proof is a bit long and is omitted here, but can be found in Appendix B of \cite{dpbasic}.
+
+
 
 \paragraph{Error Measure}
 As this report concerns itself exclusively with the sum of entries 
@@ -198,7 +221,7 @@ blah
 Let $X \sim \mathcal{N}(\bm{0}, \bm{\Sigma_X})$ be a $d$-dimensional gaussian vector
 with expected value $\bm{0}$, and let $\sigma_j^2$ denote the variance of the 
 $j$'th dimension where $1 \le j \le d$.
-By theorem \ref{lem:ExpQuad} we have that the expected $l_2$-norm 
+By lemma \ref{lem:ExpQuad} we have that the expected $l_2$-norm 
 of such a vector is given by
 \[
     \ee{X} = \text{tr} (\bm{\Sigma_X}) = \sum_{j=1}^d \sigma_j^2
@@ -884,7 +907,7 @@ in expected error by calculating
 the privacy budget.}
 
 
-\section{Discussion}
+\section{Discussion \& Future work}
 % On the problem setup
 Earlier when I defined the problem at hand I also defined the constraint that the expected norm after 
 transforming the data should be 1, i.e. the constraint given by equation \eqref{eq:normcon}. 
@@ -928,6 +951,15 @@ would interesting to investigate the bias-variance tradeoff and finding an
 optimal clipping probability $p_{C}$.
 
 
+\subsection{Limitation}
+The biggest limitation of the method proposed in this project, is the requirement for an estimate
+of the mean $\bm{\mu}$ as this is a problem equivalent to the one which the mechanism proposed here solves.
+The desire is that incorporating this is possible, as other methods in recent research has achieved something similair.
+Many parallels can be drawn to \cite{Huang2021}, as they also clip points
+according to some sphere in which they privately find a center for the sphere. The main concept which is introduced in this project
+is the noise is added to each dimension as a function of its variance, which is not done in \cite{Huang2021}.
+My hope is that the analysis presented here is of value in a context where finding the center of the sphere is incorporated
+into the mechanism itself.
 
 \newpage
 \section{It is a mess, don't look here}
