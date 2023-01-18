@@ -38,35 +38,40 @@
 \newtheorem{lemma}{Lemma}[section]
 
 
-\title{Differentially private vector aggreation in the case of multivariate gaussian data}
+\title{Differentially private vector sums in the case of normally distributed data}
 \author{Tim Sehested Poulsen}
 
 \begin{document}
 
 \maketitle
-\todo{datasets -> dataset}
-\todo{Write introduction, mention relation to average vector}
 \section{Introduction}
 In recent years there has been an increased focus on the privacy of individuals, as we live in the age of data.
-More and more data is collected about us to be used for solving real world problems be that through old school statistics or 
+More and more data is collected about us to be used for solving real world problems, be that through old school statistics or 
 advanced algorithmic systems, such as deep neural networks.
-Often it is also the situation that to solve the problem at hand, sensitive data is required. 
-In fact it is often the case that the more sensitive the data is the more useful it is.
+Often it is also the situation that to solve the problem at hand, using sensitive data is a necessity. 
+In fact that is often the case, as the more sensitive the data is, the more useful it is.
 Many attempts have been made to combat this dilemma, preserve the privacy of the individuals involved whilst harvesting the 
 fruitful information which the sensitive data contains.
-It has been shown repeatdatly  that de-anonymizing the data by removing "person-
-ally identiﬁable information", such as names, PIN codes (Personal Identification Number) or the alike is not enough
+It has been shown repeatdatly  that de-anonymizing the data by removing "personally identiﬁable information", such as names, PIN codes (Personal Identification Number) or the alike is not enough
 to protect individuals from advesaries \cite{medical,netflix}. 
-This project focuses releasing aggregate statistics from sensitive data to the public, which has also been shown to break privacy when released \cite{exposed}. \\
+Even publicising aggregate statistics from sensitive data, has been shown to break privacy \cite{exposed}.
+
+\noindent Many optmimization problems rely upon calculating the sum, or equivalently the mean,
+of a set of vectors.
+If the data which is used contains sensitive information it is a necessity that
+calculating and using this aggregate statistic is done privately. 
+The focus of this project will be to calculate the sum of a set of vectors whilst
+maintaining the privacy of individuals. \\
 
 In an desire to mathematically define what is meant by privacy and giving a basis for algorithms to be compared and measured on their degree of privacy preservation 
 the term \textit{Differential Privacy} was born. It is merely a mathematical definition (which will be covered shortly), but has been the golden standard on which
 algorithms can be proofed against.
 In essence it incapsulates that the effect of any individual on the output of a statistic,
- should be limited preferably to such an extend that the individual is not reckognizable.
-As this project focuses on releasing the sum of vectors (with sensitive information) from a dataset, it specifically means in this setting
-that it should, to some extend, not be possible to deduce whether any one individual was part of the calculated sum or not.
-\todo{Why sums are important, its use cases and the relation to mean}
+should be limited; preferably to such an extend that the individual is not reckognizable.
+
+\noindent In the context of this project it specifically means that it should, 
+to some extend, not be possible to deduce whether any one individual was part of a given sum of vectors.
+
 
 \section{Definitions \& Preliminaries}
 Before I mathematically introduce the concept of Differential Privacy, there are some prerequistes in order to understand the definition.
@@ -82,14 +87,15 @@ I will also be using the notation $[n]$ which is the set $[n] = \{1,2,\dots,n-1,
 
 \noindent The following two definitions are essential to the definition of differential privacy, and are used
 when arguing about privacy and proving that an algorithm satisfies differential privacy.
-\begin{definition}[Neighbouring dataset \cite{dwork2016}]
+\begin{definition}[Neighbouring dataset \cite{dpbasic}]
 Two dataset $X, X' \in \R^{n \times d}$ are said to be 
 neigbouring if they differ in at most a single entry.
 Neighbouring dataset are denoted with the relation $X \sim X'$ and defined as followed
 \[ X \sim X' \iff \lra{ \setdef{i \in \N}{i \le n \land x_i \ne x_i' } } \le 1 \]
 \end{definition}
 
-\begin{definition}[Sensitivity \cite{dpbasic}] % Definition 3.8
+\begin{definition}[Sensitivity \defcite{dpbasic}{Definition 3.8}] % Definition 3.8
+\label{def:sensitivity}
 Let $f(X): \R^{n \times d} \rightarrow \R^k$ be a function. 
 The $l_p$-sensitivity of $f$ is the maximal 
 possible $l_p$-norm of the difference between the output of $f$ 
@@ -109,7 +115,7 @@ defining one of them in terms of another.
 I will be working with the most standard on which is called $(\epsilon, \delta)$-Differential Privacy,
 refered to as \edp.
 \vspace*{0.3cm}
-\begin{definition}[$(\epsilon, \delta)$-Differential Privacy \cite{dwork2016}]
+\begin{definition}[$(\epsilon, \delta)$-Differential Privacy \defcite{dpbasic}{Definition 2.4}]
 
 A randomized algorithm $\M: \R^{n \times d} \rightarrow \mathcal{R}$ 
 is $(\epsilon, \delta)$-differentially private if for all possible 
@@ -171,10 +177,10 @@ which estimates $f(X)$ is then
     \text{Err}(M) := \ee{M(X) - f(X)}
 \]
 
-\paragraph{extra}
-
-\subsection{Quadratic forms of random variables}
-\todo{write cohesive text here, and decide what to keep}
+\subsection{Gaussian Random Variables}
+As this project will be working mainly with gaussian random variables I will 
+lay a firm foundation of a few important properties which they possess. 
+I will however omit the proofs as they are of no importance to the project.
 
 \begin{lemma}
 \label{lem:GaussTrans}
@@ -187,11 +193,6 @@ We then have that
     
 \end{lemma}
 
-Quadratics of random variables have been well studied \cite{BatesQuadForm,MathaiQaudForms}, 
-specially in the case of multivariate gaussian varaibles \cite{IowaQuadNormForms,MathaiQaudForms}.
-Even more research has been done in evaluating the CDF of these quadratic forms
-for Gaussian random vectors \cite{QuadFormsNume,QaudFormsBounds}.
-
 \begin{lemma}[Expectation of a quadratic random variable \cite{BatesQuadForm}]
 \label{lem:ExpQuad}
 Let $X$ be a $d$-dimensional random vector with expected value $\Exp{X} =  \bm{\mu_{X}}$
@@ -202,29 +203,15 @@ $d \times d$ symmetric matrix, then
 \]
 \end{lemma}
 
-\begin{proof}
-Blah blah
-\begin{align*}
-    &\Exp{X^T A X} 
-    =\text{tr}\lr{\Exp{X^T A X}} 
-    =\Exp{\text{tr} \lr{X^T A X}} \\
-    &= \Exp{\text{tr} \lr{A X X^T}}
-    = \text{tr} \lr{A \Exp{X X^T}} 
-    = \text{tr} \lr{A \lr{ \var{X} + \bm{\mu} \bm{\mu}^T}} \\
-    &= \text{tr} \lr{A \bm{\Sigma}} + \text{tr} \lr{A \bm{\mu \mu^T}}
-    = \text{tr} \lr{A \bm{\Sigma}} + \bm{\mu}^T A \bm{\mu}
-\end{align*}
-blah
-\end{proof}
 \begin{corollary}
 \label{cor:expNorm}
-Let $X \sim \mathcal{N}(\bm{0}, \bm{\Sigma_X})$ be a $d$-dimensional gaussian vector
-with expected value $\bm{0}$, and let $\sigma_j^2$ denote the variance of the 
+Let $X \sim \mathcal{N}(\bm{\mu}, \bm{\Sigma_X})$ be a $d$-dimensional gaussian vector
+with expected value $\mu_j$ for dimension $j$, and let $\sigma_j^2$ denote the variance of the 
 $j$'th dimension where $1 \le j \le d$.
 By lemma \ref{lem:ExpQuad} we have that the expected $l_2$-norm 
 of such a vector is given by
 \[
-    \ee{X} = \text{tr} (\bm{\Sigma_X}) = \sum_{j=1}^d \sigma_j^2
+    \ee{X} = \text{tr} (\bm{\Sigma_X}) + \|\bm{\mu}\|^2 = \sum_{j=1}^d \sigma_j^2 + \mu_j^2
 \]
 \end{corollary}
 
@@ -240,6 +227,8 @@ is known.
 It does so by computing the value of $g(X)$ and then adding noise
 to each dimension drawn from the normal distribution 
 $\mathcal{N}(0, \sigma_{\epsilon,\delta}^2)$.
+The variance $\sigma_{\epsilon, \delta}^2$ is chosen specifically to satisfy \edp, 
+and it will shortly be covered how to choose this.
 This can be seen as adding a noise vector $\eta$ which 
 is then distributed according to
 the multivariate normal distribution 
@@ -277,10 +266,10 @@ lies in determining a $\sigma_{\epsilon, \delta}$ which achieves
 \edp, and preferably the smallest such one.
 
 The following theorem was initially proven
-\begin{theorem}\textnormal{\cite{dpbasic}}
+\begin{theorem}\textnormal{\defcite{dpbasic}{Theorem 3.22}}
 \label{theo:gaussMech}
 Let $g: \R^{n \times d} \rightarrow \R^{d}$ be an arbitrary 
-$d$-dimensional function with $l_2$-sensitvity 
+$d$-dimensional function which by definition \ref{def:sensitivity} has $l_2$-sensitvity 
 $ \Delta(g) = \max_{X \sim X'} \| g(X) - g(X') \|$, 
 and let $\epsilon \in (0,1)$.
 The Gaussian Mechanism with
@@ -288,7 +277,8 @@ $\sigma_{\epsilon, \delta} = \Delta(g)  \sqrt{2\ln(1.25/\delta)}/\epsilon$
 is \edp.
 \end{theorem}
 The proof is rather long and is therefore ommitted here. A few years later it was shown in \cite{BalleWang} how to compute the minimal $\sigma_{\epsilon, \delta}$.
-\begin{theorem}\textnormal{\cite{BalleWang}}
+
+\begin{theorem}\textnormal{\defcite{BalleWang}{Theorem 8}}
 \label{theo:OptSig}
 The Gaussian Mechanism is differentially private if and only if $\sigma_{\epsilon, \delta} \ge \Delta(g) \cdot \sigma_{opt}$ where
 $\sigma_{opt} \in \R$ is the smallest value greater than 0, which satisfies
@@ -300,35 +290,38 @@ $\sigma_{opt} \in \R$ is the smallest value greater than 0, which satisfies
 In \cite{BalleWang} it is also shown how to compute this value, but since this is of no importance to this project it will therefore not be covered here.
 For the rest of the report I will only be referring to $\sigma_{opt}$ as the minimal value given by equation \eqref{eq:sigopt}.
 
-The main downside of the Gaussian Mechanism is that it adds equal noise to all dimensions, regardless of the sensitivity in that dimension.
+The main downside of the Gaussian Mechanism is that it adds equal noise to all dimensions, 
+even if additional information about the skewness of the data was know.
 As this report focuses on giving differentially private estimates of sums of vectors, it is natural to ask whether adding equal noise in all dimensions
-is optimal in this setting. Let us define the function of interest $f(X) = \sum_{i \in [n]} x_i$, for a dataset $X \in \R^{n \times d}$. 
-The sensitivity of this function must be twice the largest possible norm of any vector.
+is optimal in all settings. Let us define the function of interest $f(X) = \sum_{i \in [n]} x_i$ which is the sum of vectors/entries in a dataset $X \in \R^{n \times d}$. 
+The sensitivity of this function must be the largest possible $l_2$ distance between two vectors in the dataset.
 Therefore if the largest difference between any two neighbouring datasets 
-in the $j$'th dimension can be limited as follows
+in the $j$'th dimension, can be limited as follows
 \begin{equation}
 \label{eq:DimCon}
     \Delta_j := \max_{X \sim X'}|X^{(j)} - X'^{(j)}|
 \end{equation}
-and we say that $X$ and $X'$ differ in the $i$'th entry we conclude that
+where $X^{(j)}$ denotes the $j$'th dimension over the dataset.
+We the have the sensitivity 
+
 \begin{equation}
 \label{eq:DelF}
     \Delta(f) = \max_{X \sim X'} \| f(X) - f(X') \| = 
-    \max_{X \sim X'} \| x_i - x_i' \| = \sqrt{\sum_{j \in [d]} \Delta_j^2} = \|\bm{\Delta}\|
+    \|\bm{\Delta}\| =  \sqrt{\sum_{j \in [d]} \Delta_j^2} 
 \end{equation}
 where $\bm{\Delta} = (\Delta_1, \Delta_2, \dots, \Delta_d)$.
 
-\noindent This means that by equation \ref{eq:ExpErrGM} the expected error of the Gaussian Mechanism when estimating $f(X)$ is given by
+\noindent This means that by equation \eqref{eq:ExpErrGM} the expected error of the Gaussian Mechanism when estimating $f(X)$ is given by
 \begin{equation}
 \label{eq:GMErr}
     \ee{\eta} = d \cdot \sigma_{\epsilon, \delta}^2 = d \cdot \lr{\Delta(f) \cdot \sigma_{opt}}^2 =
     d  \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 
 \end{equation}
-A logical next step would be to add noise to each dimensions such that it is proportional to the sensitivity of that dimension.
-This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism, appropriately called the Elliptical Gaussian Mechanism
+A logical next step would be to add noise to each dimensions such that it given as a monotone function of the sensitivity of that dimension.
+This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism called the \textit{Elliptical Gaussian Mechanism}
 works very similairly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling all $\eta_j$ from 
 $\mathcal{N}(0,\sigma_{\epsilon, \delta}^2)$, here they are instead drawn from $\mathcal{N}\lr{0,\lr{\sigma_{opt}\cdot \frac{\Delta_j}{b_j}}^2}$. 
-The algorithm is described in detail in Algorithm \ref{alg:EllipGM}
+The algorithm is described in detail in Algorithm \ref{alg:EllipGM}.
 
 \begin{algorithm}
 \caption{The Elliptical Gaussian Mechanism}\label{alg:EllipGM}
@@ -354,25 +347,32 @@ Though the algorithm seems short and simple, as the the only thing which disting
 is to draw samples from $\mathcal{N}(0, \lr{\sigma_{opt} \cdot \frac{\Delta_j}{b_j}}^2)$, 
 it can be seen as a transformation of space. Consider transforming the data by the factor $\frac{b_j}{\Delta_j}$ in each dimension. 
 Then you would have that each dimension is bounded
+\begin{gather*}
+    \tilde{x}_{i,j} := x_{i,j} \cdot \frac{b_j}{\Delta_j} \\
+    \forall i,i' \in [n] : |x_{i,j} - x_{i',j}| \le \Delta_j \implies |\tilde{x}_{i,j} - \tilde{x}_{i',j}| \le b_j
+\end{gather*}
+
+and in this space the sensitivity of $f(\tilde{X})= \sum_{i \in [n]} \tilde{x}_i$ is then
 \[
-    x_{i,j} \le \frac{\Delta_j}{2} \implies \widehat{x}_{i,j} := x_{i,j} \cdot \frac{b_j}{\Delta_j} \le \frac{b_j}{2}
-\]
-and in this space the sensitivity of $f(X)= \sum_{i \in [n]} x_i$ is then
-\[
-    \Delta(f) = \sqrt{\sum_{j \in [d]}\lr{\frac{b_j}{2} - \lr{-\frac{b_j}{2}}}^2} = \sqrt{\sum_{j \in [d]} b_j^2} = \|\bm{b}\| =  1
+    \Delta(f) = \|\bm{b}\| = \sqrt{\sum_{j \in [d]} b_j^2} =  1
 \]
 This means that all points in $X$ are mapped to lie withing the unit ball, and in this space one can simply add noise to each 
 dimension drawn from $\eta_j \sim \mathcal{N}(0, \sigma_{opt})$. Then the inverse transformation $\frac{\Delta_j}{b_j}$ 
 can then be applied to each dimension of $f(\overline{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
-because differential privacy is preserved under post processing as per Theorem \ref{theo:PostProc}. \\
+because differential privacy is preserved under post processing as per lemma \ref{lem:PostProc}. \\
 
 
-The main thing that really differentiates Algorithm \ref{alg:EllipGM} from the normal Gaussian Mechanism is the introduction of the scaling vector $\bm{b}$.
+By this interpretation it can also be seen that the mechanism ensures privacy for vectors lying with a $d$-dimensional
+ellipsoid with radii $(b_1/\Delta_1, \dots, b_d/\Delta_d)$, 
+whereas the Gaussian mechanism ensures privacy for vectors lying within a sphere with radius $\| \bm{\Delta} \|$.
+It can therefore be seen that the Gaussian mechanism is a special instance of the Elliptical Gaussian mechanism
+in which $b_j$ is chosen such that $\Delta_j/b_j = \| \bm{\Delta} \|$. \\
+Thus the thing that really distinguishes the two mechanisms is the introduction of the scaling vector $\bm{b}$.
 This is the scaling of how much weight should be attributed to each dimension when adding noise. It is shown how to determine the optimal values for $b_j$
 in \cite{Lebeda2022}, and what the expected error of the mechanism then is.
 
-\begin{theorem}[Optimality and error of the Elliptical Gaussian Mechanism \cite{Lebeda2022}]
-The value for $b_j$ which minimizes the expected $l_2$ error $\ee{\bm{\eta}}$ of Algorithm \ref{alg:EllipGM} is as follows
+\begin{theorem}[Optimality of the Elliptical Gaussian Mechanism \defcite{Lebeda2022}{Lemma 3.2 \& 3.3}]
+The value for $b_j$ which minimizes the expected squared $l_2$ error $\ee{\bm{\eta}}$ of Algorithm \ref{alg:EllipGM} is as follows
 \[
     b_j = \sqrt{\frac{\Delta_j}{\sum_{j \in [d]} \Delta_j}}
 \]
@@ -385,6 +385,7 @@ where $\| \cdot \|_1$ is the $l_1$ norm.
 
 \end{theorem}
 The proof will be ommitted here, but it is very similair to the proofs for lemma \ref{lem:Optb} and Theorem \ref{theo:Alg3OptErr} which are in section \ref{seq:problem}.
+Additionally a generalized version of the theorem is proofed in \cite{Lebeda2022}.
 
 Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} we have the following ratio
 \[
@@ -419,8 +420,7 @@ This means that $x_i \sim \mathcal{N}(\bm{\mu}, \Sigma ) $,
 where $\Sigma$ is a diagonal matrix with the variance of each 
 dimension along its diagonal.
 It is quite apparent that determining a limit $ \Delta_j $ is impossible 
-in this setting as the gaussian distribution is continously defined 
-on the range $ (-\infty, \infty)$.
+in this setting as the support of the gaussian distribution is $ (-\infty, \infty)$.
 Several recent papers has combatted this by doing something called 
 \textit{clipping} \cite{Huang2021,coinpress}. 
 Clipping is the process of limiting all points to lie within a sphere with radius $C$.
@@ -459,8 +459,8 @@ However, doing so is in essence almost the same problem as I am attempting to so
 The difference lies in the fact that this estimate could be given quite 
 losely and I am interested in the sum (or mean) of a specific dataset not that of the original distribution. \\
 
-In this setting, we again have the intuition that addding equal noise in all dimensions is non optimal, and instead the noise in a dimension should be proportional
-to the variance $\sigma_j^2$ in that dimension. In a desire to achieve similair results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
+In this setting, we again have the intuition that addding equal noise in all dimensions is non optimal, and instead the noise should be given as as monotone function
+of the standard deviation $\sigma_j$ in that dimension. In a desire to achieve similair results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
 I will use somewhat the same approach to achieve \edp.
 They achieve \edp by finding scalings of each dimenion such that all points lie within a unit ball, i.e. a ball with radius $1$. 
 There does not exist such a transformation for gaussian data, as there will always be a non-zero 
@@ -472,10 +472,9 @@ I whish to find a scaling of each dimension $b_j$ s.t.
 \label{eq:Alg3Con}
     &\ee{\tilde{x}} = 1
 \end{align}
-\todo{fix the rest, I mean introduce the estimated mean}
 where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product. 
 Then $\overline{f}$ can be computed on this transformed dataset $\widehat{X}$, where the probability of clipping is less than $\frac{1}{n}$.
-As Theorem \ref{theo:PostProc} shows, \edp is preserved under post processing, 
+As lemma \ref{lem:PostProc} shows, \edp is preserved under post processing, 
 we can therefore add noise to each coordinate drawn from $\mathcal{N}(0,(2C\sigma_{opt})^2)$ in the transformed space to achieve \edp.
 The transformation back to the original space is then done by multiplying each dimension with $b_j^{-1}$, and due to the linearity of transformation 
 this is also done to the noise added.
@@ -519,7 +518,6 @@ The error introduced by the noise is then given by $\| \bm{\eta} \|^2$ and due t
     \Return $T + \bm{\eta}$
 \end{algorithmic}
 \end{algorithm}
-
 The pseudo code for the mechanism is given in Algorithm \ref{alg:EGM2}. At first glance it seems quite different from Algorithm \ref{alg:EllipGM}
 despite it being very similiar. The most notable thing here
 is that the transformation has to be performed on the dataset,
@@ -579,7 +577,7 @@ I then solve $\frac{\partial \mathcal{L}}{\partial b_j}(\bm{b},\lambda) = 0$ for
     \lambda \sigma_j^2b_j = \sigma_{\epsilon,\delta}^2 b_i^{-3}  \\
 \label{eq:solvbi}
     &\iff b_j^4 = \frac{\sigma_{\epsilon,\delta}^2}{\lambda \sigma_j^2} \iff 
-    b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} 
+    b_j = \pm \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} 
 \end{align}
 I now have the last partial derivative 
 $\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 0$ which I solve for
@@ -589,17 +587,20 @@ $\lambda$ using the previous expression for $b_j$.
     &\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 
     \sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 \\
     &\sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 = 0 \iff
-    \sum_{j=1}^d \sigma_j^2 \lr{\frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
+    \sum_{j=1}^d \sigma_j^2 \lr{ \frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
     &\frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}} \sum_{j=1}^d \frac{\sigma_j^2}{\sigma_j} = 1 \iff
     \sigma_{\epsilon,\delta} \sum_{j=1}^d \sigma_j = \sqrt{\lambda}
 \end{align*}
 Inserting back into equation \eqref{eq:solvbi}
 \[
-    b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} =
-    \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
-    \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i} } 
+    b_j = \pm \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} =
+    \pm \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
+    \pm \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i} } 
 \]
 \todo{show that this stationary point is a minimum}
+% And define b_j >= 0
+% Use theorem 7.12 from "Matrix Differential Calculus with Applications in Statistics and Econometrics"
+% Perhaps don't include proof and just argue that it is equivalent to the one solved in og paper
 Giving us the value of $b_j$ which minimizes the expected error.
 \end{proof}
 
@@ -612,7 +613,7 @@ again where $n$ denotes the number of points in the dataset.
 As $x_i$ is a multivariate gaussian distribution, so is $(x_i - \mue) \odot \bm{b}$ by lemma \ref{lem:GaussTrans},
 and it is the case that $\|(x_i - \mue) \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
 Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form in the general case.
-These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms}, and some special cases does have closed forms.
+These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms,IowaQuadNormForms}, and some special cases does have closed forms.
 Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately there was none which were of use in this setting.
 However, there does exist several numerical algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
 I would recommend using one of these algorithms in practice, and will do so in the emperical analysis in section \ref{sec:emperical}.
@@ -670,7 +671,7 @@ Using this we can get the following bound
 \end{align*}
 Concluding that $\Exp{ |Y_j^k| } \le \frac{3}{2}\sigma_j^{2k} \cdot 2^{k-2} \cdot k!$.
 
-\noindent Secondly I calculate $\Exp{Y_j^2}$ exactly to be used in equation \ref{eq:BernCon}
+\noindent Secondly I calculate $\Exp{Y_j^2}$ exactly to be used in equation \eqref{eq:BernCon}
 \begin{align}
 \label{eq:ExpY2:1}
     &\Exp{Y_j^2} = 
@@ -780,7 +781,7 @@ Combining these results and using the upper bound on $C$ from lemma \ref{lem:Ber
     &=\frac{\sqrt{8 \ln(n) \sum_{j \in [d]} \sigma_j^2}}{\sum_{i \in [d]} \sigma_i}
     + 1
 \end{align*}
-Inserting this back into equation \ref{eq:Alg3Err2} we conclude
+Inserting this back into equation \eqref{eq:Alg3Err2} we conclude
 \begin{align*}
     \ee{\bm{\eta}} &= 4\sigma_{opt}^2 \cdot 
     C^2 \cdot \sum_{i=1}^d b_j^{-2} \\
@@ -811,13 +812,13 @@ it could very well still be that the error was less in reality.
 As previously mention, there exists numerical solutions for evaluating $\prob{\|x_i\| > C^2}$ so it is natural to perform an emperically evaluation of these errors
  and investigating whether the transformation lessen the error.
 Intuitively it makes sense that allowing different noise to be added for each dimension, can only produce better results.
-\todo{Write and discuss restrictiveness of the bound}
-\todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
-\todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
+%\todo{Write and discuss restrictiveness of the bound}
+%\todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
+%\todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
 
 
-
-\todo{Write emperical evaluation section} 
+%\todo{Write emperical evaluation section} 
+% TODO: insert link to python package for evaluating the CDF, as well as link to source code for experiment
 \section{Emperical Evaluation}
 \label{sec:emperical}
 For the emperical evaluation I wanted to investigate the 
@@ -961,6 +962,7 @@ is the noise is added to each dimension as a function of its variance, which is 
 My hope is that the analysis presented here is of value in a context where finding the center of the sphere is incorporated
 into the mechanism itself.
 
+\todo{Write conclusion}
 \newpage
 \section{It is a mess, don't look here}
 \subsection{Gaussian data}

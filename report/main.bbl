@@ -27,11 +27,6 @@
 {\sc Das, A., and Geisler, W.~S.}
 \newblock A method to integrate and classify normal distributions, 2020.
 
-\bibitem{dwork2016}
-{\sc Dwork, C., McSherry, F., Nissim, K., and Smith, A.}
-\newblock Calibrating noise to sensitivity in private data analysis.
-\newblock {\em Journal of Privacy and Confidentiality 7}, 3 (2016), 17--51.
-
 \bibitem{dpbasic}
 {\sc Dwork, C., Roth, A., et~al.}
 \newblock The algorithmic foundations of differential privacy.
