@@ -53,6 +53,12 @@
 {\sc Huang, Z., Liang, Y., and Yi, K.}
 \newblock Instance-optimal mean estimation under differential privacy.
 
+\bibitem{matrixcalc}
+{\sc Magnus, J.~R.}
+\newblock {\em Matrix differential calculus with applications in statistics and
+  econometrics}, third edition.~ed.
+\newblock Wiley Series in Probability and Statistics. Wiley, Hoboken, NJ, 2019.
+
 \bibitem{MathaiQaudForms}
 {\sc Mathai, A., and Provost, S.}
 \newblock Quadratic forms in random variables.

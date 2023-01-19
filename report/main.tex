@@ -10,6 +10,7 @@
 \usepackage{hyperref}
 \usepackage{cleveref}  % For referencing equations
 \usepackage{cite} % For bibtex
+\usepackage{multirow} % for multicolumn/ multirow in matrix
 
 % For writing todo inline
 \presetkeys%
@@ -96,7 +97,7 @@ Neighbouring dataset are denoted with the relation $X \sim X'$ and defined as fo
 
 \begin{definition}[Sensitivity \defcite{dpbasic}{Definition 3.8}] % Definition 3.8
 \label{def:sensitivity}
-Let $f(X): \R^{n \times d} \rightarrow \R^k$ be a function. 
+Let $f(X): \R^{n \times d} \rightarrow \R^k$ be a function, in wich $k \in \N$.
 The $l_p$-sensitivity of $f$ is the maximal 
 possible $l_p$-norm of the difference between the output of $f$ 
 on two neighbouring dataset.
@@ -557,7 +558,9 @@ Using lagrangian multipliers we find the local maxima or
 minia of the function subject to equality constraints.
 To do so we construct the lagrangian function $\mathcal{L}: \R^{d+1} \rightarrow \R$ from the optimization problem given by
 equation \eqref{eq:Alg3Err} and the constraint given by \eqref{eq:normcon} for ease of notation we define 
-$\sigma_{\epsilon, \delta} := 2C\sigma_{opt}$.
+$\sigma_{\epsilon, \delta} := 2C\sigma_{opt}$. 
+I will also define $b_j \ge 0$ simply to make calculations easier, 
+as $b_j$ is squared there will also be a $-b_j$ which gives the same result.
 \[
     \mathcal{L}(\bm{b},\lambda) = \sigma_{\epsilon,\delta}^2\sum_{j \in [d]} b_j^{-2}
     + \lambda \lr{ \sum_{j=1}^d \lr{\sigma_j b_j}^2 - 1}
@@ -577,31 +580,60 @@ I then solve $\frac{\partial \mathcal{L}}{\partial b_j}(\bm{b},\lambda) = 0$ for
     \lambda \sigma_j^2b_j = \sigma_{\epsilon,\delta}^2 b_i^{-3}  \\
 \label{eq:solvbi}
     &\iff b_j^4 = \frac{\sigma_{\epsilon,\delta}^2}{\lambda \sigma_j^2} \iff 
-    b_j = \pm \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} 
+    b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} 
 \end{align}
 I now have the last partial derivative 
 $\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 0$ which I solve for
 $\lambda$ using the previous expression for $b_j$.
 
-\begin{align*}
+\begin{align}
     &\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 
     \sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 \\
     &\sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 = 0 \iff
     \sum_{j=1}^d \sigma_j^2 \lr{ \frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
+    \label{eq:optlam}
     &\frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}} \sum_{j=1}^d \frac{\sigma_j^2}{\sigma_j} = 1 \iff
     \sigma_{\epsilon,\delta} \sum_{j=1}^d \sigma_j = \sqrt{\lambda}
-\end{align*}
+\end{align}
 Inserting back into equation \eqref{eq:solvbi}
-\[
+\begin{equation}
+\label{eq:optbj}
     b_j = \pm \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} =
-    \pm \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
-    \pm \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i} } 
+    \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
+    \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i} } 
+\end{equation}
+To show that the value for $b_j$ is a minimum I will use theorem 7.12 from \cite{matrixcalc}.
+I must then construct the bordered hessian matrix
+\[
+    \overline{H} =
+    \begin{bmatrix}
+       \frac{\partial^2 \mathcal{L}}{\partial \lambda^2} & \frac{\partial^2 \mathcal{L}}{\partial \lambda \partial \bm{b}} \\
+       \lr{\frac{\partial^2 \mathcal{L}}{\partial \lambda \partial \bm{b}}}^T & \frac{\partial^2 \mathcal{L}}{\partial \bm{b}^2}
+    \end{bmatrix}
 \]
-\todo{show that this stationary point is a minimum}
-% And define b_j >= 0
-% Use theorem 7.12 from "Matrix Differential Calculus with Applications in Statistics and Econometrics"
-% Perhaps don't include proof and just argue that it is equivalent to the one solved in og paper
-Giving us the value of $b_j$ which minimizes the expected error.
+In which 
+\begin{gather*}
+\frac{\partial^2 \mathcal{L}}{\partial \lambda^2}  = 0 \\
+\frac{\partial^2 \mathcal{L}}{\partial \lambda \partial \bm{b}}
+    = \lr{\frac{\partial^2 \mathcal{L}}{\partial \lambda \partial b_1 }, \dots,\frac{\partial^2 \mathcal{L}}{\partial \lambda \partial b_d} }
+    = \lr{2\sigma_1^2 b_1, \dots, 2\sigma_d^2 b_d} \\
+\frac{\partial^2 \mathcal{L}}{\partial \bm{b}^2} = 
+\begin{bmatrix}
+    \frac{\partial^2\mathcal{L}}{\partial x_1^2} & \dots & \frac{\partial^2\mathcal{L}}{\partial x_1 \partial x_d} \\
+    \vdots  & \ddots & \vdots \\
+    \frac{\partial^2\mathcal{L}}{\partial x_d\partial x_1} & \dots & \frac{\partial^2\mathcal{L}}{\partial x_d^2} \\
+\end{bmatrix}
+= \text{diag} \lr{\frac{6\sigma_{\epsilon, \delta}^2}{b_1^4} + 2\lambda\sigma_1^2, \dots, \frac{6\sigma_{\epsilon, \delta}^2}{b_d^4} + 2\lambda\sigma_d^2 }
+\end{gather*}
+The symmetric square matrix $\overline{H}$ of size $d+1$ only has values along the diagnoal, the first row
+and the first column, the rest is $0$ as there are no variables which depend on eachother.
+Then theorem 7.12 from \cite{matrixcalc} states that if the $r$'th leading principal component of $\overline{H}$ is negative,
+evaluated with $b_j$ set by equation \eqref{eq:optbj} and $\lambda$ set by equation \eqref{eq:optlam}
+for all $r \in \{2,3,\dots,d+1\}$, the values thus give a minimum to the optimization problem.
+Showing that the $r$'th leading principal component is negative is shown as an induction proof in
+appendix \ref{apx:inducproof}. So, based on that result, I can conclude that equation \eqref{eq:optbj}
+gives the value for $b_j$ which minimizes the expected squared norm of the noise in algorithm \ref{alg:EGM2}.
+
 \end{proof}
 
 Now to evaluate the expected error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important important to determine the value $C$.
@@ -1161,6 +1193,94 @@ Then we have that $\alpha = 1 + t$.
 
 \bibliography{refs.bib}{}
 \bibliographystyle{acm}
+
+\newpage
+\appendix
+\section*{Appendix}
+
+\section{Induction proof of the $r$'th leading principal component of the Bordered Hessian matrix in lemma \ref{lem:Optb}}
+\label{apx:inducproof}
+I will proof that for the matrix
+\[
+    \overline{H} =
+    \begin{bmatrix}
+    0 & 2\sigma_1^2b_1 & \dots & 2 \sigma_d^2 b_d \\
+    2\sigma_1^2b_1 & \frac{6\sigma_{\epsilon, \delta}^2}{b_1^4} + 2 \lambda \sigma_1^2 &  & \multirow{2.5}{0.5in}{\Large 0}  \\
+    \vdots & \multirow{2.5}{-0.5in}{\Large 0}  & \ddots \\
+    2\sigma_d^2b_d &  & & \frac{6\sigma_{\epsilon, \delta}^2}{b_d^4} + 2 \lambda \sigma_d^2 
+    \end{bmatrix}
+\]
+the $r$'th leading principal minor is negative for all $r \in \{2,3, \dots, d+1\}$
+when $b_j$ and $\lambda$ is set as
+\begin{gather*}
+b_j = \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i \in [d]} \sigma_i}} \\
+\lambda  = \sigma_{\epsilon,\delta}^2 \lr{ \sum_{i \in [d]} \sigma_i}^2
+\end{gather*}
+\begin{proof}
+Initially I insert these values and get the following matrix
+\[
+    \overline{H}_{d+1} =
+    \begin{bmatrix}
+    0 & \frac{2\sigma_1^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}}& \dots & \frac{2\sigma_d^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}} \\
+    \frac{2\sigma_1^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}} & 2\sigma_{\epsilon, \delta}^2 \lr{\sum_{i \in [d]} \sigma_i}^2 \lr{3\sigma_1^2 + 1} &  & \multirow{2.5}{0.5in}{\Large 0}  \\
+    \vdots & \multirow{2.5}{-0.5in}{\Large 0}  & \ddots \\
+    \frac{2\sigma_1^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}} &  & & 2\sigma_{\epsilon, \delta}^2 \lr{\sum_{i \in [d]} \sigma_i}^2 \lr{3\sigma_d^2 + 1}
+    \end{bmatrix}
+\]
+
+I define $\overline{H}_{r}$ to be the matrix with the first $r$ rows and columns of $\overline{H}_{d+1}$. 
+Secondly I will note that since $\sigma_i > 0$ by definition, we have that all entries $\overline{H}_{d+1,i,j}$ 
+in this matrix are positive.
+So I will prove that the $r$'th leading principal minor 
+$\text{det}(\overline{H}_{r}) = |\overline{H}_{r}|$ is negative for all $r \in \{2,3,\dots,d+1\}$ by induction on $r$.
+So for the base case I show that it is true for $r=2$, which is the value
+\[
+    |\overline{H_2}| = 0 \cdot H_{2,1,1} - \overline{H}_{2,2,1} \cdot \overline{H}_{2,1,2} < 0 
+\]
+Which is true since all entries $\overline{H}_{r,i,j} > 0$. Thus it holds for the base case.
+Assume now the induction hypothesis, that $|\overline{H}_{r-1}| < 0$, the $r$'th leading principal minor is 
+then given by
+\begin{equation}
+\label{eq:dethr}
+|\overline{H}_{r}| = |\overline{H}_{r-1}| \cdot \overline{H}_{r,r,r} + (-1)^{1 + r} \cdot |B_{r-1}| \cdot \overline{H}_{r,1,r}
+\end{equation}
+Where $B_{r-1}$ is the matrix where the first row and the last column of $\overline{H}_{r}$ is removed.
+Then from equation \eqref{eq:dethr} it can be seen that since $|\overline{H}_{r-1}| < 0$ by the indcution hypothesis
+then we have that 
+\begin{equation}
+\label{eq:inducstep}
+(-1)^{1+r} \cdot |B_{r-1}| < 0 \implies |\overline{H}_{r}| < 0
+\end{equation}
+which would complete the induction step.
+So to show that $(-1)^{r+1} \cdot |B_{r-1}| < 0$ I will observe that the last row $r-1$, has only a single value in the first column
+and the rest are $0$.
+\[
+    B_{r-1} =
+    \begin{bmatrix}
+    \frac{2\sigma_1^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}} & 2\sigma_{\epsilon, \delta}^2 \lr{\sum_{i \in [d]} \sigma_i}^2 \lr{3\sigma_1^2 + 1} &  & \multirow{2.5}{0.5in}{\Large 0}  \\
+    & \multirow{2.5}{-0.5in}{\Large 0}  & \ddots \\
+    \vdots &  & & 2\sigma_{\epsilon, \delta}^2 \lr{\sum_{i \in [d]} \sigma_i}^2 \lr{3\sigma_d^2 + 1} \\
+    \frac{2\sigma_1^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}} & 0 & \dots &  0
+    \end{bmatrix}
+\]
+Therefore I can calculate the determinant by multiplying $(-1)^{r-1 + 1} \cdot B_{r-1,r-1,1}$ with the determinant
+of the matrix I get when removing the last row and the first column of $B_{r-1}$.
+This matrix can be observed to be a diagonal matrix, in which all values along the diagonal are positive.
+Thus, this sub-matrix of $B_{r-1}$ has a positive determinant which I will denote as $\tilde{B}_{r-1}$
+in which as just said $|\tilde{B}_{r-1}| > 0$.
+Therefore
+\begin{align*}
+    |B_{r-1}| &= (-1)^{r-1+1} \cdot B_{r-1,r-1,1} \cdot |\tilde{B}_{r-1}| \\
+    &=(-1)^{r} \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}| \\
+    \implies  &(-1)^{1+r} \cdot |B_{r-1}| \\
+    &=  (-1)^{1+r} \cdot (-1)^{r} \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}| \\
+    &= (-1)^{2r + 1} \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}| \\
+    &= -1 \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}|
+\end{align*}
+And since both $\overline{H}_{r,r-1,1} > 0$ and $|\tilde{B}_{r-1} > 0$, we have that
+$(-1)^{1+r} \cdot |B_{r-1}| < 0$, completing the induction step by equation \eqref{eq:inducstep}.
+\end{proof}
+
 
 
 \end{document}
