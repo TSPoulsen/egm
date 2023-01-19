@@ -47,86 +47,84 @@
 \maketitle
 \section{Introduction}
 In recent years there has been an increased focus on the privacy of individuals, as we live in the age of data.
-More and more data is collected about us to be used for solving real world problems, be that through old school statistics or 
+More and more data is collected about us to be used for solving real world problems, be that through old school statistics or
 advanced algorithmic systems, such as deep neural networks.
-Often it is also the situation that to solve the problem at hand, using sensitive data is a necessity. 
+Often it is also the situation that to solve the problem at hand, using sensitive data is a necessity.
 In fact that is often the case, as the more sensitive the data is, the more useful it is.
-Many attempts have been made to combat this dilemma, preserve the privacy of the individuals involved whilst harvesting the 
+Many attempts have been made to combat this dilemma, preserve the privacy of the individuals involved whilst harvesting the
 fruitful information which the sensitive data contains.
-It has been shown repeatdatly  that de-anonymizing the data by removing "personally identiﬁable information", such as names, PIN codes (Personal Identification Number) or the alike is not enough
-to protect individuals from advesaries \cite{medical,netflix}. 
-Even publicising aggregate statistics from sensitive data, has been shown to break privacy \cite{exposed}.
+It has been shown repeatedly that de-anonymizing the data by removing "personally identifiable information", such as names, PIN codes (Personal Identification Number) or the alike is not enough
+to protect individuals from adversaries \cite{medical,netflix}.
+Even publicizing aggregate statistics from sensitive data, has been shown to break privacy \cite{exposed}.
 
-\noindent Many optmimization problems rely upon calculating the sum, or equivalently the mean,
+\noindent Many optimization problems rely upon calculating the sum, or equivalently the mean,
 of a set of vectors.
 If the data which is used contains sensitive information it is a necessity that
-calculating and using this aggregate statistic is done privately. 
+calculating and using this aggregate statistic is done privately.
 The focus of this project will be to calculate the sum of a set of vectors whilst
 maintaining the privacy of individuals. \\
 
-In an desire to mathematically define what is meant by privacy and giving a basis for algorithms to be compared and measured on their degree of privacy preservation 
+In an effort to mathematically define what is meant by privacy and giving a basis for algorithms to be compared and measured on their degree of privacy preservation
 the term \textit{Differential Privacy} was born. It is merely a mathematical definition (which will be covered shortly), but has been the golden standard on which
 algorithms can be proofed against.
-In essence it incapsulates that the effect of any individual on the output of a statistic,
-should be limited; preferably to such an extend that the individual is not reckognizable.
+In essence it encapsulates that the effect of any individual on the output of a statistic,
+should be limited; preferably to such an extend that the individual is not recognizable.
 
-\noindent In the context of this project it specifically means that it should, 
-to some extend, not be possible to deduce whether any one individual was part of a given sum of vectors.
-
+\noindent In the context of this project it specifically means that it should,
+to some extent, not be possible to deduce whether any one individual was part of a given sum of vectors.
 
 \section{Definitions \& Preliminaries}
-Before I mathematically introduce the concept of Differential Privacy, there are some prerequistes in order to understand the definition.
-Firstly I must introduce:
+Before I mathematically introduce the concept of Differential Privacy, there are some prerequisites in order to understand the definition.
+Firstly, I must introduce:
 
 \textbf{The dataset} which will mostly be written as $X \in \R^{n \times d}$.
-I have that $n$ denotes the number of entries in the dataset and 
+I have that $n$ denotes the number of entries in the dataset and
 $d$ is the number of dimensions of the dataset.
-I will throughout the report refer to a single entry of 
+I will throughout the report refer to a single entry of
 the dataset as $x_i$ and dimension $j \in [d]$ of entry $i \in [n]$ as $x_{i,j}$.
 I will also be using the notation $[n]$ which is the set $[n] = \{1,2,\dots,n-1, n\}$.
 \vspace*{0.3cm}
 
 \noindent The following two definitions are essential to the definition of differential privacy, and are used
 when arguing about privacy and proving that an algorithm satisfies differential privacy.
-\begin{definition}[Neighbouring dataset \cite{dpbasic}]
-Two dataset $X, X' \in \R^{n \times d}$ are said to be 
-neigbouring if they differ in at most a single entry.
-Neighbouring dataset are denoted with the relation $X \sim X'$ and defined as followed
+\begin{definition}[Neighboring dataset \cite{dpbasic}]
+Two dataset $X, X' \in \R^{n \times d}$ are said to be
+neighboring if they differ in at most a single entry.
+Neighboring dataset are denoted with the relation $X \sim X'$ and defined as follows:
 \[ X \sim X' \iff \lra{ \setdef{i \in \N}{i \le n \land x_i \ne x_i' } } \le 1 \]
 \end{definition}
 
 \begin{definition}[Sensitivity \defcite{dpbasic}{Definition 3.8}] % Definition 3.8
 \label{def:sensitivity}
-Let $f(X): \R^{n \times d} \rightarrow \R^k$ be a function, in wich $k \in \N$.
-The $l_p$-sensitivity of $f$ is the maximal 
-possible $l_p$-norm of the difference between the output of $f$ 
-on two neighbouring dataset.
-We denote the sensitivity as 
+Let $f(X): \R^{n \times d} \rightarrow \R^k$ be a function, in which $k \in \N$.
+The $l_p$-sensitivity of $f$ is the maximal
+possible $l_p$-norm of the difference between the output of $f$
+on two neighboring dataset.
+We denote the sensitivity as
 \[
-\Delta_p (f) = \max_{X \sim X'} \| f(X) - f(X') \|_p 
+\Delta_p (f) = \max_{X \sim X'} \| f(X) - f(X') \|_p
 \]
-and then the total $l_2$-sensitivity is then
 \end{definition}
-\noindent Throughout the report I will only be working with $l_2$-sensitivity and
+\noindent Throughout the report, I will only be working with $l_2$-sensitivity and
 will just denote this as $\Delta(f)$ for ease of notation. \\
 
 Differential privacy has multiple slightly different
-formal definitions, all of which are very similair and there exists ways of
+formal definitions, all of which are very similar, and there exist ways of
 defining one of them in terms of another.
-I will be working with the most standard on which is called $(\epsilon, \delta)$-Differential Privacy,
-refered to as \edp.
+I will be working with the most standard one, which is called $(\epsilon, \delta)$-Differential Privacy,
+referred to as \edp.
 \vspace*{0.3cm}
 \begin{definition}[$(\epsilon, \delta)$-Differential Privacy \defcite{dpbasic}{Definition 2.4}]
 
-A randomized algorithm $\M: \R^{n \times d} \rightarrow \mathcal{R}$ 
-is $(\epsilon, \delta)$-differentially private if for all possible 
-subsets of outputs $S \subseteq \mathcal{R}$ and all pairs of 
-neighbouring dataset $X \sim X'$ we have that
+A randomized algorithm $\M: \R^{n \times d} \rightarrow \mathcal{R}$
+is $(\epsilon, \delta)$-differentially private if for all possible
+subsets of outputs $S \subseteq \mathcal{R}$ and all pairs of
+neighboring dataset $X \sim X'$ we have that
 \[ \prob{M(X) \in S} \le e^{\epsilon} \cdot \prob{M(X') \in S} + \delta \]
 
 \end{definition}
 
-\noindent The definition of differential privacy lends itself to posses some very useful properties.
+\noindent The definition of differential privacy lends itself to possess some very useful properties.
 I will cover two of these, which are of importance to this project.
 
 \begin{lemma}[ \edp under post-processing \defcite{dpbasic}{Proposition 2.1}] %Proposition 2.1 in the cite
