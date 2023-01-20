@@ -216,7 +216,6 @@ of such a vector is given by
 
 
 \section{Algorithms}
-\subsection{The Gaussian Mechanism}
 One of the most fundamental algorithms for achieving 
 \edp is the Gaussian Mechanism \cite{dpbasic}. It computes the real
 value of a statistic, where the $l_2$-sensitivity is known.
@@ -250,7 +249,7 @@ Pseudo code for the algorithm can be seen in Algorithm \ref{alg:gaussmech}.
     \Return$g(X) + \bm{\eta}$
 \end{algorithmic}
 \end{algorithm}
-\noindent The algorithm quite intuitively prodcues error which is purely given by the norm of the noise added, and the expected error can be calculated to be
+\noindent The algorithm quite intuitively produces error which is purely given by the norm of the noise added, and the expected error can be calculated to be
 \[
     \ee{(g(X) + \bm{\eta}) - g(X)} = 
     \ee{\bm{\eta}}
@@ -275,7 +274,7 @@ The Gaussian Mechanism with
 $\sigma_{\epsilon, \delta} = \Delta(g)  \sqrt{2\ln(1.25/\delta)}/\epsilon$ 
 is \edp.
 \end{theorem}
-The proof is rather long and is therefore ommitted here. A few years later it was shown in \cite{BalleWang} how to compute the minimal $\sigma_{\epsilon, \delta}$.
+The proof is rather long and is therefore omitted here. A few years later it was shown in \cite{BalleWang} how to compute the minimal $\sigma_{\epsilon, \delta}$.
 
 \begin{theorem}\textnormal{\defcite{BalleWang}{Theorem 8}}
 \label{theo:OptSig}
@@ -287,10 +286,10 @@ $\sigma_{opt} \in \R$ is the smallest value greater than 0, which satisfies
 \end{equation}
 \end{theorem}
 In \cite{BalleWang} it is also shown how to compute this value, but since this is of no importance to this project it will therefore not be covered here.
-For the rest of the report I will only be referring to $\sigma_{opt}$ as the minimal value given by equation \eqref{eq:sigopt}.
+For the rest of the report, I will only be referring to $\sigma_{opt}$ as the minimal value given by equation \eqref{eq:sigopt}.
 
 The main downside of the Gaussian Mechanism is that it adds equal noise to all dimensions, 
-even if additional information about the skewness of the data was know.
+even if additional information about the skewness of the data was known.
 As this report focuses on giving differentially private estimates of sums of vectors, it is natural to ask whether adding equal noise in all dimensions
 is optimal in all settings. Let us define the function of interest $f(X) = \sum_{i \in [n]} x_i$ which is the sum of vectors/entries in a dataset $X \in \R^{n \times d}$. 
 The sensitivity of this function must be the largest possible $l_2$ distance between two vectors in the dataset.
@@ -301,7 +300,7 @@ in the $j$'th dimension, can be limited as follows
     \Delta_j := \max_{X \sim X'}|X^{(j)} - X'^{(j)}|
 \end{equation}
 where $X^{(j)}$ denotes the $j$'th dimension over the dataset.
-We the have the sensitivity 
+We then have the sensitivity 
 
 \begin{equation}
 \label{eq:DelF}
@@ -316,9 +315,9 @@ where $\bm{\Delta} = (\Delta_1, \Delta_2, \dots, \Delta_d)$.
     \ee{\eta} = d \cdot \sigma_{\epsilon, \delta}^2 = d \cdot \lr{\Delta(f) \cdot \sigma_{opt}}^2 =
     d  \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 
 \end{equation}
-A logical next step would be to add noise to each dimensions such that it given as a monotone function of the sensitivity of that dimension.
-This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism called the \textit{Elliptical Gaussian Mechanism}
-works very similairly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling all $\eta_j$ from 
+A logical next step would be to add noise to each dimension such that it is given as a monotone function of the sensitivity of that dimension.
+This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism, called the \textit{Elliptical Gaussian Mechanism}
+works very similarly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling all $\eta_j$ from 
 $\mathcal{N}(0,\sigma_{\epsilon, \delta}^2)$, here they are instead drawn from $\mathcal{N}\lr{0,\lr{\sigma_{opt}\cdot \frac{\Delta_j}{b_j}}^2}$. 
 The algorithm is described in detail in Algorithm \ref{alg:EllipGM}.
 
@@ -342,7 +341,7 @@ The algorithm is described in detail in Algorithm \ref{alg:EllipGM}.
 \end{algorithmic}
 \end{algorithm}
 
-Though the algorithm seems short and simple, as the the only thing which distinguishes it from The Gaussian Mechanism 
+Though the algorithm seems short and simple, the only thing which distinguishes it from The Gaussian Mechanism 
 is to draw samples from $\mathcal{N}(0, \lr{\sigma_{opt} \cdot \frac{\Delta_j}{b_j}}^2)$, 
 it can be seen as a transformation of space. Consider transforming the data by the factor $\frac{b_j}{\Delta_j}$ in each dimension. 
 Then you would have that each dimension is bounded
@@ -355,18 +354,18 @@ and in this space the sensitivity of $f(\tilde{X})= \sum_{i \in [n]} \tilde{x}_i
 \[
     \Delta(f) = \|\bm{b}\| = \sqrt{\sum_{j \in [d]} b_j^2} =  1
 \]
-This means that all points in $X$ are mapped to lie withing the unit ball, and in this space one can simply add noise to each 
+This means that all points in $X$ are mapped to lie within the unit ball, and in this space, one can simply add noise to each 
 dimension drawn from $\eta_j \sim \mathcal{N}(0, \sigma_{opt})$. Then the inverse transformation $\frac{\Delta_j}{b_j}$ 
 can then be applied to each dimension of $f(\overline{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
-because differential privacy is preserved under post processing as per lemma \ref{lem:PostProc}. \\
+because differential privacy is preserved under post-processing as per lemma \ref{lem:PostProc}. \\
 
 
-By this interpretation it can also be seen that the mechanism ensures privacy for vectors lying with a $d$-dimensional
+By this interpretation, it can also be seen that the mechanism ensures privacy for vectors lying with a $d$-dimensional
 ellipsoid with radii $(b_1/\Delta_1, \dots, b_d/\Delta_d)$, 
-whereas the Gaussian mechanism ensures privacy for vectors lying within a sphere with radius $\| \bm{\Delta} \|$.
+whereas the Gaussian mechanism, ensures privacy for vectors lying within a sphere with radius $\| \bm{\Delta} \|$.
 It can therefore be seen that the Gaussian mechanism is a special instance of the Elliptical Gaussian mechanism
 in which $b_j$ is chosen such that $\Delta_j/b_j = \| \bm{\Delta} \|$. \\
-Thus the thing that really distinguishes the two mechanisms is the introduction of the scaling vector $\bm{b}$.
+Thus the thing that distinguishes the two mechanisms is the introduction of the scaling vector $\bm{b}$.
 This is the scaling of how much weight should be attributed to each dimension when adding noise. It is shown how to determine the optimal values for $b_j$
 in \cite{Lebeda2022}, and what the expected error of the mechanism then is.
 
@@ -383,8 +382,8 @@ which leads the error to be
 where $\| \cdot \|_1$ is the $l_1$ norm.
 
 \end{theorem}
-The proof will be ommitted here, but it is very similair to the proofs for lemma \ref{lem:Optb} and Theorem \ref{theo:Alg3OptErr} which are in section \ref{seq:problem}.
-Additionally a generalized version of the theorem is proofed in \cite{Lebeda2022}.
+The proof will be omitted here, but it is very similar to the proofs for lemma \ref{lem:Optb} and Theorem \ref{theo:Alg3OptErr} which are in section \ref{seq:problem}.
+Additionally, a generalized version of the theorem is proofed in \cite{Lebeda2022}.
 
 Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm \ref{alg:EllipGM} we have the following ratio
 \[
@@ -392,14 +391,14 @@ Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm
     = \lr{\frac{\sqrt{d}\| \bm{\Delta} \|}{\| \bm{\Delta} \|_1}}^2
     = \frac{d \sum_{j \in [d]} \Delta_j^2}{\lr{\sum_{j \in [d]} \Delta_j}^2}
 \]
-in which it can be seen that they are equal when all entries of $\bm{\Delta}$ are the same. Otherwise the error for the Elliptical Gaussian Mechanism is lower
+in which it can be seen that they are equal when all entries of $\bm{\Delta}$ are the same. Otherwise, the error for the Elliptical Gaussian Mechanism is lower
 when $\bm{\Delta}$ is skewed. As argued in \cite{Lebeda2022} Algorithm \ref{alg:EllipGM} improves Algorithm \ref{alg:gaussmech} by a factor in $[1,d)$.
 
 \section{Problem setup}
 \label{seq:problem}
-As previously mentioned the problem investigated here consists of realeasing the sum of vectors 
+As previously mentioned the problem investigated here consists of releasing the sum of vectors 
 in a dataset under differential privacy.
-More formally we whish to release the value of 
+More formally we wish to release the value of 
 $ f(X) = \sum_{i = 1}^n x_i  $
 under \edp. \\
 The common factor for achieving \edp in both the Gaussian Mechanism
@@ -408,21 +407,21 @@ Specifically for the Elliptical Gaussian Mechanism data is required to lie withi
 It is formally described by equation \eqref{eq:DimCon} 
 essentially saying that there is an upper and lower bound on each dimension.
 This requirement is needed to know the $l_2$-sensitivity $ \Delta(f) $ as shown in equation \eqref{eq:DelF}.
-In this project I will change this assumption and instead 
+In this project, I will change this assumption and instead 
 look at the case where each dimension is normally distributed.
 This means that for each 
 $ j \in [d] $ we have that 
 $x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$.
 An equivalent formulation is that the data is 
-multivariately gaussianly distributed but with no correlation between dimensions.
+multivariate gaussianly distributed but with no correlation between dimensions.
 This means that $x_i \sim \mathcal{N}(\bm{\mu}, \Sigma ) $, 
 where $\Sigma$ is a diagonal matrix with the variance of each 
 dimension along its diagonal.
 It is quite apparent that determining a limit $ \Delta_j $ is impossible 
 in this setting as the support of the gaussian distribution is $ (-\infty, \infty)$.
-Several recent papers has combatted this by doing something called 
+Several recent papers have combatted this by doing something called 
 \textit{clipping} \cite{Huang2021,coinpress}. 
-Clipping is the process of limiting all points to lie within a sphere with radius $C$.
+Clipping is the process of limiting all points to lie within a sphere of radius $C$.
 To perform clipping two things are required, (1) a center of the sphere which we call $\bm{\hat{\mu}}$
 which will become obvious why later, and (2) the radius $C$.
 This means that every vector is transformed as such
@@ -443,29 +442,29 @@ $\sigma_{\epsilon, \delta} = \Delta\lr{\overline{f}} \sigma_{opt} = 2C \sigma_{o
 Though the mechanism is still \edp it will now have 
 a larger error when regarding the true sum
 $f(X) = \sum_i^n x_i$ as the actual answer. If the probability of clipping is set
-so low that we actually don't expect to clip any entries we can use $\overline{f}$ as an approximation of $f$.
+so low that we don't expect to clip any entries we can use $\overline{f}$ as an approximation of $f$.
 Say there are $n$ points in a dataset, I will thus set the probability of clipping to be less than $\frac{1}{n}$ and get that
 \[
     \ee{\lr{\overline{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
 \]
-This is of course not correct as some error will come from clipping points, but in this report 
+This is of course not correct as some error will come from clipping points but in this report 
 I will solely focus on the error introduced by the noise added. Another source of error will come from
 determining a good estimate for the center of the sphere, which optimally is $\mue = \bm{\mu}$, i.e. 
 the mean of the distribution which the data originates from.
 As lemma \ref{lem:dpcombine} states that \edp methods can be combined,
-one can aquire such an estimate using some of the privacy budget.
+one can acquire such an estimate using some of the privacy budget.
 However, doing so is in essence almost the same problem as I am attempting to solve.
 The difference lies in the fact that this estimate could be given quite 
-losely and I am interested in the sum (or mean) of a specific dataset not that of the original distribution. \\
+loosely and I am interested in the sum (or mean) of a specific dataset not that of the original distribution. \\
 
-In this setting, we again have the intuition that addding equal noise in all dimensions is non optimal, and instead the noise should be given as as monotone function
-of the standard deviation $\sigma_j$ in that dimension. In a desire to achieve similair results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
+In this setting, we again have the intuition that adding equal noise in all dimensions is non-optimal, and instead, the noise should be given as a monotone function
+of the standard deviation $\sigma_j$ in that dimension. In a desire to achieve similar results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
 I will use somewhat the same approach to achieve \edp.
-They achieve \edp by finding scalings of each dimenion such that all points lie within a unit ball, i.e. a ball with radius $1$. 
+They achieve \edp by finding scalings of each dimension such that all points lie within a unit ball, i.e. a ball with radius $1$. 
 There does not exist such a transformation for gaussian data, as there will always be a non-zero 
 probability of observing points outside the unit ball.
-Instead I will introduce the constraint that the expected squared distance betwwen any point and the estimated mean $\mue$ after the transformation should be $1$. 
-I whish to find a scaling of each dimension $b_j$ s.t.
+Instead, I will introduce the constraint that the expected squared distance between any point and the estimated mean $\mue$ after the transformation should be $1$. 
+I wish to find a scaling of each dimension $b_j$ s.t.
 \begin{align}
     &\tilde{x}_i := (x_i - \mue) \odot \bm{b} \\
 \label{eq:Alg3Con}
@@ -517,21 +516,20 @@ The error introduced by the noise is then given by $\| \bm{\eta} \|^2$ and due t
     \Return $T + \bm{\eta}$
 \end{algorithmic}
 \end{algorithm}
-The pseudo code for the mechanism is given in Algorithm \ref{alg:EGM2}. At first glance it seems quite different from Algorithm \ref{alg:EllipGM}
-despite it being very similiar. The most notable thing here
+The pseudo-code for the mechanism is given in Algorithm \ref{alg:EGM2}. At first glance, it seems quite different from Algorithm \ref{alg:EllipGM}
+despite it being very similar. The most notable thing here
 is that the transformation has to be performed on the dataset,
-as it is important which points are being clipped, in order to ensure that the mechanism is \edp.
-In Algorithm \ref{alg:EllipGM} only the inverse transformation, $b_j^{-1}$, is being
-applied on the noise to be added. \\
+as it is important which points are being clipped, to ensure that the mechanism is \edp.
+In Algorithm \ref{alg:EllipGM} only the inverse transformation, $b_j^{-1}$, is being applied on the noise to be added. \\
 
-\noindent If we try to minimize the error introduced by the noise, we are back to a very similiar problem to the one solved in \cite{Lebeda2022}. 
+\noindent If we try to minimize the error introduced by the noise, we are back to a very similar problem to the one solved in \cite{Lebeda2022}. 
 Minimize the error described in equation \eqref{eq:Alg3Err}
 under the constraint given in equation \eqref{eq:Alg3Con}.
 The constraint can be given as
 \begin{equation*}
     \ee{(x_i - \mue) \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 + \| \bm{\mu} - \mue \|^2 = 1
 \end{equation*}
-due to Corollary \ref{cor:expNorm}. We then relax this constraint by ommitting $\| \bm{\mu} - \mue \|^2$, 
+due to Corollary \ref{cor:expNorm}. We then relax this constraint by omitting $\| \bm{\mu} - \mue \|^2$, 
 as this in terms of the algorithm is constant and will simply lead to a constant scaling of all $b_j$.
 Thus the constraint is
 \begin{equation}
@@ -553,7 +551,7 @@ in Algorithm \ref{alg:EGM2} is minimized when
 \end{lemma}
 \begin{proof}
 Using lagrangian multipliers we find the local maxima or 
-minia of the function subject to equality constraints.
+minima of the function subject to equality constraints.
 To do so we construct the lagrangian function $\mathcal{L}: \R^{d+1} \rightarrow \R$ from the optimization problem given by
 equation \eqref{eq:Alg3Err} and the constraint given by \eqref{eq:normcon} for ease of notation we define 
 $\sigma_{\epsilon, \delta} := 2C\sigma_{opt}$. 
@@ -623,8 +621,8 @@ In which
 \end{bmatrix}
 = \text{diag} \lr{\frac{6\sigma_{\epsilon, \delta}^2}{b_1^4} + 2\lambda\sigma_1^2, \dots, \frac{6\sigma_{\epsilon, \delta}^2}{b_d^4} + 2\lambda\sigma_d^2 }
 \end{gather*}
-The symmetric square matrix $\overline{H}$ of size $d+1$ only has values along the diagnoal, the first row
-and the first column, the rest is $0$ as there are no variables which depend on eachother.
+The symmetric square matrix $\overline{H}$ of size $d+1$ only has values along the diagonal, the first row
+and the first column, the rest is $0$ as there are no variables which depend on each other.
 Then theorem 7.12 from \cite{matrixcalc} states that if the $r$'th leading principal component of $\overline{H}$ is negative,
 evaluated with $b_j$ set by equation \eqref{eq:optbj} and $\lambda$ set by equation \eqref{eq:optlam}
 for all $r \in \{2,3,\dots,d+1\}$, the values thus give a minimum to the optimization problem.
@@ -634,7 +632,7 @@ gives the value for $b_j$ which minimizes the expected squared norm of the noise
 
 \end{proof}
 
-Now to evaluate the expected error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important important to determine the value $C$.
+Now to evaluate the expected error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important to determine the value $C$.
 As $C$ should be given by the minimal value which satisfies the inequality
 \[
    \prob{ \| (x_i - \mue) \odot \bm{b} \| > C } = \prob{ \| (x_i - \mue) \odot \bm{b} \|^2 > C^2} < \frac{1}{n}
@@ -643,11 +641,11 @@ again where $n$ denotes the number of points in the dataset.
 As $x_i$ is a multivariate gaussian distribution, so is $(x_i - \mue) \odot \bm{b}$ by lemma \ref{lem:GaussTrans},
 and it is the case that $\|(x_i - \mue) \odot \bm{b}\|^2$ is the sum of independent gaussian variables squared.
 Such a sum is distributed as a generalized Chi-square \cite{GenChiSq}, and neither its PDF nor CDF has a closed form in the general case.
-These quadratic forms of gaussian vectors has been studied well and for decades \cite{MathaiQaudForms,IowaQuadNormForms}, and some special cases does have closed forms.
-Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately there was none which were of use in this setting.
-However, there does exist several numerical algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
-I would recommend using one of these algorithms in practice, and will do so in the emperical analysis in section \ref{sec:emperical}.
-For the sake of analysis I will provide and upper bound on $C$ using Bernstein's inequality.
+These quadratic forms of gaussian vectors have been studied well and for decades \cite{MathaiQaudForms,IowaQuadNormForms}, and some special cases do have closed forms.
+Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately, there were none which were of use in this setting.
+However, there do exist several numerical algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
+I would recommend using one of these algorithms in practice and I will do so in the empirical analysis in section \ref{sec:emperical}.
+For the sake of analysis, I will provide an upper bound on $C$ using Bernstein's inequality.
 
 \begin{lemma}
 \label{lem:Bernstein}
@@ -672,7 +670,7 @@ using the $j$'th gaussian random variable.
 As $\Exp{Y_j} = \Exp{X_j^2 - \Exp{X_j^2}} = \Exp{X_j^2} - \Exp{X_j^2} = 0$ 
 we have that $Y_j$ is zero centered. We are thus interested in giving bounds on
 $\prob{\sum_{j \in [d]} Y_j}$. 
-We can use Bernsteins inequality, if there exists some $L \in \R$ which satisfies 
+We can use Bernstein's inequality, if there exists some $L \in \R$ which satisfies 
 \begin{equation}
 \label{eq:BernCon}
     \Exp{ |Y^k_j| } \le \frac{1}{2} \Exp{Y_j^2} L^{k-2} k!
@@ -688,8 +686,8 @@ we can therefore bound it by
     \Exp{ | \lr{\sigma_j^2 Z}^{k} | } = 
     \sigma_j^{2k} \cdot \Exp{ |Z^{k} | }
 \]
-Where $Z \sim \chi^2_1$ is a chi square with 1 degree of freedom.
-The moment generating function of $Z$ is 
+Where $Z \sim \chi^2_1$ is a chi-square random variable with 1 degree of freedom.
+The moment-generating function of $Z$ is 
 $\Exp{Z^m} = 1 \cdot 3 \cdot 5 \cdot \ldots \cdot (2m - 1) $.
 Using this we can get the following bound
 \begin{align*}
@@ -738,7 +736,7 @@ We can then use Bernstein's inequality to bound the following
     \prob{\sum_{j \in [d]} Y_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{Y_j^2}}} < e^{-t^2}
 \end{equation}
 
-Which in in this case can be rewritten to get a tail bound on $\sum_{j \in [d]} X_j^2$,
+Which in this case can be rewritten to get a tail bound on $\sum_{j \in [d]} X_j^2$,
 by reusing results from equations \eqref{eq:ExpY2:1}-\eqref{eq:ExpY2:2}
 \begin{align*}
 &\prob{\sum_{j \in [d]} Y_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{Y_j^2}}} 
@@ -795,7 +793,7 @@ when $\mue = \bm{\mu}$.
     \prob{ \sum_{j \in [d]} \tilde{x}_{i,j}^2 \ge C^2}
 \end{align*}
 
-Which means I can give an upper bound on $C^2$, whilst having
+This means I can give an upper bound on $C^2$, whilst having
 $b_j \sigma_j = \sqrt{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}$ 
 as the standard deviation.
 Furthermore, I wish the clipping probability to be less than $n^{-1}$, giving me
@@ -835,13 +833,13 @@ And the constraint on $t = \sqrt{\ln (n)}$ from lemma \ref{lem:Bernstein} is
 \end{align*}
 \end{proof}
 
-At this point it would be preferable to compare the error of algorithm 3, to that of doing no transformation, and similairly deciding on a bound $C$ 
-such that the clipping probability was less than $n^{-1}$ on $X$. However as I can only give upper bounds on these errors there is little to no value in comparing 
-upper bounds as there is no guarentee on the thighness of these bounds. So even if I were to determine an upper bound for the error without transformation which was higher than that of algorithm 3, 
+At this point, it would be preferable to compare the error of algorithm 3, to that of doing no transformation, and similarly deciding on a bound $C$ 
+such that the clipping probability was less than $n^{-1}$ on $X$. However, as I can only give upper bounds on these errors there is little to no value in comparing 
+upper bounds as there is no guarantee on the tightness of these bounds. So even if I were to determine an upper bound for the error without transformation which was higher than that of algorithm 3, 
 it could very well still be that the error was less in reality.
-As previously mention, there exists numerical solutions for evaluating $\prob{\|x_i\| > C^2}$ so it is natural to perform an emperically evaluation of these errors
- and investigating whether the transformation lessen the error.
-Intuitively it makes sense that allowing different noise to be added for each dimension, can only produce better results.
+As previously mentioned, there exist numerical solutions for evaluating $\prob{\|x_i\| > C^2}$ so it is natural to perform an empirically evaluation of these errors
+ and investigating whether the transformation lessens the error.
+Intuitively it makes sense that allowing noise to be added differently for each dimension, can only produce better results.
 %\todo{Write and discuss restrictiveness of the bound}
 %\todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
 %\todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
@@ -851,26 +849,26 @@ Intuitively it makes sense that allowing different noise to be added for each di
 % TODO: insert link to python package for evaluating the CDF, as well as link to source code for experiment
 \section{Emperical Evaluation}
 \label{sec:emperical}
-For the emperical evaluation I wanted to investigate the 
+For the empirical evaluation, I wanted to investigate the 
 improvement by calculating the expected error on hypothetical datasets. 
-This is as a contrast to using real world datasets, where it is uncertain whether
+This is in contrast to using real-world datasets, where it is uncertain whether
 the data is distributed according to a multivariate gaussian mechanism with independent dimensions.
-Secondly I gain the benefit of creating a wide range of hypothetical scenarios and evaluating these.
-When creating hypothetical dataset I am merely interested in the standard deviations of each dimension,
-thus there is no need to truly create a dataset but instead I chose to 
+Secondly, I gain the benefit of creating a wide range of hypothetical scenarios and evaluating these.
+When creating a hypothetical dataset I am merely interested in the standard deviations of each dimension,
+thus there is no need to truly create a dataset but instead, I chose to 
 synthetically create the parameters of a hypothetical dataset.
 So I chose to have the standard deviation of each dimension be chosen according 
 to Zipf's law \cite{zipf}. The distribution is often used to describe 
-sizes of cities or frequencies of words in texts, but it can also be used to 
+the sizes of cities or frequencies of words in texts, but it can also be used to 
 describe discrete distributions with different levels of skewness. 
-This propoerty is what I will be utilizing, as I will chose the 
+This property is what I will be utilizing, as I will choose the 
 standard deviation of dimension $i \in [d]$ as
 \[
     \sigma_i = \frac{ \frac{1}{i^\alpha}}{\sum_{j \in [d]} \frac{1}{j^\alpha}}
 \]
 The parameter $\alpha$ thus decides the skewness of how much each dimension contributes to the total amount of variance.
 Figure \ref{fig:skew} shows how much each dimension contributes to the total variance for
-$\alpha \in \{0.1,1,3\}$ and $d = 100$. This means that for high $\alpha$ only a few dimensions has any variance, 
+$\alpha \in \{0.1,1,3\}$ and $d = 100$. This means that for high $\alpha$ only a few dimensions have any variance, 
 and for low $\alpha$ it is almost uniformly distributed.
 \begin{figure}[h!]
 \label{fig:skew}
@@ -880,29 +878,29 @@ zipf's law for different skewness levels ($\alpha$).}
 \end{figure}
 
 So the needed parameters to describe a hypothetical are $\alpha$, $d$ the number of dimensions, and 
-$n$ the number of points which is needed to decide the clipping probability.
+$n$ is the number of points which is needed to decide the clipping probability.
 
 I then calculated the expected error as described by equation 
 \eqref{eq:Alg3Err2} denoting this as $\mathcal{E}_t$ and compare that to
 \[
     \mathcal{E}_n = \lr{2C_n\sigma_{opt}}^2
 \]
-In which $C_n$ is choose as the minimal value satisfying 
+In which $C_n$ is chosen as the minimal value satisfying 
 $\prob{ \|x_i\|^2 > C_n^2} \le \frac{1}{n}$. 
 I then calculate the fraction $\frac{\mathcal{E}_n}{\mathcal{E}_t}$ to compare 
 the expected errors, and as I have $\sigma_{opt}^2$ in both the denominator and the numerator I 
-can ommit caluclating this as doing so is not a trivial task. 
+can omit calculating this as doing so is not a trivial task. 
 Figure \ref{fig:result} shows calculating this fraction for varying $\alpha \in [10^{-2}, 10^2]$, and for 
 $d \in \{10, 100, 1000\}$ and $n \in \{10^2, 10^3, 10^6\}$.
-It shows that when few dimensions have much more variance than the rest,
-performing the transformation improes the expected error, for all 
+It shows that when a few dimensions have much more variance than the rest,
+performing the transformation improves the expected error, for all 
 configurations of $n$ and $d$.
 \begin{figure}[h!]
 \label{fig:result}
 \includegraphics[scale=0.62]{plots/result.png}
 \caption{Improvement of applying the transformation. 
 Each subplot shows for a fixed number of dimensions $d$, how much the improvement is for different 
-skewness paramters $\alpha$ and number of data points $n$,
+skewness parameters $\alpha$ and the number of data points $n$,
  which is used to decide the clipping probability.}
 \end{figure}
 
@@ -914,17 +912,11 @@ It could perhaps have been that the transformation changed the distribution in s
 that the tail was much longer.
 Interestingly I observe that the method improves by a factor of $[1,d]$ 
 quite like how the Elliptical Gaussian Mechanism improves the Gaussian Mechanism by a 
-factor of $[1,d)$. Perhaps a similiar argument could be made in this case, 
+factor of $[1,d)$. Perhaps a similar argument could be made in this case, 
 if the distribution of the norms had a closed form or more analysis of it was done.
-But the emperical evidence is quite strong in favor of this phenomenon being present here as well.
+But the empirical evidence is quite strong in favour of this phenomenon being present here as well.
 
 
-
-
-In this setting To create these hypothetical dataset, I 
-
-
-in expected error by calculating 
 %- Zipf's law for different amount of skewness of standard deviation
 %- 10^-1 basically uniform and 10^1 basically only 1 dimension has variance
 %- Introduce how results are shown
@@ -943,9 +935,9 @@ the privacy budget.}
 Earlier when I defined the problem at hand I also defined the constraint that the expected norm after 
 transforming the data should be 1, i.e. the constraint given by equation \eqref{eq:normcon}. 
 This constraint is perhaps not optimal in terms of how the problem should be restricted. The idea behind the constraint
-is to force the data to become more symmetrical in the transformed space, however it does not necessarily enforce this. 
+is to force the data to become more symmetrical in the transformed space, however, it does not necessarily enforce this. 
 An alternative constraint which I initially investigated for this project was to find a transformation, such that the majority of 
-data entries lie within a ball with diameter 1, and entries outside would be clipped.
+data entries lie within a ball with a diameter of 1, and entries outside would be clipped.
 In this transformed space it would be sufficient to add noise drawn from
 $\mathcal{N}(0, \sigma_{opt}^2)$. The constraint would thus be the following
 \begin{equation}
@@ -953,46 +945,45 @@ $\mathcal{N}(0, \sigma_{opt}^2)$. The constraint would thus be the following
     \prob{ \| x_i \odot \bm{b} \| > \frac{1}{2}} \le \frac{1}{n} 
 \end{equation}
 To achieve optimal results with this constraint it would be required to know the cumulative density function of $\| x_i \odot \bm{b} \|$, 
-which as discussed earlier is distributed as a generalized chi square and does not have a closed form. 
-So without a closed form there would be no way of finding optimal values for $b_j$. 
+which as discussed earlier is distributed as a generalized chi-square and does not have a closed form. 
+So without a closed form, there would be no way of finding optimal values for $b_j$. 
 Another option would be to have the same constraint, but instead define it in terms of a tail inequality such as the one
 given by lemma \ref{lem:Bernstein}. However the constraint on $t$ in that lemma can be quite restrictive for some inputs, 
 and the method would not be applicable to all datasets.
 I also attempted to find optimal values for $b_j$ whilst using Chebyshev's inequality to give closed forms for equation \eqref{eq:AltCon}, 
-unfortunately this lead to a very complicated optimization problem, which I did not attempt to solve.
-The benefit os using Chebyshev's inequality would be that it is very generalized and would be applicable to any dataset, 
+unfortunately, this lead to a very complicated optimization problem, which I did not attempt to solve.
+The benefit of using Chebyshev's inequality would be that it is very generalized and would be applicable to any dataset, 
 but it is also quite well known that the bounds given by Chebyshev's inequality are usually quite loose. 
 I settled for the constraint where the expected norm is $1$, which intuitively seemed quite good and was much easier to solve. 
-The emperical data also support this intuition \\
+The empirical data also support this intuition \\
 
 % On the empirical evaulation
 % downside of not creating dataset and actually doing the algo
 % is that clipping bias is not taken into account
-In the emperical evaluation of the method I chose to compare the method
+In the empirical evaluation of the method, I chose to compare the method
 to that which I deemed the most natural thing to do if 
 one were to use the Gaussian Mechanism. Simply clip points with 
 probability $\frac{1}{n}$, and add noise according to this.
 This method nor doing it with a transformation does take into account
 the bias which comes from clipping the data in the first place.
 And preferably Algorithm \ref{alg:EGM2} (doing the transformation) should
-be compared to state of the art methods, such as the ones in \cite{coinpress, Huang2021}.
+be compared to state-of-the-art methods, such as the ones in \cite{coinpress, Huang2021}.
 In such as comparison the clipping bias should be taken into account as well, and
-in a more in depth analysis of the Algorithm \ref{alg:EGM2} it
-would interesting to investigate the bias-variance tradeoff and finding an
+in a more in-depth analysis of the Algorithm \ref{alg:EGM2} it
+would interesting to investigate the bias-variance tradeoff and find an
 optimal clipping probability $p_{C}$.
 
 
 \subsection{Limitation}
-The biggest limitation of the method proposed in this project, is the requirement for an estimate
+The biggest limitation of the method proposed in this project is the requirement for an estimate
 of the mean $\bm{\mu}$ as this is a problem equivalent to the one which the mechanism proposed here solves.
-The desire is that incorporating this is possible, as other methods in recent research has achieved something similair.
+The desire is that incorporating this is possible, as other methods in recent research have achieved something similar.
 Many parallels can be drawn to \cite{Huang2021}, as they also clip points
 according to some sphere in which they privately find a center for the sphere. The main concept which is introduced in this project
-is the noise is added to each dimension as a function of its variance, which is not done in \cite{Huang2021}.
+is that noise is added to each dimension as a function of its variance, which is not done in \cite{Huang2021}.
 My hope is that the analysis presented here is of value in a context where finding the center of the sphere is incorporated
 into the mechanism itself.
 
-\todo{Write conclusion}
 \newpage
 \section{It is a mess, don't look here}
 \subsection{Gaussian data}
@@ -1255,27 +1246,27 @@ and the rest are $0$.
 \[
     B_{r-1} =
     \begin{bmatrix}
-    \frac{2\sigma_1^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}} & 2\sigma_{\epsilon, \delta}^2 \lr{\sum_{i \in [d]} \sigma_i}^2 \lr{3\sigma_1^2 + 1} &  & \multirow{2.5}{0.5in}{\Large 0}  \\
+    \overline{H}_{r,2,1} & \overline{H}_{r,2,2} &  & \multirow{2.5}{0.5in}{\Large 0}  \\
     & \multirow{2.5}{-0.5in}{\Large 0}  & \ddots \\
-    \vdots &  & & 2\sigma_{\epsilon, \delta}^2 \lr{\sum_{i \in [d]} \sigma_i}^2 \lr{3\sigma_d^2 + 1} \\
-    \frac{2\sigma_1^{2/3}}{\sqrt{\sum_{i \in [d]} \sigma_i}} & 0 & \dots &  0
+    \vdots &  & & \overline{H}_{r,r-1,r-1} \\
+    \overline{H}_{r,r,1} & 0 & \dots &  0
     \end{bmatrix}
 \]
-Therefore I can calculate the determinant by multiplying $(-1)^{r-1 + 1} \cdot B_{r-1,r-1,1}$ with the determinant
+Therefore I can calculate the determinant by multiplying $(-1)^{r-1 + 1} \cdot \overline{H}_{r,r,1}$ with the determinant
 of the matrix I get when removing the last row and the first column of $B_{r-1}$.
 This matrix can be observed to be a diagonal matrix, in which all values along the diagonal are positive.
 Thus, this sub-matrix of $B_{r-1}$ has a positive determinant which I will denote as $\tilde{B}_{r-1}$
 in which as just said $|\tilde{B}_{r-1}| > 0$.
 Therefore
 \begin{align*}
-    |B_{r-1}| &= (-1)^{r-1+1} \cdot B_{r-1,r-1,1} \cdot |\tilde{B}_{r-1}| \\
-    &=(-1)^{r} \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}| \\
+    |B_{r-1}| &= (-1)^{r-1+1} \cdot \overline{H}_{r,r,1} \cdot |\tilde{B}_{r-1}| \\
+    &=(-1)^{r} \cdot \overline{H}_{r,r,1} \cdot |\tilde{B}_{r-1}| \\
     \implies  &(-1)^{1+r} \cdot |B_{r-1}| \\
-    &=  (-1)^{1+r} \cdot (-1)^{r} \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}| \\
-    &= (-1)^{2r + 1} \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}| \\
-    &= -1 \cdot \overline{H}_{r,r-1,1} \cdot |\tilde{B}_{r-1}|
+    &=  (-1)^{1+r} \cdot (-1)^{r} \cdot \overline{H}_{r,r,1} \cdot |\tilde{B}_{r-1}| \\
+    &= (-1)^{2r + 1} \cdot \overline{H}_{r,r,1} \cdot |\tilde{B}_{r-1}| \\
+    &= -1 \cdot \overline{H}_{r,r,1} \cdot |\tilde{B}_{r-1}|
 \end{align*}
-And since both $\overline{H}_{r,r-1,1} > 0$ and $|\tilde{B}_{r-1} > 0$, we have that
+And since both $\overline{H}_{r,r,1} > 0$ and $|\tilde{B}_{r-1}| > 0$, we have that
 $(-1)^{1+r} \cdot |B_{r-1}| < 0$, completing the induction step by equation \eqref{eq:inducstep}.
 \end{proof}
 
