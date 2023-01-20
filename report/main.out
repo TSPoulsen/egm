@@ -2,11 +2,10 @@
 \BOOKMARK [1][-]{section.2}{Definitions \046 Preliminaries}{}% 2
 \BOOKMARK [2][-]{subsection.2.1}{Gaussian Random Variables}{section.2}% 3
 \BOOKMARK [1][-]{section.3}{Algorithms}{}% 4
-\BOOKMARK [2][-]{subsection.3.1}{The Gaussian Mechanism}{section.3}% 5
-\BOOKMARK [1][-]{section.4}{Problem setup}{}% 6
-\BOOKMARK [1][-]{section.5}{Emperical Evaluation}{}% 7
-\BOOKMARK [1][-]{section.6}{Discussion \046 Future work}{}% 8
-\BOOKMARK [2][-]{subsection.6.1}{Limitation}{section.6}% 9
-\BOOKMARK [1][-]{section.7}{It is a mess, don't look here}{}% 10
-\BOOKMARK [2][-]{subsection.7.1}{Gaussian data}{section.7}% 11
-\BOOKMARK [1][-]{appendix.A}{Induction proof of the r'th leading principal component of the Bordered Hessian matrix in lemma 4.1}{}% 12
+\BOOKMARK [1][-]{section.4}{Problem setup}{}% 5
+\BOOKMARK [1][-]{section.5}{Emperical Evaluation}{}% 6
+\BOOKMARK [1][-]{section.6}{Discussion \046 Future work}{}% 7
+\BOOKMARK [2][-]{subsection.6.1}{Limitation}{section.6}% 8
+\BOOKMARK [1][-]{section.7}{It is a mess, don't look here}{}% 9
+\BOOKMARK [2][-]{subsection.7.1}{Gaussian data}{section.7}% 10
+\BOOKMARK [1][-]{appendix.A}{Induction proof of the r'th leading principal component of the Bordered Hessian matrix in lemma 4.1}{}% 11

@@ -27,6 +27,13 @@
 {\sc Das, A., and Geisler, W.~S.}
 \newblock A method to integrate and classify normal distributions, 2020.
 
+\bibitem{daviesalgo}
+{\sc Davies, R.~B.}
+\newblock Algorithm as 155: The distribution of a linear combination of
+  chi-square random variables.
+\newblock {\em Journal of the Royal Statistical Society. Series C (Applied
+  Statistics) 29}, 3 (1980), 323--333.
+
 \bibitem{dpbasic}
 {\sc Dwork, C., Roth, A., et~al.}
 \newblock The algorithmic foundations of differential privacy.

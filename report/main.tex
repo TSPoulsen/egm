@@ -11,6 +11,7 @@
 \usepackage{cleveref}  % For referencing equations
 \usepackage{cite} % For bibtex
 \usepackage{multirow} % for multicolumn/ multirow in matrix
+\usepackage{titlesec}
 
 % For writing todo inline
 \presetkeys%
@@ -45,6 +46,10 @@
 \begin{document}
 
 \maketitle
+
+\tableofcontents
+
+\newpage
 \section{Introduction}
 In recent years there has been an increased focus on the privacy of individuals, as we live in the age of data.
 More and more data is collected about us to be used for solving real world problems, be that through old school statistics or
@@ -154,6 +159,7 @@ We thus have that
 
 
 \begin{lemma}[\edp under composition \defcite{dpbasic}{Theorem 3.16} ] % Theorem 3.16
+\label{lem:dpcombine}
 Let $\mathcal{M}_i: \R^{n \times d} \rightarrow \mathcal{R}_i$ be an $\lr{\epsilon_i, \delta_i}$-differentially private algorithm
 for $i \in [k]$. Then if $\mathcal{M}_{[k]} : \R^{n \times d} \rightarrow \prod_{i=1}^{k} \mathcal{R}_i$ is defined to be
 $\mathcal{M}_{[k]} = \lr{\mathcal{M}_1(X), \mathcal{M}_2(X), \dots, \mathcal{M}_{k}(X)}$ then we have that
@@ -186,7 +192,7 @@ I will however omit the proofs as they are of no importance to the project.
 Let $X \sim \mathcal{N}(\mu, \sigma^2)$ be a gaussian random variable and let $r \in \R$ be a constant.
 We then have that
 \begin{align*}
-    &rX \sim \mathcal{N}(\mu, (r\sigma)^2) \\
+    &rX \sim \mathcal{N}(r\mu, (r\sigma)^2) \\
     &X - r \sim \mathcal{N}(\mu-r, \sigma^2) 
 \end{align*}
     
@@ -442,7 +448,7 @@ $\sigma_{\epsilon, \delta} = \Delta\lr{\overline{f}} \sigma_{opt} = 2C \sigma_{o
 Though the mechanism is still \edp it will now have 
 a larger error when regarding the true sum
 $f(X) = \sum_i^n x_i$ as the actual answer. If the probability of clipping is set
-so low that we don't expect to clip any entries we can use $\overline{f}$ as an approximation of $f$.
+so low that we don't expect to clip any entries, and $\mue$ estimates $\bm{\mu}$ well, we can use $\overline{f}$ as an approximation of $f$.
 Say there are $n$ points in a dataset, I will thus set the probability of clipping to be less than $\frac{1}{n}$ and get that
 \[
     \ee{\lr{\overline{f}(X) + \eta} - f(X)} \approx \ee{\lr{f(X) + \eta} - f(X)} = \ee{\eta}
@@ -527,10 +533,10 @@ Minimize the error described in equation \eqref{eq:Alg3Err}
 under the constraint given in equation \eqref{eq:Alg3Con}.
 The constraint can be given as
 \begin{equation*}
-    \ee{(x_i - \mue) \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 + \| \bm{\mu} - \mue \|^2 = 1
+    \ee{(x_i - \mue) \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 + \| \bm{b} \odot \lr{\bm{\mu} - \mue} \|^2 = 1
 \end{equation*}
-due to Corollary \ref{cor:expNorm}. We then relax this constraint by omitting $\| \bm{\mu} - \mue \|^2$, 
-as this in terms of the algorithm is constant and will simply lead to a constant scaling of all $b_j$.
+due to Corollary \ref{cor:expNorm}. We then relax this constraint by omitting $ \| \bm{b} \odot \lr{ \bm{\mu} - \mue} \|^2$, 
+both due to ease of analysis and as we assume $\mue$ estimates $\bm{\mu}$ well enough for this term to be negiable.
 Thus the constraint is
 \begin{equation}
 \label{eq:normcon}
@@ -645,7 +651,8 @@ These quadratic forms of gaussian vectors have been studied well and for decades
 Some have also studied giving tail bounds on these probabilities \cite{QaudFormsBounds}, unfortunately, there were none which were of use in this setting.
 However, there do exist several numerical algorithms for evaluating the cumulative density function with high precision \cite{QuadFormsNume}. 
 I would recommend using one of these algorithms in practice and I will do so in the empirical analysis in section \ref{sec:emperical}.
-For the sake of analysis, I will provide an upper bound on $C$ using Bernstein's inequality.
+For the sake of analysis, I will provide an upper bound on $C$. There are many ways in which this can be done,
+I have chosen to do so using one of Bernstein's inequality, which results in a relatively simple expression.
 
 \begin{lemma}
 \label{lem:Bernstein}
@@ -840,13 +847,7 @@ it could very well still be that the error was less in reality.
 As previously mentioned, there exist numerical solutions for evaluating $\prob{\|x_i\| > C^2}$ so it is natural to perform an empirically evaluation of these errors
  and investigating whether the transformation lessens the error.
 Intuitively it makes sense that allowing noise to be added differently for each dimension, can only produce better results.
-%\todo{Write and discuss restrictiveness of the bound}
-%\todo{Write about alternative ways of giving upper bound on $C$, and why it is not so important}
-%\todo{Write alternative ways of defining the problem. CLip prob less than $n^{-1}$ and such}
 
-
-%\todo{Write emperical evaluation section} 
-% TODO: insert link to python package for evaluating the CDF, as well as link to source code for experiment
 \section{Emperical Evaluation}
 \label{sec:emperical}
 For the empirical evaluation, I wanted to investigate the 
@@ -886,7 +887,10 @@ I then calculated the expected error as described by equation
     \mathcal{E}_n = \lr{2C_n\sigma_{opt}}^2
 \]
 In which $C_n$ is chosen as the minimal value satisfying 
-$\prob{ \|x_i\|^2 > C_n^2} \le \frac{1}{n}$. 
+$\prob{ \|x_i\|^2 > C_n^2} \le \frac{1}{n}$.
+I calculate this using the python package \href{https://pypi.org/project/chi2comb/}{chi2comb}, 
+which is based on the algorithm described in \cite{daviesalgo}.
+
 I then calculate the fraction $\frac{\mathcal{E}_n}{\mathcal{E}_t}$ to compare 
 the expected errors, and as I have $\sigma_{opt}^2$ in both the denominator and the numerator I 
 can omit calculating this as doing so is not a trivial task. 
@@ -914,22 +918,17 @@ Interestingly I observe that the method improves by a factor of $[1,d]$
 quite like how the Elliptical Gaussian Mechanism improves the Gaussian Mechanism by a 
 factor of $[1,d)$. Perhaps a similar argument could be made in this case, 
 if the distribution of the norms had a closed form or more analysis of it was done.
-But the empirical evidence is quite strong in favour of this phenomenon being present here as well.
+But the empirical evidence is quite strong in favour of this phenomenon being present here as well. \\
 
-
+\noindent All the code for generating these results and plots can be found on \url{https://github.com/TSPoulsen/egm}.
 %- Zipf's law for different amount of skewness of standard deviation
 %- 10^-1 basically uniform and 10^1 basically only 1 dimension has variance
 %- Introduce how results are shown
 %- Skewness has great impact on improvement
 %- improvement of [1, d] just like original paper (and ref the equation)
 % In the future:
-%- Comparison to state of the art methods, including the clipping bias.
-\todo{Downside of not creating dataset adn doing algo is that clipping bias is not taken into account}
-\todo{Compare method to state of the art on hypothetical datasets.}
-\todo{Mention that method requires sigmas to be known as estimating would take up most of
-the privacy budget.}
 
-
+\newpage
 \section{Discussion \& Future work}
 % On the problem setup
 Earlier when I defined the problem at hand I also defined the constraint that the expected norm after 
@@ -947,15 +946,17 @@ $\mathcal{N}(0, \sigma_{opt}^2)$. The constraint would thus be the following
 To achieve optimal results with this constraint it would be required to know the cumulative density function of $\| x_i \odot \bm{b} \|$, 
 which as discussed earlier is distributed as a generalized chi-square and does not have a closed form. 
 So without a closed form, there would be no way of finding optimal values for $b_j$. 
+
 Another option would be to have the same constraint, but instead define it in terms of a tail inequality such as the one
-given by lemma \ref{lem:Bernstein}. However the constraint on $t$ in that lemma can be quite restrictive for some inputs, 
-and the method would not be applicable to all datasets.
-I also attempted to find optimal values for $b_j$ whilst using Chebyshev's inequality to give closed forms for equation \eqref{eq:AltCon}, 
-unfortunately, this lead to a very complicated optimization problem, which I did not attempt to solve.
+given by lemma \ref{lem:Bernstein}. However the constraint on $t$ in that lemma can be quite restrictive for some inputs. 
+This means that it is not always possible to set $t$ such that $e^{-t} = \frac{1}{n}$, 
+and the method would not be applicable for all inputs.
+I also attempted to find optimal values for $b_j$ whilst using Chebyshev's inequality to give closed forms for equation \eqref{eq:AltCon}.
+Unfortunately, this lead to a very complicated optimization problem, which I did not attempt to solve.
 The benefit of using Chebyshev's inequality would be that it is very generalized and would be applicable to any dataset, 
-but it is also quite well known that the bounds given by Chebyshev's inequality are usually quite loose. 
+but it is also quite well known that the bounds given by Chebyshev's inequality are often quite far from the true values. 
 I settled for the constraint where the expected norm is $1$, which intuitively seemed quite good and was much easier to solve. 
-The empirical data also support this intuition \\
+The empirical data also support this intuition. \\
 
 % On the empirical evaulation
 % downside of not creating dataset and actually doing the algo
@@ -964,18 +965,27 @@ In the empirical evaluation of the method, I chose to compare the method
 to that which I deemed the most natural thing to do if 
 one were to use the Gaussian Mechanism. Simply clip points with 
 probability $\frac{1}{n}$, and add noise according to this.
-This method nor doing it with a transformation does take into account
-the bias which comes from clipping the data in the first place.
-And preferably Algorithm \ref{alg:EGM2} (doing the transformation) should
+Both this method, and doing it with a transformation do \textbf{not} take into account
+the bias which comes from clipping the data in the first place. 
+It is not necessarily the case that the ignored clipping errors are equal, 
+it can be that the few points which are clipped in the transformed space introduce much more error
+than the ones which are clipped in the original space. 
+The argument for ignoring them is that the clipping probability is set very low,
+thus only very few points are being clipped in the first place. In a situation where
+the clipping probability is set to account for the bias-variance tradeoff between noise error
+and clipping error, the clipping error will most likely have a larger impact which could be amplified by the transformation. \\
+Generally Algorithm \ref{alg:EGM2} (doing the transformation) should
 be compared to state-of-the-art methods, such as the ones in \cite{coinpress, Huang2021}.
-In such as comparison the clipping bias should be taken into account as well, and
+In such as comparison the clipping bias should most certainly be taken into account as well, and
 in a more in-depth analysis of the Algorithm \ref{alg:EGM2} it
 would interesting to investigate the bias-variance tradeoff and find an
 optimal clipping probability $p_{C}$.
 
 
 \subsection{Limitation}
-The biggest limitation of the method proposed in this project is the requirement for an estimate
+\todo{Mention that method requires sigmas to be known as estimating would take up most of
+the privacy budget.}
+One of the biggest limitation of the method proposed in this project is the requirement for an estimate
 of the mean $\bm{\mu}$ as this is a problem equivalent to the one which the mechanism proposed here solves.
 The desire is that incorporating this is possible, as other methods in recent research have achieved something similar.
 Many parallels can be drawn to \cite{Huang2021}, as they also clip points

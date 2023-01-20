@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Definitions \& Preliminaries}{2}{section.2}%
+\contentsline {paragraph}{Error Measure}{4}{lemma.2.2}%
+\contentsline {subsection}{\numberline {2.1}Gaussian Random Variables}{4}{subsection.2.1}%
+\contentsline {section}{\numberline {3}Algorithms}{4}{section.3}%
+\contentsline {section}{\numberline {4}Problem setup}{7}{section.4}%
+\contentsline {section}{\numberline {5}Emperical Evaluation}{17}{section.5}%
+\contentsline {section}{\numberline {6}Discussion \& Future work}{19}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Limitation}{20}{subsection.6.1}%
+\contentsline {section}{\numberline {7}It is a mess, don't look here}{21}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Gaussian data}{21}{subsection.7.1}%
+\contentsline {section}{\numberline {A}Induction proof of the $r$'th leading principal component of the Bordered Hessian matrix in lemma \ref {lem:Optb}}{26}{appendix.A}%
