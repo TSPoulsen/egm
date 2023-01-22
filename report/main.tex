@@ -40,12 +40,35 @@
 \newtheorem{lemma}{Lemma}[section]
 
 
-\title{Differentially private vector sums in the case of normally distributed data}
-\author{Tim Sehested Poulsen}
+\title{\textbf{Differentially private vector sums for normally distributed data}}
+\author{Tim Sehested Poulsen \\ tpw705@alumni.ku.dk}
+
 
 \begin{document}
 
 \maketitle
+\begin{center}
+Supervisor: Rasmus Pagh
+\end{center}
+\begin{figure}[b]
+\centering{
+\includegraphics[scale=0.5]{KU_logo.png}
+}
+\end{figure}
+\newpage
+\begin{abstract}
+This project aims at, reviewing some current methods to achieve differentially private estimates
+of sums of vectors. One such method which utilizes the variance of each dimension
+is then analysed further in an attempt to add less noise whilst still achieving differential privacy.
+I did so in a restricted setting in which data is normally distributed with 
+priory knowledge about the distribution. I then analysed the 
+noise in this setting and ways in which the mechanism could be used optimally.
+I then proceed to give bounds on the noise and lastly evaluate it empirically on
+synthetic datasets. This shows great promise as the empirical improvement is between 1 to d times better than a naive approach.
+Lastly the limitations of the proposed method and analysis is discussed and ways in
+further research could be carried out are reviewed. 
+\end{abstract}
+\newpage
 
 \tableofcontents
 
@@ -96,7 +119,7 @@ when arguing about privacy and proving that an algorithm satisfies differential 
 Two dataset $X, X' \in \R^{n \times d}$ are said to be
 neighboring if they differ in at most a single entry.
 Neighboring dataset are denoted with the relation $X \sim X'$ and defined as follows:
-\[ X \sim X' \iff \lra{ \setdef{i \in \N}{i \le n \land x_i \ne x_i' } } \le 1 \]
+\[ X \sim X' \iff \lra{ \setdef{i \in [n]}{ x_i \ne x_i' } } \le 1 \]
 \end{definition}
 
 \begin{definition}[Sensitivity \defcite{dpbasic}{Definition 3.8}] % Definition 3.8
@@ -198,7 +221,7 @@ We then have that
     
 \end{lemma}
 
-\begin{lemma}[Expectation of a quadratic random variable \cite{BatesQuadForm}]
+\begin{lemma}[Expectation of a quadratic random variable \defcite{BatesQuadForm}{Theorem 6}]
 \label{lem:ExpQuad}
 Let $X$ be a $d$-dimensional random vector with expected value $\Exp{X} =  \bm{\mu_{X}}$
 and covariance matrix $\var{X} = \bm{\Sigma_{X}}$. Let also $A$ be a constant 
@@ -222,6 +245,7 @@ of such a vector is given by
 
 
 \section{Algorithms}
+\subsection{The Gaussian Mechanism}
 One of the most fundamental algorithms for achieving 
 \edp is the Gaussian Mechanism \cite{dpbasic}. It computes the real
 value of a statistic, where the $l_2$-sensitivity is known.
@@ -263,7 +287,7 @@ Pseudo code for the algorithm can be seen in Algorithm \ref{alg:gaussmech}.
 Which by corollary \ref{cor:expNorm} is 
 \begin{equation}
 \label{eq:ExpErrGM}
-    \ee{\eta} = \sum_i^d \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
+    \ee{\bm{\eta}} = \sum_i^d \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
 \end{equation}
 It is apparent that the main difficulty of the mechanism 
 lies in determining a $\sigma_{\epsilon, \delta}$ which achieves
@@ -290,6 +314,10 @@ $\sigma_{opt} \in \R$ is the smallest value greater than 0, which satisfies
 \label{eq:sigopt}
     \Phi \lr{\frac{1}{2\sigma_{opt}} - \epsilon\sigma_{opt}} - e^{\epsilon} \Phi \lr{-\frac{1}{2\sigma_{opt}} - \epsilon\sigma_{opt}} \le \delta
 \end{equation}
+Where $\Phi$ is the cumulative density function of a standard normal distribution, thus
+\[
+    \Phi(x) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{x} e^{-\frac{t^2}{2}} dt
+\]
 \end{theorem}
 In \cite{BalleWang} it is also shown how to compute this value, but since this is of no importance to this project it will therefore not be covered here.
 For the rest of the report, I will only be referring to $\sigma_{opt}$ as the minimal value given by equation \eqref{eq:sigopt}.
@@ -318,9 +346,10 @@ where $\bm{\Delta} = (\Delta_1, \Delta_2, \dots, \Delta_d)$.
 \noindent This means that by equation \eqref{eq:ExpErrGM} the expected error of the Gaussian Mechanism when estimating $f(X)$ is given by
 \begin{equation}
 \label{eq:GMErr}
-    \ee{\eta} = d \cdot \sigma_{\epsilon, \delta}^2 = d \cdot \lr{\Delta(f) \cdot \sigma_{opt}}^2 =
+    \ee{\bm{\eta}} = d \cdot \sigma_{\epsilon, \delta}^2 = d \cdot \lr{\Delta(f) \cdot \sigma_{opt}}^2 =
     d  \cdot \sigma_{opt}^2 \cdot \| \bm{\Delta} \|^2 
 \end{equation}
+\subsection{The Elliptical Gaussian Mechanism}
 A logical next step would be to add noise to each dimension such that it is given as a monotone function of the sensitivity of that dimension.
 This has been studied in \cite{Lebeda2022} and lays the foundation for this report. Their mechanism, called the \textit{Elliptical Gaussian Mechanism}
 works very similarly to the Gaussian Mechanism as described by algorithm \ref{alg:gaussmech}, though instead of sampling all $\eta_j$ from 
@@ -361,8 +390,8 @@ and in this space the sensitivity of $f(\tilde{X})= \sum_{i \in [n]} \tilde{x}_i
     \Delta(f) = \|\bm{b}\| = \sqrt{\sum_{j \in [d]} b_j^2} =  1
 \]
 This means that all points in $X$ are mapped to lie within the unit ball, and in this space, one can simply add noise to each 
-dimension drawn from $\eta_j \sim \mathcal{N}(0, \sigma_{opt})$. Then the inverse transformation $\frac{\Delta_j}{b_j}$ 
-can then be applied to each dimension of $f(\overline{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
+dimension drawn from $\eta_j \sim \mathcal{N}(0, \sigma_{opt}^2)$. Then the inverse transformation $\frac{\Delta_j}{b_j}$ 
+can then be applied to each dimension of $f(\tilde{X})$ as well as $\eta$, giving a differentially private estimate of $f(X)$, 
 because differential privacy is preserved under post-processing as per lemma \ref{lem:PostProc}. \\
 
 
@@ -400,7 +429,8 @@ Comparing the expected error between Algorithm \ref{alg:gaussmech} and Algorithm
 in which it can be seen that they are equal when all entries of $\bm{\Delta}$ are the same. Otherwise, the error for the Elliptical Gaussian Mechanism is lower
 when $\bm{\Delta}$ is skewed. As argued in \cite{Lebeda2022} Algorithm \ref{alg:EllipGM} improves Algorithm \ref{alg:gaussmech} by a factor in $[1,d)$.
 
-\section{Problem setup}
+\section{Gaussian Data}
+\subsection{Clipping points}
 \label{seq:problem}
 As previously mentioned the problem investigated here consists of releasing the sum of vectors 
 in a dataset under differential privacy.
@@ -463,6 +493,8 @@ However, doing so is in essence almost the same problem as I am attempting to so
 The difference lies in the fact that this estimate could be given quite 
 loosely and I am interested in the sum (or mean) of a specific dataset not that of the original distribution. \\
 
+\subsection{Noise scaling}
+
 In this setting, we again have the intuition that adding equal noise in all dimensions is non-optimal, and instead, the noise should be given as a monotone function
 of the standard deviation $\sigma_j$ in that dimension. In a desire to achieve similar results to that of the Elliptical Gaussian Mechanism, just with normally distributed data,
 I will use somewhat the same approach to achieve \edp.
@@ -472,12 +504,13 @@ probability of observing points outside the unit ball.
 Instead, I will introduce the constraint that the expected squared distance between any point and the estimated mean $\mue$ after the transformation should be $1$. 
 I wish to find a scaling of each dimension $b_j$ s.t.
 \begin{align}
+\nonumber
     &\tilde{x}_i := (x_i - \mue) \odot \bm{b} \\
 \label{eq:Alg3Con}
     &\ee{\tilde{x}} = 1
 \end{align}
 where $\bm{b} = (b_1, b_2, \dots, b_d)$, and $\odot$ is the element-wise product. 
-Then $\overline{f}$ can be computed on this transformed dataset $\widehat{X}$, where the probability of clipping is less than $\frac{1}{n}$.
+Then $\overline{f}$ can be computed on this transformed dataset $\tilde{X}$, where the probability of clipping is less than $\frac{1}{n}$.
 As lemma \ref{lem:PostProc} shows, \edp is preserved under post processing, 
 we can therefore add noise to each coordinate drawn from $\mathcal{N}(0,(2C\sigma_{opt})^2)$ in the transformed space to achieve \edp.
 The transformation back to the original space is then done by multiplying each dimension with $b_j^{-1}$, and due to the linearity of transformation 
@@ -493,7 +526,7 @@ The error introduced by the noise is then given by $\| \bm{\eta} \|^2$ and due t
     \ee{\bm{\eta}} = \sum_{j=1}^d \lr{b_j^{-1} \cdot 2C\sigma_{opt}}^2   = \lr{2C\sigma_{opt}}^2 \sum_{j=1}^d b_j^{-2}
 \end{equation}
 
-\begin{algorithm}
+\begin{algorithm}[h]
 \caption{The Elliptical Gaussian Mechanism for Gaussian data}\label{alg:EGM2}
 \begin{algorithmic}
     \Input
@@ -507,15 +540,15 @@ The error introduced by the noise is then given by $\| \bm{\eta} \|^2$ and due t
     \Output
     \State \edp estimate of $f(X)$
     \EndOutput
-    \State $\widehat{\bm{\sigma}} \gets \bm{\sigma} \odot \bm{b}$
-    \State $C \gets \textnormal{ Minimal $C$ satisfying } \prob{\|\widehat{x}\| > C} \le p_C \textnormal{, for } \widehat{x} \sim \mathcal{N}(\bm{0},\widehat{\bm{\sigma}})$
+    \State $\tilde{\bm{\sigma}} \gets \bm{\sigma} \odot \bm{b}$
+    \State $C \gets \textnormal{ Minimal $C$ satisfying } \prob{\|\tilde{x}\| > C} \le p_C \textnormal{, for } \tilde{x} \sim \mathcal{N}(\bm{0},\tilde{\bm{\sigma}})$
     \State $T \gets \bm{0}$
     \For{$i \in [n]$}
-        \State $\widehat{x}_i \gets \lr{x_i - \bm{\hat{\mu}}} \odot \bm{b}$
-        \State $T \gets T + \min \lr{\frac{C}{\|\widehat{x}_i\|}, 1} \cdot \widehat{x}_i + \bm{\hat{\mu}}$
+        \State $\tilde{x}_i \gets \lr{x_i - \bm{\hat{\mu}}} \odot \bm{b}$
+        \State $T \gets T + \min \lr{\frac{C}{\|\tilde{x}_i\|}, 1} \cdot \tilde{x}_i $
     \EndFor
+    \State $T \gets \lr{T \odot \bm{b}^{-1}} + \mue$
     \For{$j \in [d]$}
-        \State $T_j \gets T_j \cdot b_j^{-1}$
         \State $\sigma_{\epsilon, \delta, j} \gets 2C\sigma_{opt} \cdot b_j^{-1}$
         \State $\eta_j \gets \textnormal{sample from } \mathcal{N}(0, \sigma_{\epsilon, \delta, j}^2)$
     \EndFor \\
@@ -536,7 +569,7 @@ The constraint can be given as
     \ee{(x_i - \mue) \odot \bm{b}} = \sum_{j \in [d]} (b_j\sigma_j)^2 + \| \bm{b} \odot \lr{\bm{\mu} - \mue} \|^2 = 1
 \end{equation*}
 due to Corollary \ref{cor:expNorm}. We then relax this constraint by omitting $ \| \bm{b} \odot \lr{ \bm{\mu} - \mue} \|^2$, 
-both due to ease of analysis and as we assume $\mue$ estimates $\bm{\mu}$ well enough for this term to be negiable.
+both due to ease of analysis and as we assume $\mue$ estimates $\bm{\mu}$ well enough for this term to be negligible.
 Thus the constraint is
 \begin{equation}
 \label{eq:normcon}
@@ -549,7 +582,7 @@ Thus the constraint is
 \label{lem:Optb}
 Let $X \in \R^{n \times d}$ be a dataset where each dimension is independently gaussianly distributed, i.e.
 $x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$.
-Then the expected squared norm of the noise $\ee{\bm{\eta}}$, 
+Assuming that $\mue = \bm{\mu}$, the expected squared norm of the noise $\ee{\bm{\eta}}$, 
 in Algorithm \ref{alg:EGM2} is minimized when
 \[
     b_j = \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i}}
@@ -578,6 +611,7 @@ The derivative with respect to $b_j$ is
 \]
 I then solve $\frac{\partial \mathcal{L}}{\partial b_j}(\bm{b},\lambda) = 0$ for $b_j$
 \begin{align}
+\nonumber
     &-2\sigma_{\epsilon,\delta}^2 b_j^{-3} + 2 \lambda \sigma_j^2b_j = 0 \iff
     \lambda \sigma_j^2b_j = \sigma_{\epsilon,\delta}^2 b_i^{-3}  \\
 \label{eq:solvbi}
@@ -589,8 +623,10 @@ $\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 0$ which I solv
 $\lambda$ using the previous expression for $b_j$.
 
 \begin{align}
+\nonumber
     &\frac{\partial \mathcal{L}}{\partial \lambda}(\bm{b},\lambda) = 
     \sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 \\
+\nonumber
     &\sum_{j=1}^d \lr{ \sigma_j b_j}^2 - 1 = 0 \iff
     \sum_{j=1}^d \sigma_j^2 \lr{ \frac{\sigma_{\epsilon,\delta}}{\sqrt{\lambda}\sigma_j}} = 1 \iff \\
     \label{eq:optlam}
@@ -600,7 +636,7 @@ $\lambda$ using the previous expression for $b_j$.
 Inserting back into equation \eqref{eq:solvbi}
 \begin{equation}
 \label{eq:optbj}
-    b_j = \pm \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} =
+    b_j = \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\lambda^{\frac{1}{4}} \sqrt{\sigma_j}} =
     \frac{\sqrt{\sigma_{\epsilon,\delta}}}{\sqrt{\sigma_{\epsilon,\delta} \sum_{i=1}^d \sigma_i} \sqrt{\sigma_j}} = 
     \frac{1}{\sqrt{\sigma_j} \sqrt{\sum_{i=1}^d \sigma_i} } 
 \end{equation}
@@ -629,16 +665,17 @@ In which
 \end{gather*}
 The symmetric square matrix $\overline{H}$ of size $d+1$ only has values along the diagonal, the first row
 and the first column, the rest is $0$ as there are no variables which depend on each other.
-Then theorem 7.12 from \cite{matrixcalc} states that if the $r$'th leading principal component of $\overline{H}$ is negative,
+Then theorem 7.12 from \cite{matrixcalc} states that if the $r$'th leading principal minor of $\overline{H}$ is negative,
 evaluated with $b_j$ set by equation \eqref{eq:optbj} and $\lambda$ set by equation \eqref{eq:optlam}
 for all $r \in \{2,3,\dots,d+1\}$, the values thus give a minimum to the optimization problem.
-Showing that the $r$'th leading principal component is negative is shown as an induction proof in
+Showing that the $r$'th leading principal minor is negative is shown as an induction proof in
 appendix \ref{apx:inducproof}. So, based on that result, I can conclude that equation \eqref{eq:optbj}
 gives the value for $b_j$ which minimizes the expected squared norm of the noise in algorithm \ref{alg:EGM2}.
 
 \end{proof}
 
-Now to evaluate the expected error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important to determine the value $C$.
+\subsection{Expectation of noise}
+Now to evaluate the expected noise error of the mechanism, which is given by equation \eqref{eq:Alg3Err}, it is highly important to determine the value $C$.
 As $C$ should be given by the minimal value which satisfies the inequality
 \[
    \prob{ \| (x_i - \mue) \odot \bm{b} \| > C } = \prob{ \| (x_i - \mue) \odot \bm{b} \|^2 > C^2} < \frac{1}{n}
@@ -768,13 +805,14 @@ as long as $t$ lies within the following bounds
 \]
 \end{proof}
 
-\noindent Combining lemma \ref{lem:Bernstein} with lemma \ref{lem:Optb} 
-we have can conclude the following:
+\noindent Combining lemma \ref{lem:Bernstein} with lemma \ref{lem:Optb}, and assuming $\mue = \bm{\mu}$.
+we can conclude the following:
 
 \begin{theorem}
 \label{theo:Alg3OptErr}
 Let $X \in \R^{n \times d}$ be a dataset in which all dimensions are independently gaussian random variables, i.e. $x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$. 
-Let $\sigma_* := \max_{j \in [d]} \sigma_j$ be the maximal standard deviation of all dimensions. We then have that
+Let $\sigma_* := \max_{j \in [d]} \sigma_j$ be the maximal standard deviation of all dimensions. 
+Under the assumption that the estimate $\mue = \bm{\mu}$, we then have that
 when $\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}$ 
 the expected squared error of the noise in algorithm \ref{alg:EGM2} can be upper bounded by 
 \[
@@ -809,7 +847,7 @@ Furthermore, I wish the clipping probability to be less than $n^{-1}$, giving me
 \]
 Combining these results and using the upper bound on $C$ from lemma \ref{lem:Bernstein} I get the following
 \begin{align*}
-    C^2 &\le 2 \sqrt{\ln(n)} \sqrt{2\sum_{j \in [d]}  \lr{\lr{b_j\sigma_j}^4}} + 
+    C^2 &\le \sqrt{\ln(n)} \sqrt{8\sum_{j \in [d]}  \lr{\lr{b_j\sigma_j}^4}} + 
     \sum_{j \in [d]} \lr{b_j\sigma_j}^2 \\
     &=\sqrt{8 \ln(n) \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} + 
     \sum_{j \in [d]} \frac{\sigma_j}{\sum_{i \in [d]} \sigma_i} \\
@@ -833,7 +871,7 @@ Inserting this back into equation \eqref{eq:Alg3Err2} we conclude
 And the constraint on $t = \sqrt{\ln (n)}$ from lemma \ref{lem:Bernstein} is
 \begin{align*}
     &0 \le t \le \frac{1}{6 (b_j\sigma_*)^2} \sqrt{2\sum_{j \in [d]} (b_j\sigma_j)^4} \iff \\
-    &\sqrt{\ln (n)} \le \frac{1}{6} \frac{\sum_{j \in [d]} \sigma_j}{\sigma_*} \sqrt{\sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
+    &\sqrt{\ln (n)} \le \frac{1}{6} \frac{\sum_{j \in [d]} \sigma_j}{\sigma_*} \sqrt{2\sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
     &\sqrt{\ln (n)} \le \sqrt{\lr{\frac{\sum_{j \in [d]} \sigma_j}{\sigma_*}}^2 \cdot \frac{2}{36} \cdot \sum_{j \in [d]} \lr{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}^2} \iff \\
     &\ln (n) \le \frac{1}{18\sigma_*^2} \cdot \sum_{j \in [d]} \sigma_j^2 \iff \\
     &\ln (n) \le \frac{\sum_{j \in [d]} \sigma_j^2}{18 \sigma_*^2}
@@ -853,7 +891,7 @@ Intuitively it makes sense that allowing noise to be added differently for each 
 For the empirical evaluation, I wanted to investigate the 
 improvement by calculating the expected error on hypothetical datasets. 
 This is in contrast to using real-world datasets, where it is uncertain whether
-the data is distributed according to a multivariate gaussian mechanism with independent dimensions.
+the data is distributed as a multivariate gaussian with independent dimensions.
 Secondly, I gain the benefit of creating a wide range of hypothetical scenarios and evaluating these.
 When creating a hypothetical dataset I am merely interested in the standard deviations of each dimension,
 thus there is no need to truly create a dataset but instead, I chose to 
@@ -878,8 +916,8 @@ and for low $\alpha$ it is almost uniformly distributed.
 zipf's law for different skewness levels ($\alpha$).} 
 \end{figure}
 
-So the needed parameters to describe a hypothetical are $\alpha$, $d$ the number of dimensions, and 
-$n$ is the number of points which is needed to decide the clipping probability.
+So the needed parameters to describe a hypothetical dataset are $\alpha$, $d$ the number of dimensions, and 
+$n$ the number of points which is needed to decide the clipping probability.
 
 I then calculated the expected error as described by equation 
 \eqref{eq:Alg3Err2} denoting this as $\mathcal{E}_t$ and compare that to
@@ -982,9 +1020,7 @@ would interesting to investigate the bias-variance tradeoff and find an
 optimal clipping probability $p_{C}$.
 
 
-\subsection{Limitation}
-\todo{Mention that method requires sigmas to be known as estimating would take up most of
-the privacy budget.}
+\subsection{Limitations}
 One of the biggest limitation of the method proposed in this project is the requirement for an estimate
 of the mean $\bm{\mu}$ as this is a problem equivalent to the one which the mechanism proposed here solves.
 The desire is that incorporating this is possible, as other methods in recent research have achieved something similar.
@@ -992,203 +1028,35 @@ Many parallels can be drawn to \cite{Huang2021}, as they also clip points
 according to some sphere in which they privately find a center for the sphere. The main concept which is introduced in this project
 is that noise is added to each dimension as a function of its variance, which is not done in \cite{Huang2021}.
 My hope is that the analysis presented here is of value in a context where finding the center of the sphere is incorporated
-into the mechanism itself.
+into the mechanism itself. 
+An intermediate step in achieving this would be to incorporate this estimate $\mue$ into the error analysis in lemma \ref{lem:Optb} 
+and lemma \ref{lem:Bernstein}. Then expressions for $b_j$ and $\ee{\bm{\eta}}$ could be given based on how well $\mue$ estimates $\bm{\mu}$.
 
-\newpage
-\section{It is a mess, don't look here}
-\subsection{Gaussian data}
-Let $X^{(j)} \sim \mathcal{N}(0, \sigma_j^2)$ 
-As the expected $l_2$-norm of $x_i$ is given by
-\[
-    \ee{x_i} = \sum_{j=1}^d \sigma_j^2
-\]
-To achieve an expected norm of $1$ I will scale 
-each dimension by a factor $\frac{1}{b_j}$ which achieves this.
-If 
-\[
-\hat{x_i} = \left( \frac{x_i^{(0)}}{b_0}, \frac{x_i^{(1)}}{b_1}, \dots, \frac{x_i^{(d)}}{b_d} \right)
-\]
-This means that $X^{(j)} \sim \mathcal{N}(0,\frac{\sigma_j^2}{b_j^2})$ 
-and the expected norm is given by 
-\[
-    \ee{x_i} = \sum_{j=1}^d \frac{\sigma_j^2}{b_j^2}
-\]
-and I can introduce that constraint that the expected norm
-after the transformation should be $1$.
-In such a case when noise is added after the transformation
-$\hat{X} + \eta$
-where $\eta \sim N(0, t^2)$ and achieves \edp in this space
-then then due to linearity of transformation the noise 
-introduced in the original space is then given by
-then the error is
+Another major limitation of the proposed method, which is of the same nature, is the requirement for the knowing the 
+variances of all dimensions. This is due to the same reasons as just discussed, that estimating $\sigma_j$ is in itself a 
+difficult task and would use up a large portion of a given privacy budget \cite{Huang2021}.
 
+\section{Conclusion}
+While much research has been performed to give good private estimates of sums over a dataset, not many has
+investigated using the variance of the data to do so. As noise inherently must be added to preserve the privacy of individuals,
+the intuition is that adding noise in each dimension should depend moreso on the variance in that dimension than the ones in other dimension.
+This means that more noise is added in dimensions with high variance in order to add less noise in dimensions with little variance.
+I investigated doing so, but in a very restricted setting. A setting where data was distributed normally and 
+in which strong priori knowledge about the variance and essentially also the mean was available.
+In this setting I analysed ways in which the added noise could be minimized whilst up-holding 
+the standard of differential privacy, and giving bounds for this noise. I also showed on synthetic dataset
+that the noise seemed to be somewhere between $[1,d]$ times better when commpared to a naive approach.
 
-
-
-
-I desire a transformation of $x_i^{(j)}$ such that the 
-expected norm is $1$. Thus I must scale each dimension by
-$\frac{1}{b_j}$, and have that 
-\[
-    \ee{x_i} = 1
-\]
-
-Minimize $\| \hat{\eta} \|$ under the constraint that $\ee{x_i} = 1$  
-
-\begin{lemma}
-\label{lem:chibound}
-Let $X \sim \mathcal{N}(0,\sigma^2)$, and $\Phi$ denote the 
-cumulative density function of $\mathcal{N}(0,1)$, then the 
-cumulative density function of $X^2$ is given by
-\[
-    F_{X^2}(x) = \prob{X^2 \le x} = 2\Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1
-\]
-\end{lemma}
-\begin{proof}
-\begin{align*}
-    &\prob{X^2 \le x} =
-    \prob{ |X| \le \sqrt{x}} =
-    2 \prob{0 \le X \le \sqrt{x}}  \\
-    & =2  \lr{\prob{X \le \sqrt{x}} - \prob{X \le 0}} =
-    2 \lr{\prob{X \le \sqrt{x}} - \frac{1}{2}}  \\
-    &= 2 \Phi \lr{\frac{\sqrt{x}}{\sigma}} - 1 
-\end{align*}
-\end{proof}
-\begin{corollary}
-From lemma \ref{lem:chibound} we can give following bound for $X \sim \mathcal{N}(0,\sigma^2)$.
-\[
-    \prob{X^2 > (4\sigma)^2} < 10^{-4}
-\]
-\end{corollary}
+Despite major limitation of the proposed method, the project demonstrates the potential of 
+utilizing the variance of individual dimensions
+and proposes ways in which the noise can be analysed.
+However, further research is needed to explore the applicability 
+of this approach in more general settings and with different types of data distributions.
+Additionally, it would be beneficial to test the proposed method on real-world data where
+certain knowledge about the data distribution is not known.
 
 
 \newpage
-
-
-
-
-
-Bernsteins inequality then states that
-\[
-    \prob{\sum_{j \in [d]} X_j \ge 2 t \sqrt{ \sum_{j \in [d]} \Exp{X_i^2}}} < e^{-t^2}
-\]
-for all 
-\[
-    0 \le t \le \frac{1}{2L} \sqrt{\sum}
-\]
-
-I have that $\bar{X}$ is a standard gaussian variable. \\
-Let $Y_j = X_j^2$ I am interested in $\sum_{j \in [d]} Y_j$,
-then it has 
-\begin{align*}
-    &\Exp{ |Y_j^k| } = \Exp{ |X_j^{2k}| } = \Exp{ |X_j|^{2k} } = 
-    \Exp{ | \sigma_j \bar{X} |^{2k} } = \\
-    &| \sigma_j |^{2k} \Exp{ | \bar{X} |^{2k}} = 
-    \sigma_j ^{2k} \prod_{c=1}^k 2c = \sigma_j^{2k} \cdot 2^k \cdot k!
-\end{align*}
-Which means $\Exp{Y_j^2} = 8 \sigma_j^{4}$.
-To check the constraint (find value for L)
-\begin{align*}
-    &\sigma_j^{2k} \cdot 2^k \cdot k! \le
-    \frac{1}{2} \cdot 8 \sigma_j^{4} \cdot L^{k-2} k! \iff \\
-    &\sigma_j^{2k} \cdot 2^k \le 4 \sigma_j^4 \cdot L^{k-2} \iff \\
-    &\sigma_j^{2(k-2)} \cdot 2^k \le 4 \L^{k-2}
-\end{align*}
-We have that 
-$\sigma_j = \sigma_j b_j = \frac{\sqrt{\sigma_j}}{\sqrt{\sum_{i \in [d]} \sigma_i}} = \sqrt{\frac{\sigma_j}{\sum_{i \in [d]} \sigma_i}}$.
-Therefore
-\begin{align*}
-    &\sigma_j^{2(k-2)} \cdot 2^k  = 
-    \lr{\sqrt{\frac{\sigma_j}{\sum_{i \in [d]}\sigma_i}}}^{2(k-2)} \cdot 2^k = \\
-    &\lr{\frac{\sigma_j}{\sum_{i \in [d]}\sigma_i}}^{k-2} \cdot 2^k \le 2^k
-\end{align*}
-This therefore implies
-\[
-    2^k \le 4 L^{k-2} \iff
-    2^{k-2} \le L^{k-2} \iff
-    2 \le L
-\]
-If it is desired that less than $10^{-p}$ points are removed then 
-$t = \sqrt{p \ln(10) }$ as long as 
-\[
-    \sqrt{p \ln(10)} \le \frac{1}{2L}\sqrt{\sum_{j \in [d]} \Exp{X_j^2}} 
-    = \sqrt{4} \cdot \frac{\sqrt{\sum_{i \in [d]} \sigma_i^2}}{\sum_{i \in [d]} \sigma_i}
-\] 
-
-
-
-\paragraph*{An alternative}
-Again minimize $\| \hat{\eta} \|$, but instead the constraint
-comes from Chebyshev's inequality, I always have that
-\[
-    \prob{ |\|x_i\|^2 - \ee{x_i}| \ge k \cdot \sqrt{\var{\|x_i\|^2}}} \le \frac{1}{k^2}
-\]
-Therefore I can set $\frac{1}{k^2} = 0.05$, and find a 
-transformation where I decide how many standard deviations
-I must be away from the mean to have norm greater than 1, i.e.
-\begin{align*}
-    \ee{x_i} + k \cdot \sqrt{\var{\|x_i\|^2}} = 1 \implies k = \frac{1-\ee{x_i}}{\sqrt{\var{\|x_i\|^2}}}
-\end{align*}
-I then have that
-\[
-    \frac{1}{k^2} = \frac{1}{\lr{\frac{1-\ee{x_i}}{\sqrt{\var{\|x_i\|^2}}}}^2} = 
-    \lr{\frac{\sqrt{\var{\|x_i\|^2}}}{1-\ee{x_i}}}^2 = 
-    \frac{\var{\|x_i \|^2}}{\lr{1 - \ee{x_i}}^2}
-\]
-I already know that
-\begin{alignat*}{2}
-    &\ee{x_i} = &\sum_{j=1}^d \frac{\sigma_j^2}{b_j^2} \\
-    &\var{\|x_i \|^2} = 2 &\sum_{j=1}^d \frac{\sigma_j^4}{b_j^4}
-\end{alignat*}
-I therefore have the constraint 
-\[
-    \frac{\var{\|x_i \|^2}}{\lr{1 - \ee{x_i}}^2} = 
-    \frac{2 \sum_{j=1}^d \frac{\sigma_j^4}{b_j^4} \\}
-    {\lr{1-\sum_{j=1}^d \frac{\sigma_j^2}{b_j^2} }^2} = 
-    0.05
-\]
-Be aware that this could find cases where expected norm is greater than 1
-and the constraint then says that they are never less than 1 in norm.
-Another restriction could be that expected norm is < 1.
-
-Chebyshev's inequality could also be used when expected norm should be 1
-and then put a bound on number of std away one must be to have less than 
-0.05 fraction of data removed.
-
-\newpage
-
-
-\newpage
-
-\section*{Extra}
-Determining $\alpha$ using Bernsteins inequality
-\[
-    \prob{\|x_i\|^2 - \ee{x_i} > t} < 2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}}
-\]
-In the case where $\ee{x_i} = 1$ and $b_i$ is optimized in this case,
-we have that
-\begin{align*}
-    &P(\|x_i\|^2 > 1 + t) < 2 \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} \\
-    &\var{\| x_i \|^2} = 2 \frac{\sum_i^d \sigma_i^2}{\lr{\sum_i^d \sigma_i}^2} \\
-    &C = \max_{i \in [d]} \lr{\sigma_i} \cdot \frac{16}{\sum_i^d \sigma_i}
-\end{align*}
-$C$ is decided such that less than $0.0001$ fraction of the data is outside this bound
-in each dimension. i.e. 
-\[
-    \forall j \in [d] \text{ : }\prob{X^{(j)} > C} < 0.0001
-\]
-
-Solving for $t$
-\begin{align*}
-&2 \cdot \exp \lr{- \frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}} = 0.0001
-\iff \ln(\frac{0.0001}{2}) = -\frac{t^2/2}{\var{\|x_i\|^2} + C \cdot t/3}
-\implies \\ &t = - \frac{C \ln(\frac{0.0001}{2}) - 
-\sqrt{\ln(\frac{0.0001}{2})(-18 \cdot \var{\|x_i\|^2} + C^2\ln(\frac{0.0001}{2}))}}{3}
-\end{align*}
-Then we have that $\alpha = 1 + t$.
-
-\todo{Determine $\alpha$ for the bound using \url{https://en.wikipedia.org/wiki/Concentration_inequality}, or \url{https://web.stanford.edu/class/cs229t/2017/Lectures/concentration-slides.pdf}}
-
 
 \bibliography{refs.bib}{}
 \bibliographystyle{acm}
@@ -1197,7 +1065,7 @@ Then we have that $\alpha = 1 + t$.
 \appendix
 \section*{Appendix}
 
-\section{Induction proof of the $r$'th leading principal component of the Bordered Hessian matrix in lemma \ref{lem:Optb}}
+\section{Induction proof of the $r$'th leading principal minor of the Bordered Hessian matrix in lemma \ref{lem:Optb}}
 \label{apx:inducproof}
 I will proof that for the matrix
 \[
@@ -1251,7 +1119,7 @@ then we have that
 (-1)^{1+r} \cdot |B_{r-1}| < 0 \implies |\overline{H}_{r}| < 0
 \end{equation}
 which would complete the induction step.
-So to show that $(-1)^{r+1} \cdot |B_{r-1}| < 0$ I will observe that the last row $r-1$, has only a single value in the first column
+So to show that $(-1)^{r+1} \cdot |B_{r-1}| < 0$ I will observe that the last row in $B_{r-1}$, has only a single value in the first column
 and the rest are $0$.
 \[
     B_{r-1} =
@@ -1263,10 +1131,9 @@ and the rest are $0$.
     \end{bmatrix}
 \]
 Therefore I can calculate the determinant by multiplying $(-1)^{r-1 + 1} \cdot \overline{H}_{r,r,1}$ with the determinant
-of the matrix I get when removing the last row and the first column of $B_{r-1}$.
-This matrix can be observed to be a diagonal matrix, in which all values along the diagonal are positive.
-Thus, this sub-matrix of $B_{r-1}$ has a positive determinant which I will denote as $\tilde{B}_{r-1}$
-in which as just said $|\tilde{B}_{r-1}| > 0$.
+of the matrix $\tilde{B}_{r-1}$ which is the matrix gotten from removing the last row and the first column of $B_{r-1}$.
+$\tilde{B}_{r-1}$ can be observed to be a diagonal matrix, in which all values along the diagonal are positive. Since
+the determinant of a diagonal matrix is the product over all values in the diagonal, we have that $|\tilde{B}_{r-1}| > 0$.
 Therefore
 \begin{align*}
     |B_{r-1}| &= (-1)^{r-1+1} \cdot \overline{H}_{r,r,1} \cdot |\tilde{B}_{r-1}| \\
