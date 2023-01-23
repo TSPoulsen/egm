@@ -79,11 +79,11 @@ More and more data is collected about us to be used for solving real world probl
 advanced algorithmic systems, such as deep neural networks.
 Often it is also the situation that to solve the problem at hand, using sensitive data is a necessity.
 In fact that is often the case, as the more sensitive the data is, the more useful it is.
-Many attempts have been made to combat this dilemma, preserve the privacy of the individuals involved whilst harvesting the
+Many attempts have been made to combat this dilemma; preserve the privacy of the individuals involved whilst harvesting the
 fruitful information which the sensitive data contains.
 It has been shown repeatedly that de-anonymizing the data by removing "personally identifiable information", such as names, PIN codes (Personal Identification Number) or the alike is not enough
 to protect individuals from adversaries \cite{medical,netflix}.
-Even publicizing aggregate statistics from sensitive data, has been shown to break privacy \cite{exposed}.
+Even publicizing aggregate statistics from sensitive data, has been shown to leak information about individuals \cite{exposed}.
 
 \noindent Many optimization problems rely upon calculating the sum, or equivalently the mean,
 of a set of vectors.
@@ -256,11 +256,11 @@ It does so by computing the value of $g(X)$ and then adding noise
 to each dimension drawn from the normal distribution 
 $\mathcal{N}(0, \sigma_{\epsilon,\delta}^2)$.
 The variance $\sigma_{\epsilon, \delta}^2$ is chosen specifically to satisfy \edp, 
-and it will shortly be covered how to choose this.
+and it will be covered shortly how to choose this.
 This can be seen as adding a noise vector $\eta$ which 
 is then distributed according to
 the multivariate normal distribution 
-$\mathcal{N}(\bm{0}, \sigma_{\epsilon,\delta}^2I)$. 
+$\mathcal{N}(\bm{0}, \sigma_{\epsilon,\delta}^2I_{d \times d})$. 
 Pseudo code for the algorithm can be seen in Algorithm \ref{alg:gaussmech}.
 
 \begin{algorithm}
@@ -273,9 +273,7 @@ Pseudo code for the algorithm can be seen in Algorithm \ref{alg:gaussmech}.
     \Output
     \State\edp estimate of $g(X)$
     \EndOutput
-    \For{$j \in [d]$}
-        \State$\eta_j \gets \textnormal{sample from } \mathcal{N}(0, \sigma_{\epsilon,\delta}^2)$
-    \EndFor \\
+    \State$\bm{\eta} \gets \textnormal{sample from } \mathcal{N}(\bm{0}, \sigma_{\epsilon,\delta}^2I_{d \times d})$ \\
     \Return$g(X) + \bm{\eta}$
 \end{algorithmic}
 \end{algorithm}
@@ -287,7 +285,7 @@ Pseudo code for the algorithm can be seen in Algorithm \ref{alg:gaussmech}.
 Which by corollary \ref{cor:expNorm} is 
 \begin{equation}
 \label{eq:ExpErrGM}
-    \ee{\bm{\eta}} = \sum_i^d \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
+    \ee{\bm{\eta}} = \sum_{i \in [d]} \sigma_{\epsilon,\delta}^2 = d \cdot \sigma_{\epsilon,\delta}^2
 \end{equation}
 It is apparent that the main difficulty of the mechanism 
 lies in determining a $\sigma_{\epsilon, \delta}$ which achieves
@@ -372,11 +370,11 @@ The algorithm is described in detail in Algorithm \ref{alg:EllipGM}.
         \State $\sigma_j \gets \sigma_{opt} \cdot \frac{\Delta_j}{b_j}$
         \State $\eta_j \gets \textnormal{sample from } \mathcal{N}(0, \sigma_j^2)$
     \EndFor \\
-    \Return $f(X) + \eta$
+    \Return $f(X) + \bm{\eta}$
 \end{algorithmic}
 \end{algorithm}
 
-Though the algorithm seems short and simple, the only thing which distinguishes it from The Gaussian Mechanism 
+Though the algorithm seems short and simple as the only thing which distinguishes it from The Gaussian Mechanism 
 is to draw samples from $\mathcal{N}(0, \lr{\sigma_{opt} \cdot \frac{\Delta_j}{b_j}}^2)$, 
 it can be seen as a transformation of space. Consider transforming the data by the factor $\frac{b_j}{\Delta_j}$ in each dimension. 
 Then you would have that each dimension is bounded
@@ -445,9 +443,10 @@ essentially saying that there is an upper and lower bound on each dimension.
 This requirement is needed to know the $l_2$-sensitivity $ \Delta(f) $ as shown in equation \eqref{eq:DelF}.
 In this project, I will change this assumption and instead 
 look at the case where each dimension is normally distributed.
-This means that for each 
-$ j \in [d] $ we have that 
-$x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)$.
+This means that we have
+\[
+    \forall i \in [n] \text{ } \forall j \in [d] : x_{i,j} \sim \mathcal{N}(\mu_j, \sigma_j^2)
+\]
 An equivalent formulation is that the data is 
 multivariate gaussianly distributed but with no correlation between dimensions.
 This means that $x_i \sim \mathcal{N}(\bm{\mu}, \Sigma ) $, 
@@ -501,7 +500,7 @@ I will use somewhat the same approach to achieve \edp.
 They achieve \edp by finding scalings of each dimension such that all points lie within a unit ball, i.e. a ball with radius $1$. 
 There does not exist such a transformation for gaussian data, as there will always be a non-zero 
 probability of observing points outside the unit ball.
-Instead, I will introduce the constraint that the expected squared distance between any point and the estimated mean $\mue$ after the transformation should be $1$. 
+Instead, I will introduce the constraint that the expected squared distance between any point and the estimated mean $\mue$ after both are transformed, should be $1$. 
 I wish to find a scaling of each dimension $b_j$ s.t.
 \begin{align}
 \nonumber
@@ -559,7 +558,8 @@ The pseudo-code for the mechanism is given in Algorithm \ref{alg:EGM2}. At first
 despite it being very similar. The most notable thing here
 is that the transformation has to be performed on the dataset,
 as it is important which points are being clipped, to ensure that the mechanism is \edp.
-In Algorithm \ref{alg:EllipGM} only the inverse transformation, $b_j^{-1}$, is being applied on the noise to be added. \\
+
+\noindent In Algorithm \ref{alg:EllipGM} only the inverse transformation, $b_j^{-1}$, is being applied on the noise to be added. \\
 
 \noindent If we try to minimize the error introduced by the noise, we are back to a very similar problem to the one solved in \cite{Lebeda2022}. 
 Minimize the error described in equation \eqref{eq:Alg3Err}
@@ -933,7 +933,7 @@ I then calculate the fraction $\frac{\mathcal{E}_n}{\mathcal{E}_t}$ to compare
 the expected errors, and as I have $\sigma_{opt}^2$ in both the denominator and the numerator I 
 can omit calculating this as doing so is not a trivial task. 
 Figure \ref{fig:result} shows calculating this fraction for varying $\alpha \in [10^{-2}, 10^2]$, and for 
-$d \in \{10, 100, 1000\}$ and $n \in \{10^2, 10^3, 10^6\}$.
+$d \in \{10^1, 10^2, 10^3\}$ and $n \in \{10^2, 10^3, 10^6\}$.
 It shows that when a few dimensions have much more variance than the rest,
 performing the transformation improves the expected error, for all 
 configurations of $n$ and $d$.
@@ -979,11 +979,11 @@ In this transformed space it would be sufficient to add noise drawn from
 $\mathcal{N}(0, \sigma_{opt}^2)$. The constraint would thus be the following
 \begin{equation}
 \label{eq:AltCon}
-    \prob{ \| x_i \odot \bm{b} \| > \frac{1}{2}} \le \frac{1}{n} 
+    \prob{ \| (x_i - \mue) \odot \bm{b} \| > \frac{1}{2}} \le \frac{1}{n} 
 \end{equation}
-To achieve optimal results with this constraint it would be required to know the cumulative density function of $\| x_i \odot \bm{b} \|$, 
+To achieve optimal results with this constraint it would be required to know the cumulative density function of $\| (x_i - \mue) \odot \bm{b} \|$, 
 which as discussed earlier is distributed as a generalized chi-square and does not have a closed form. 
-So without a closed form, there would be no way of finding optimal values for $b_j$. 
+So without a closed form, it would be very difficult to find optimal values for $b_j$. 
 
 Another option would be to have the same constraint, but instead define it in terms of a tail inequality such as the one
 given by lemma \ref{lem:Bernstein}. However the constraint on $t$ in that lemma can be quite restrictive for some inputs. 
@@ -1022,7 +1022,7 @@ optimal clipping probability $p_{C}$.
 
 \subsection{Limitations}
 One of the biggest limitation of the method proposed in this project is the requirement for an estimate
-of the mean $\bm{\mu}$ as this is a problem equivalent to the one which the mechanism proposed here solves.
+of the mean $\mue$ as this is a problem equivalent to the one which the mechanism proposed here solves.
 The desire is that incorporating this is possible, as other methods in recent research have achieved something similar.
 Many parallels can be drawn to \cite{Huang2021}, as they also clip points
 according to some sphere in which they privately find a center for the sphere. The main concept which is introduced in this project
